@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue';
-import { supabase } from '@yakiben/supabase';
+import { supabase } from '@app/supabase';
 
 const token = ref<string | null>(null);
 const user = ref<any>(null);

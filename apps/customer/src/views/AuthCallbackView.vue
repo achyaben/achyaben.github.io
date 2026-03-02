@@ -23,7 +23,7 @@ onMounted(() => {
   const params = parseHash(hash);
   if (params.access_token) {
     auth.token.value = params.access_token;
-    localStorage.setItem('yakiben-auth-token', params.access_token);
+    localStorage.setItem('app-auth-token', params.access_token);
     // Optionally, fetch user info from Supabase
     // await auth.refreshSession();
     router.replace('/'); // Redirect to home or dashboard

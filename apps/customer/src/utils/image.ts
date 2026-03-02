@@ -16,7 +16,7 @@ export function getImageUrl(path: string): string {
   const cleanPath = path.startsWith('/') ? path.slice(1) : path;
 
   // import.meta.env.BASE_URL is provided by Vite
-  // It defaults to '/' but in our case it's '/yakiben/customer/' or '/yakiben/admin/'
+  // It defaults to '/' but in our case it's '/customer/' or '/admin/'
   const baseUrl = import.meta.env.BASE_URL;
 
   return `${baseUrl}${cleanPath}`;

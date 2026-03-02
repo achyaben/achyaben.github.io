@@ -1,4 +1,4 @@
-import { supabase } from '@yakiben/supabase';
+import { supabase } from '@app/supabase';
 import type { Order } from '../../types';
 import { STORAGE_KEYS } from '../../constants';
 

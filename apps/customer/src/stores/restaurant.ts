@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue';
-import { supabase } from '@yakiben/supabase';
+import { supabase } from '@app/supabase';
 import { RESTAURANT_INFO } from '../config/restaurant';
 
 interface BusinessHours {

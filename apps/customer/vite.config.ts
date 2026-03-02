@@ -5,11 +5,11 @@ import path from 'path';
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [vue()],
-  base: '/yakiben/customer/',
+  base: './',
   publicDir: path.resolve(__dirname, '../../public'),
   resolve: {
     alias: {
-      '@yakiben/supabase': path.resolve(__dirname, '../../libs/supabase/client.ts'),
+      '@app/supabase': path.resolve(__dirname, '../../libs/supabase/client.ts'),
       axios: 'axios',
     },
   },

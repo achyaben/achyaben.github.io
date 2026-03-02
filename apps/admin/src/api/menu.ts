@@ -1,4 +1,4 @@
-import { supabase } from '@yakiben/supabase';
+import { supabase } from '@app/supabase';
 import type { MenuItem } from '../types/types';
 
 export const menuApi = {

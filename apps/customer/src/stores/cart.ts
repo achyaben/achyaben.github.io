@@ -8,7 +8,7 @@ interface CartItem {
   subtotal: number;
 }
 
-const STORAGE_KEY = 'yakiben-cart';
+const STORAGE_KEY = 'app-cart';
 
 // Load initial cart state from localStorage
 const initialCart = localStorage.getItem(STORAGE_KEY);

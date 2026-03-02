@@ -184,7 +184,7 @@ const getCartCountForCategory = (category: string) => {
 const ANNOUNCEMENT_ID = 'banner-2025-07-limit';
 
 function checkAnnouncement() {
-  const dismissed = localStorage.getItem(`yakiben-banner-dismissed-${ANNOUNCEMENT_ID}`);
+  const dismissed = localStorage.getItem(`app-banner-dismissed-${ANNOUNCEMENT_ID}`);
   showAnnouncement.value = !dismissed;
 }
 
@@ -192,7 +192,7 @@ const showAnnouncement = ref(false);
 
 function closeAnnouncement() {
   showAnnouncement.value = false;
-  localStorage.setItem(`yakiben-banner-dismissed-${ANNOUNCEMENT_ID}`, 'true');
+  localStorage.setItem(`app-banner-dismissed-${ANNOUNCEMENT_ID}`, 'true');
 }
 </script>
 

@@ -8,7 +8,7 @@ const app = createApp(App);
 
 app.use(router);
 app.use(vue3GoogleLogin, {
-  clientId: '228058456776-74ia8mkrg3jsqmgvmpgkfru3h6khv09v.apps.googleusercontent.com',
+  clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || '',
 });
 
 app.mount('#app');

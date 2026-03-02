@@ -1,11 +1,9 @@
 <template>
-  <div
-    class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100"
-  >
+  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
     <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden">
       <div class="px-8 py-10">
         <div class="text-center mb-8">
-          <h1 class="text-4xl font-bold text-gray-800 mb-2">Yakiben Admin</h1>
+          <h1 class="text-4xl font-bold text-gray-800 mb-2">Admin Login</h1>
           <p class="text-gray-600">Sign in with your authorized Google account</p>
         </div>
 
@@ -36,7 +34,7 @@ const router = useRouter();
 const authStore = useAuthStore();
 const error = ref('');
 
-const GOOGLE_CLIENT_ID = '228058456776-74ia8mkrg3jsqmgvmpgkfru3h6khv09v.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
 onMounted(() => {
   if (!GOOGLE_CLIENT_ID) {

@@ -2,7 +2,7 @@ import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import type { User, UserRole } from '../types/types';
 import { USER_ROLES } from '../constants/auth';
-import { supabase } from '@yakiben/supabase';
+import { supabase } from '@app/supabase';
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null);

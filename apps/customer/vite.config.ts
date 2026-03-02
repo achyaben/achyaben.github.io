@@ -9,7 +9,7 @@ export default defineConfig({
   publicDir: path.resolve(__dirname, '../../public'),
   resolve: {
     alias: {
-      '@yakiben/supabase': path.resolve(__dirname, '../../libs/supabase/client.ts'),
+      '@app/supabase': path.resolve(__dirname, '../../libs/supabase/client.ts'),
       axios: 'axios',
     },
   },

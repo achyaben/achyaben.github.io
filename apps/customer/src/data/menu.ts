@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue';
 import type { MenuItem } from '../types';
-import { supabase } from '@yakiben/supabase';
+import { supabase } from '@app/supabase';
 
 const items = ref<MenuItem[]>([]);
 const isLoading = ref(false);

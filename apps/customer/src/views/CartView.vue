@@ -442,7 +442,7 @@ import { ordersApi } from '../data/api/orders';
 import { useCart } from '../stores/cart';
 import { useRestaurantStore } from '../stores/restaurant';
 import { useAuthStore } from '../stores/auth';
-import { supabase } from '@yakiben/supabase';
+import { supabase } from '@app/supabase';
 import type { Order, OrderStatus, PaymentStatus, PaymentMethod } from '../types';
 
 const router = useRouter();

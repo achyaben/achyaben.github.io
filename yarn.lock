@@ -2396,6 +2396,38 @@ __metadata:
   languageName: node
   linkType: hard
 
+"achyaben@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "achyaben@workspace:."
+  dependencies:
+    "@tailwindcss/aspect-ratio": "npm:^0.4.2"
+    "@tailwindcss/forms": "npm:^0.5.10"
+    "@types/axios": "npm:^0.14.4"
+    "@types/google.accounts": "npm:^0.0.18"
+    "@typescript-eslint/eslint-plugin": "npm:^8.35.0"
+    "@typescript-eslint/parser": "npm:^8.35.0"
+    "@vitejs/plugin-vue": "npm:^6.0.0"
+    "@vue/compiler-sfc": "npm:^3.5.17"
+    "@vue/tsconfig": "npm:^0.7.0"
+    autoprefixer: "npm:^10.4.21"
+    axios: "npm:^1.13.2"
+    eslint: "npm:^9.30.0"
+    eslint-config-prettier: "npm:^10.1.5"
+    eslint-define-config: "npm:^2.1.0"
+    eslint-plugin-vue: "npm:^10.2.0"
+    husky: "npm:^9.1.7"
+    lint-staged: "npm:^16.1.2"
+    postcss: "npm:^8.5.6"
+    prettier: "npm:^3.6.2"
+    tailwindcss: "npm:^4.1.11"
+    typescript: "npm:^5.8.3"
+    vite: "npm:^7.0.0"
+    vue: "npm:^3.5.17"
+    vue-eslint-parser: "npm:^10.2.0"
+    vue-tsc: "npm:^2.2.10"
+  languageName: unknown
+  linkType: soft
+
 "acorn-jsx@npm:^5.3.2":
   version: 5.3.2
   resolution: "acorn-jsx@npm:5.3.2"
@@ -7057,38 +7089,6 @@ __metadata:
   checksum: 10c0/c1bfa219d64e56fee265b2bd31b2fcecefc063ee802da1e73bad1f21d7afd89b943c9e2c97af2942f60b1ad46f915a4c81e00039c7d398b53cf410e29d3c30bd
   languageName: node
   linkType: hard
-
-"yakiben@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "yakiben@workspace:."
-  dependencies:
-    "@tailwindcss/aspect-ratio": "npm:^0.4.2"
-    "@tailwindcss/forms": "npm:^0.5.10"
-    "@types/axios": "npm:^0.14.4"
-    "@types/google.accounts": "npm:^0.0.18"
-    "@typescript-eslint/eslint-plugin": "npm:^8.35.0"
-    "@typescript-eslint/parser": "npm:^8.35.0"
-    "@vitejs/plugin-vue": "npm:^6.0.0"
-    "@vue/compiler-sfc": "npm:^3.5.17"
-    "@vue/tsconfig": "npm:^0.7.0"
-    autoprefixer: "npm:^10.4.21"
-    axios: "npm:^1.13.2"
-    eslint: "npm:^9.30.0"
-    eslint-config-prettier: "npm:^10.1.5"
-    eslint-define-config: "npm:^2.1.0"
-    eslint-plugin-vue: "npm:^10.2.0"
-    husky: "npm:^9.1.7"
-    lint-staged: "npm:^16.1.2"
-    postcss: "npm:^8.5.6"
-    prettier: "npm:^3.6.2"
-    tailwindcss: "npm:^4.1.11"
-    typescript: "npm:^5.8.3"
-    vite: "npm:^7.0.0"
-    vue: "npm:^3.5.17"
-    vue-eslint-parser: "npm:^10.2.0"
-    vue-tsc: "npm:^2.2.10"
-  languageName: unknown
-  linkType: soft
 
 "yallist@npm:^3.0.2":
   version: 3.1.1

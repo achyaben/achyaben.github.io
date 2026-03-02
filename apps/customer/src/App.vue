@@ -5,7 +5,7 @@ import UserMenu from './components/UserMenu.vue';
 import MaintenanceView from './views/MaintenanceView.vue';
 import NetworkErrorView from './views/NetworkErrorView.vue';
 import { getImageUrl } from './utils/image';
-import { supabase } from '@yakiben/supabase';
+import { supabase } from '@app/supabase';
 import { useRestaurantStore } from './stores/restaurant';
 import { useAuthStore } from './stores/auth';
 import { useRouter } from 'vue-router';
@@ -57,11 +57,9 @@ onMounted(async () => {
       <!-- Navbar -->
       <div class="bg-white border-b border-gray-200 sticky top-0 z-[100] shadow-sm">
         <div class="container mx-auto px-4 h-16 flex justify-between items-center">
-          <router-link
-            to="/"
-            class="flex items-center space-x-2 text-base md:text-xl font-bold tracking-tight text-gray-900 hover:opacity-80 transition"
-          >
-            <img :src="getImageUrl('/assets/logo.webp')" alt="Yakiben" class="h-8 w-8 rounded-lg" />
+          <router-link to="/"
+            class="flex items-center space-x-2 text-base md:text-xl font-bold tracking-tight text-gray-900 hover:opacity-80 transition">
+            <img :src="getImageUrl('/assets/logo.webp')" alt="App Logo" class="h-8 w-8 rounded-lg" />
             <span>{{ info.app_name }}</span>
           </router-link>
           <UserMenu />
@@ -72,16 +70,10 @@ onMounted(async () => {
 
       <main>
         <router-view v-slot="{ Component }">
-          <transition
-            name="page"
-            mode="out-in"
-            enter-active-class="transition ease-out duration-200"
-            enter-from-class="opacity-0 translate-y-2"
-            enter-to-class="opacity-100 translate-y-0"
-            leave-active-class="transition ease-in duration-150"
-            leave-from-class="opacity-100 translate-y-0"
-            leave-to-class="opacity-0 translate-y-2"
-          >
+          <transition name="page" mode="out-in" enter-active-class="transition ease-out duration-200"
+            enter-from-class="opacity-0 translate-y-2" enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition ease-in duration-150" leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 translate-y-2">
             <component :is="Component" />
           </transition>
         </router-view>

@@ -1,4 +1,4 @@
-import { supabase } from '@yakiben/supabase';
+import { supabase } from '@app/supabase';
 
 export const settingsApi = {
   async getRestaurantInfo(): Promise<any> {

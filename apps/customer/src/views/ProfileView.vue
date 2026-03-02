@@ -166,7 +166,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { supabase } from '@yakiben/supabase';
+import { supabase } from '@app/supabase';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();

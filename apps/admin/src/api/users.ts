@@ -1,4 +1,4 @@
-import { supabase } from '@yakiben/supabase';
+import { supabase } from '@app/supabase';
 import type { User, UserRole } from '../types/types';
 
 export const usersApi = {

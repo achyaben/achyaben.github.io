@@ -1,256 +1,365 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Modern Restaurant System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      // Embedded content
-      const content = {
-        "header": {
-          "title": "Yakiben",
-          "nav": [
-            { "name": "About", "link": "#about" },
-            { "name": "Product", "link": "#product" },
-            { "name": "Pricing", "link": "#pricing" },
-            { "name": "Contact", "link": "#contact" }
-          ]
-        },
-        "sections": {
-          "about": {
-            "title": "About Yakiben",
-            "content": "Yakiben is a modern restaurant system designed to empower small business owners by reducing costs and providing modular, easy-to-use tools."
-          },
-          "product": {
-            "title": "Our Product",
-            "features": [
-              {
-                "group": "Cost Benefits",
-                "entries": [
-                  { "title": "Save Costs", "description": "Reduce commission fees to just 1-3% compared to 30-40% charged by mainstream apps.", "image": "./images/benefit.svg", "details": "This graph shows the cost benefits of using Yakiben compared to competitors." },
-                  { "title": "Operational Costs", "description": "Highlight reduced operational costs with Yakiben.", "image": "./images/cost.svg", "details": "This graph highlights the reduced operational costs with Yakiben." }
-                ]
-              },
-              {
-                "group": "Management Tools",
-                "entries": [
-                  { "title": "Easy Management", "description": "Manage your menu, orders, and promotions effortlessly with our admin panel.", "image": "./images/customer-sp-screen.png", "details": "Screenshot of the customer app showcasing its user-friendly interface." },
-                  { "title": "Order Management", "description": "Seamless operations with our order management app.", "image": "./images/orders-pc-screen.png", "details": "Screenshot of the order management app for seamless operations." }
-                ]
-              },
-              {
-                "group": "Branding",
-                "entries": [
-                  { "title": "Your Own Branding", "description": "Promote your restaurant directly to customers without relying on third-party apps.", "image": "./images/own-branding-1.png", "details": "Promote your restaurant with personalized branding options." },
-                  { "title": "Showcase Identity", "description": "Showcase your unique identity with Yakiben's branding tools.", "image": "./images/own-branding-2.png", "details": "Showcase your unique identity with Yakiben's branding tools." }
-                ]
-              },
-              {
-                "group": "Modular System",
-                "entries": [
-                  { "title": "Modular System", "description": "Quickly set up a system tailored to your restaurant's needs with our modular design.", "image": "./images/modular-system.png" },
-                  { "title": "Customizable Features", "description": "Adapt Yakiben to your specific requirements with ease.", "image": "./images/customizable-features.png" },
-                  { "title": "Scalable Design", "description": "Easily scale your restaurant operations with Yakiben's flexible and scalable design.", "image": "./images/scalable-design.png", "details": "Illustration of Yakiben's scalable design enabling restaurant growth." },
-                  { "title": "Integrated Ecosystem", "description": "Experience seamless integration of tools and features for a unified restaurant management system.", "image": "./images/integrated-ecosystem.png", "details": "Illustration of Yakiben's integrated ecosystem connecting all restaurant operations." }
-                ]
-              }
-            ]
-          },
-          "pricing": {
-            "title": "Pricing",
-            "content": "Our pricing is simple and transparent. Pay only for hosting and managing resources with a variable monthly cost. 0% per order, no hidden fees."
-          },
-          "contact": {
-            "title": "Contact Us",
-            "content": "Have questions or want to get started? Reach out to us at contact@yakiben.com."
-          },
-          "value": {
-            "title": "Our Philosophy",
-            "content": "We believe in returning the hard work of small business owners by providing tools that require minimal effort and deliver maximum impact."
-          }
-        },
-        "announcement": {
-          "text": "Explore our customer app for more features and benefits!",
-          "link": {
-            "url": "./customer",
-            "label": "Click here"
+<!DOCTYPE html>
+<html lang="ja" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>あちゃー | Charcoal-Grilled Yakitori & Indian Curry</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              DEFAULT: '#DC143C', // Deep red
+              dark: '#B22222',
+            }
           }
         }
-      };
-
-      async function loadContent() {
-        // Update header and banner classes dynamically
-        const header = document.querySelector('header');
-        header.classList.remove('bg-red-700');
-        header.classList.add('bg-[#DC143C]'); // Simrik red shade
-
-        const announcementBanner = document.getElementById('announcement-banner');
-        announcementBanner.classList.add('bg-blue-600'); // Dimmed blue shade
-
-        // Optimize main width for large screens
-        const main = document.querySelector('main');
-        main.classList.add('max-w-screen-xl', 'mx-auto');
-
-        // Load announcement banner
-        const announcementText = document.getElementById('announcement-text');
-        if (content.announcement) {
-          announcementText.innerHTML = `${content.announcement.text} <a href='${content.announcement.link.url}' class='underline font-bold'>${content.announcement.link.label}</a>`;
-          announcementBanner.classList.remove('hidden');
-        }
-
-        document.getElementById('header-title').textContent = content.header.title;
-        const nav = document.getElementById('nav-links');
-        content.header.nav.forEach(item => {
-          const link = document.createElement('a');
-          link.href = item.link;
-          link.textContent = item.name;
-          link.className = 'text-lg font-medium hover:underline mx-2';
-          nav.appendChild(link);
-        });
-
-        document.getElementById('about-title').textContent = content.sections.about.title;
-        document.getElementById('about-content').textContent = content.sections.about.content;
-
-        document.getElementById('value-title').textContent = content.sections.value.title;
-        document.getElementById('value-content').textContent = content.sections.value.content;
-
-        document.getElementById('pricing-title').textContent = content.sections.pricing.title;
-        document.getElementById('pricing-content').textContent = content.sections.pricing.content;
-
-        document.getElementById('contact-title').textContent = content.sections.contact.title;
-        document.getElementById('contact-content').textContent = content.sections.contact.content;
-
-        document.getElementById('value-title').classList.add('text-center'); 
-        document.getElementById('value-content').classList.add('text-center'); 
-        document.getElementById('pricing-title').classList.add('text-center');
-        document.getElementById('pricing-content').classList.add('text-center');
-        document.getElementById('value').classList.add('mx-auto', 'text-center', 'max-w-4xl'); 
-        document.getElementById('pricing').classList.add('mx-auto', 'text-center', 'max-w-4xl');
-        document.getElementById('product').classList.add('mx-auto', 'text-center', 'max-w-4xl'); 
-
-        const productSection = document.getElementById('product');
-        productSection.innerHTML = '';
-        content.sections.product.features.forEach(group => {
-          const groupDiv = document.createElement('div');
-          groupDiv.className = 'mb-12';
-          groupDiv.innerHTML = `<h2 class='text-3xl font-bold mb-6'>${group.group}</h2>`;
-
-          const featuresDiv = document.createElement('div');
-          featuresDiv.className = 'grid grid-cols-1 md:grid-cols-2 gap-8';
-
-          group.entries.forEach(entry => {
-            const featureDiv = document.createElement('div');
-            featureDiv.className = 'bg-white p-6 rounded-lg shadow-md overflow-hidden';
-            featureDiv.innerHTML = `
-              <h3 class='text-2xl font-bold mb-4'>${entry.title}</h3>
-              <p>${entry.description}</p>
-              <div class='bg-gray-100 p-4 rounded-md flex flex-col items-center mt-4'>
-                <img src='${entry.image}' alt='${entry.title}' class='w-full max-w-[600px] h-auto object-contain rounded-md mb-4 cursor-pointer' onclick='openCarousel("${entry.image}")'>
-                <p class='text-sm text-gray-500 mt-2'>This diagram illustrates the key features and benefits of the product. ${entry.details ? entry.details : ''}</p>
-              </div>
-            `;
-            featuresDiv.appendChild(featureDiv);
-          });
-
-          groupDiv.appendChild(featuresDiv);
-          productSection.appendChild(groupDiv);
-        });
-
-        const navLinks = document.getElementById('nav-links');
-        navLinks.classList.add('flex-wrap', 'justify-center');
-
-        const headerTitle = document.getElementById('header-title');
-        headerTitle.classList.add('sm:text-xl'); 
       }
+    }
+  </script>
+  <style>
+    /* Custom utility to hide elements before JS loads translations to prevent flicker */
+    [data-i18n] { opacity: 0; transition: opacity 0.2s; }
+    .i18n-loaded [data-i18n] { opacity: 1; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300 antialiased flex flex-col min-h-screen">
 
-      function openCarousel(imageSrc) {
-        const carouselOverlay = document.createElement('div');
-        carouselOverlay.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
-        carouselOverlay.innerHTML = `
-          <div class='relative w-11/12 max-w-4xl max-h-[90vh] flex items-center justify-center p-4'>
-            <img src='${imageSrc}' alt='Carousel Image' class='max-w-full max-h-[90vh] object-contain rounded-md cursor-zoom-in' onclick='toggleZoom(this)'>
+  <!-- Navigation -->
+  <nav class="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-colors">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <!-- Logo -->
+        <div class="flex-shrink-0 flex items-center">
+          <a href="#" class="text-2xl font-bold tracking-tight text-brand dark:text-brand-dark" data-i18n="nav.logo">あちゃー</a>
+        </div>
+        
+        <!-- Desktop Menu -->
+        <div class="hidden md:flex items-center space-x-8">
+          <a href="#about" class="text-sm font-medium hover:text-brand transition-colors" data-i18n="nav.about">About Us</a>
+          <a href="#menu" class="text-sm font-medium hover:text-brand transition-colors" data-i18n="nav.menu">Menu</a>
+          <a href="#location" class="text-sm font-medium hover:text-brand transition-colors" data-i18n="nav.location">Location</a>
+          
+          <div class="flex items-center space-x-4 border-l pl-4 border-gray-300 dark:border-gray-700">
+            <!-- Lang Toggle -->
+            <button id="lang-toggle" class="text-sm font-bold p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+              EN
+            </button>
+            <!-- Theme Toggle -->
+            <button id="theme-toggle" class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="Toggle Dark Mode">
+              <!-- Sun Icon (hidden in dark mode) -->
+              <svg id="theme-toggle-light-icon" class="w-5 h-5 hidden dark:block text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 3.22a1 1 0 011.41 1.41l-.71.71a1 1 0 01-1.41-1.41l.71-.71zM18 10a1 1 0 110 2h-1a1 1 0 110-2h1zm-3.22 4.22a1 1 0 01-1.41 1.41l-.71-.71a1 1 0 011.41-1.41l.71.71zM10 16a1 1 0 11-2 0v-1a1 1 0 112 0v1zm-4.22-3.22a1 1 0 01-1.41-1.41l.71-.71a1 1 0 011.41 1.41l-.71.71zM2 10a1 1 0 110-2h1a1 1 0 110 2H2zm3.22-4.22a1 1 0 011.41-1.41l.71.71a1 1 0 01-1.41 1.41l-.71-.71zM10 4a6 6 0 100 12 6 6 0 000-12z" clip-rule="evenodd" />
+              </svg>
+              <!-- Moon Icon (hidden in light mode) -->
+              <svg id="theme-toggle-dark-icon" class="w-5 h-5 block dark:hidden text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+              </svg>
+            </button>
           </div>
-        `;
-        carouselOverlay.addEventListener('click', (e) => {
-          if (!e.target.closest('img')) {
-            closeCarousel();
-          }
-        });
-        document.body.appendChild(carouselOverlay);
-      }
-
-      function toggleZoom(imageElement) {
-        if (imageElement.classList.contains('zoomed-in')) {
-          imageElement.classList.remove('zoomed-in');
-          imageElement.classList.add('cursor-zoom-in');
-          imageElement.classList.remove('cursor-zoom-out');
-          imageElement.style.transform = '';
-        } else {
-          imageElement.classList.add('zoomed-in');
-          imageElement.classList.remove('cursor-zoom-in');
-          imageElement.classList.add('cursor-zoom-out');
-          imageElement.style.transform = 'scale(2)';
-        }
-      }
-
-      function closeCarousel() {
-        const carouselOverlay = document.querySelector('.fixed.inset-0');
-        if (carouselOverlay) {
-          document.body.removeChild(carouselOverlay);
-        }
-      }
-
-      function closeBanner() {
-        const banner = document.getElementById('announcement-banner');
-        if (banner) {
-          banner.style.display = 'none';
-        }
-      }
-    </script>
-  </head>
-  <body class="bg-gray-50 text-gray-800" onload="loadContent()">
-    <div id="announcement-banner" class="bg-blue-500 text-white text-center py-4 hidden">
-      <p id="announcement-text"></p>
-      <button onclick="closeBanner()" class="absolute top-2 right-4 text-white font-bold">×</button>
+          <a href="./customer" class="bg-brand text-white px-5 py-2 rounded-full font-medium hover:bg-brand-dark transition-colors shadow-md shadow-brand/20" data-i18n="cta.order">Order Online</a>
+        </div>
+      </div>
     </div>
-    <header class="bg-yellow-400 text-white py-4 shadow-md">
-      <div class="container mx-auto flex justify-between items-center px-4">
-        <h1 id="header-title" class="text-2xl font-bold"></h1>
-        <nav id="nav-links" class="flex"></nav>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="relative bg-white dark:bg-gray-800 overflow-hidden isolate border-b border-gray-100 dark:border-gray-800">
+    <div class="absolute inset-0 -z-10 bg-[url('https://images.unsplash.com/photo-1542314831-c6a4d142997f?auto=format&fit=crop&q=80')] bg-cover bg-center opacity-10 dark:opacity-20 mix-blend-multiply dark:mix-blend-overlay"></div>
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 flex flex-col items-center text-center">
+      <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-6 drop-shadow-sm" data-i18n="hero.title">
+        炭火焼鳥 <span class="text-brand">&</span> インドカレー
+      </h1>
+      <p class="mt-4 text-xl sm:text-2xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-10" data-i18n="hero.subtitle">
+        本格的な味わいを、モバイルで簡単に注文。待たずにテイクアウト！
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center w-full sm:w-auto">
+        <a href="./customer" class="w-full sm:w-auto px-8 py-4 bg-brand text-white text-lg font-bold rounded-full hover:bg-brand-dark transition-all transform hover:scale-105 shadow-xl shadow-brand/30 flex items-center justify-center gap-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+          <span data-i18n="hero.cta">オンラインで注文する</span>
+        </a>
       </div>
-    </header>
+    </div>
+  </section>
 
-    <main class="container mx-auto px-4 py-8">
-      <section id="about" class="text-center mb-12">
-        <h2 id="about-title" class="text-4xl font-bold mb-4"></h2>
-        <p id="about-content" class="text-lg text-gray-600"></p>
-      </section>
+  <!-- About Section -->
+  <section id="about" class="py-20 bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white" data-i18n="about.title">私たちのこだわり</h2>
+      <div class="w-16 h-1 bg-brand mx-auto mb-8 rounded-full"></div>
+      <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed" data-i18n="about.desc">
+        新鮮な食材を使用した本格的な味わいをお楽しみください。ジューシーな炭火焼鳥と、スパイスの効いた本格インドカレー。一見不思議な組み合わせですが、一度食べたらやみつきになる美味しさです。ご家族での夕食や、お仕事帰りのテイクアウトにぜひご利用ください。
+      </p>
+    </div>
+  </section>
 
-      <section id="value" class="text-center mb-12">
-        <h2 id="value-title" class="text-4xl font-bold mb-4"></h2>
-        <p id="value-content" class="text-lg text-gray-600"></p>
-      </section>
-
-      <section id="product" class="w-full text-center mx-auto px-4">
-        <div id="product-features"></div>
-      </section>
-
-      <section id="pricing" class="text-center mt-12">
-        <h2 id="pricing-title" class="text-4xl font-bold mb-4"></h2>
-        <p id="pricing-content" class="text-lg text-gray-600"></p>
-      </section>
-
-      <section id="contact" class="text-center mt-12">
-        <h2 id="contact-title" class="text-4xl font-bold mb-4"></h2>
-        <p id="contact-content" class="text-lg text-gray-600"></p>
-      </section>
-    </main>
-    <div class="text-center text-sm text-gray-400 mt-4">* Some images are AI-generated. Data in graphs are accurate as of July 2025.</div>
-    <footer class="bg-gray-800 text-white py-4 mt-12">
-      <div class="container mx-auto text-center">
-        <p>&copy; 2025 Yakiben. All rights reserved.</p>
+  <!-- Menu Highlights -->
+  <section id="menu" class="py-20 bg-white dark:bg-gray-800 border-y border-gray-100 dark:border-gray-800">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white" data-i18n="menu.title">おすすめメニュー</h2>
+        <div class="w-16 h-1 bg-brand mx-auto mt-6 rounded-full"></div>
       </div>
-    </footer>
-  </body>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Item 1 -->
+        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow border border-gray-100 dark:border-gray-700">
+          <div class="h-48 bg-gray-200 dark:bg-gray-600 relative overflow-hidden group">
+            <img src="https://images.unsplash.com/photo-1580476262798-badd98f5122f?auto=format&fit=crop&q=80" alt="Bento placeholder" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2" data-i18n="menu.item1.title">特製弁当</h3>
+            <p class="text-gray-600 dark:text-gray-300 mb-4" data-i18n="menu.item1.desc">毎日の特選お肉と季節の野菜を詰め込んだ、ボリューム満点のお弁当。</p>
+          </div>
+        </div>
+        
+        <!-- Item 2 -->
+        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow border border-gray-100 dark:border-gray-700">
+          <div class="h-48 bg-gray-200 dark:bg-gray-600 relative overflow-hidden group">
+            <img src="https://images.unsplash.com/photo-1606086812822-026852bb07fd?auto=format&fit=crop&q=80" alt="Curry placeholder" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2" data-i18n="menu.item2.title">スパイスカレー</h3>
+            <p class="text-gray-600 dark:text-gray-300 mb-4" data-i18n="menu.item2.desc">独自ブレンドのスパイスを使用した本格カレー。焼鳥との相性も抜群です。</p>
+          </div>
+        </div>
+
+        <!-- Item 3 -->
+        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow border border-gray-100 dark:border-gray-700">
+          <div class="h-48 bg-gray-200 dark:bg-gray-600 relative overflow-hidden group">
+            <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80" alt="Yakitori placeholder" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2" data-i18n="menu.item3.title">焼鳥盛り合わせ</h3>
+            <p class="text-gray-600 dark:text-gray-300 mb-4" data-i18n="menu.item3.desc">炭火でじっくり香ばしく焼き上げた自慢の串焼き。おつまみにも最適です。</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-12 text-center">
+        <a href="./customer" class="inline-flex items-center text-brand dark:text-brand-dark font-bold hover:underline" data-i18n="menu.link">
+          フルメニューを見る →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Location & Hours Section -->
+  <section id="location" class="py-20 bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6" data-i18n="loc.title">店舗情報</h2>
+          <div class="w-16 h-1 bg-brand mb-8 rounded-full"></div>
+          
+          <div class="space-y-6 text-gray-600 dark:text-gray-300 flex flex-col items-center sm:items-start text-center sm:text-left">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start">
+              <svg class="w-6 h-6 text-brand mt-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+              <div class="sm:ml-4 mt-2 sm:mt-0">
+                <p class="font-bold text-gray-900 dark:text-white" data-i18n="loc.name.title">店舗名</p>
+                <p>炭火焼鳥＆インドカレーあちゃー</p>
+              </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center sm:items-start">
+              <svg class="w-6 h-6 text-brand mt-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+              <div class="sm:ml-4 mt-2 sm:mt-0">
+                <p class="font-bold text-gray-900 dark:text-white" data-i18n="loc.address.title">住所</p>
+                <p>〒134-0085<br>東京都江戸川区南葛西5-13-10</p>
+              </div>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row items-center sm:items-start">
+              <svg class="w-6 h-6 text-brand mt-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <div class="sm:ml-4 mt-2 sm:mt-0">
+                <p class="font-bold text-gray-900 dark:text-white" data-i18n="loc.hours.title">営業時間</p>
+                <p data-i18n="loc.hours.desc">10:00 〜 20:00<br>定休日：なし</p>
+              </div>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row items-center sm:items-start">
+              <svg class="w-6 h-6 text-brand mt-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+              <div class="sm:ml-4 mt-2 sm:mt-0">
+                <p class="font-bold text-gray-900 dark:text-white" data-i18n="loc.phone.title">電話番号</p>
+                <p>03-6808-8274</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex flex-col gap-6">
+          <div class="h-64 sm:h-80 bg-gray-200 rounded-2xl overflow-hidden shadow-inner w-full">
+            <iframe 
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4242.804609032754!2d139.8739693!3d35.64590059999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60187da42defed25%3A0x22c78ff2f47537b2!2z54Kt54Gr54S86bOlJuOCpOODs-ODieOCq-ODrOODvOOBguOBoeOCg-ODvA!5e1!3m2!1sen!2sjp!4v1770808200764!5m2!1sen!2sjp" 
+              width="100%" 
+              height="100%" 
+              style="border:0;" 
+              allowfullscreen="" 
+              loading="lazy" 
+              referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+          </div>
+          <!-- Google Calendar Embed -->
+          <div class="h-64 sm:h-80 bg-gray-200 rounded-2xl overflow-hidden shadow-inner w-full">
+            <iframe 
+              src="https://calendar.google.com/calendar/embed?src=tanka.yakitori.achya%40gmail.com&ctz=Asia%2FTokyo&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&mode=AGENDA" 
+              style="border: 0" 
+              width="100%" 
+              height="100%" 
+              frameborder="0" 
+              scrolling="no">
+            </iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-16 mt-auto">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-8">
+        
+        <div class="flex flex-col items-center md:items-start">
+          <p class="font-extrabold text-2xl text-brand dark:text-brand-dark mb-4" data-i18n="nav.logo">あちゃー</p>
+          <div class="flex space-x-6">
+            <!-- Line Official Account Link from restaurant.ts (@928fpuvz) -->
+            <a href="https://page.line.me/928fpuvz" target="_blank" rel="noopener" class="text-[#06C755] hover:text-[#05A345] transition-colors" title="Add us on LINE">
+              <span class="sr-only">Line</span>
+              <svg class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24"><path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.036 9.608.391.084.922.258 1.057.592.122.303.079.778.039 1.085l-.171 1.027c-.053.303-.242 1.186 1.039.647 1.281-.54 6.911-4.069 9.428-6.967 1.739-1.907 2.572-3.843 2.572-5.992z"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="text-center md:text-right">
+          <p class="text-gray-500 dark:text-gray-400 text-sm mb-2">
+            &copy; 2025 Achyaben. All rights reserved.
+          </p>
+          <p class="text-gray-400 dark:text-gray-500 text-xs flex items-center justify-center md:justify-end gap-1">
+            <span>Powered by</span>
+            <a href="https://ashok314.github.io/yakiben/" target="_blank" rel="noopener" class="underline hover:text-gray-600 dark:hover:text-gray-300">
+              Yakiben
+            </a>
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </footer>
+
+  <!-- Logic Scripts -->
+  <script>
+    // --- 1. THEME MODE LOGIC --- //
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    
+    // Check local storage or system preference
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+
+    // Toggle theme
+    themeToggleBtn.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      if (document.documentElement.classList.contains('dark')) {
+        localStorage.theme = 'dark';
+      } else {
+        localStorage.theme = 'light';
+      }
+    });
+
+    // --- 2. MULTI-LANGUAGE (i18n) LOGIC --- //
+    const translations = {
+      ja: {
+        "nav.logo": "あちゃー",
+        "nav.about": "こだわり",
+        "nav.menu": "メニュー",
+        "nav.location": "アクセス",
+        "cta.order": "注文アプリを開く",
+        "hero.title": "炭火焼鳥 <span class='text-brand'>&</span> インドカレー",
+        "hero.subtitle": "本格的な味わいを、モバイルで簡単に注文。待たずにテイクアウト！",
+        "hero.cta": "オンラインで注文する",
+        "about.title": "私たちのこだわり",
+        "about.desc": "新鮮な食材を使用した本格的な味わいをお楽しみください。ジューシーな炭火焼鳥と、スパイスの効いた本格インドカレー。一見不思議な組み合わせですが、一度食べたらやみつきになる美味しさです。ご家族での夕食や、お仕事帰りのテイクアウトにぜひご利用ください。",
+        "menu.title": "おすすめメニュー",
+        "menu.item1.title": "特製弁当",
+        "menu.item1.desc": "毎日の特選お肉と季節の野菜を詰め込んだ、ボリューム満点のお弁当。",
+        "menu.item2.title": "スパイスカレー",
+        "menu.item2.desc": "独自ブレンドのスパイスを使用した本格カレー。焼鳥との相性も抜群です。",
+        "menu.item3.title": "焼鳥盛り合わせ",
+        "menu.item3.desc": "炭火でじっくり香ばしく焼き上げた自慢の串焼き。おつまみにも最適です。",
+        "menu.link": "フルメニューを見る →",
+        "loc.title": "店舗情報",
+        "loc.name.title": "店舗名",
+        "loc.address.title": "住所",
+        "loc.hours.title": "営業時間",
+        "loc.hours.desc": "10:00 〜 20:00<br>祝日を除く毎週月曜日が定休日<br>祝日の場合は火曜日",
+        "loc.phone.title": "電話番号",
+        "lang.toggleBtn": "EN"
+      },
+      en: {
+        "nav.logo": "Achyaben",
+        "nav.about": "About Us",
+        "nav.menu": "Menu",
+        "nav.location": "Location",
+        "cta.order": "Order Online",
+        "hero.title": "Yakitori <span class='text-brand'>&</span> Indian Curry",
+        "hero.subtitle": "Experience authentic flavors. Order online and pick up at your convenience.",
+        "hero.cta": "Start Your Order",
+        "about.title": "Our Philosophy",
+        "about.desc": "Experience authentic flavors prepared with fresh ingredients. Juicy charcoal-grilled Yakitori and authentic Indian Curry with rich spices. It might sound like an unusual combination, but it's deliciously addictive. Perfect for family dinners or picking up after work.",
+        "menu.title": "Menu Highlights",
+        "menu.item1.title": "Signature Bento",
+        "menu.item1.desc": "Our chef's daily selection of premium meats and seasonal vegetables packed tight.",
+        "menu.item2.title": "Spice Curry",
+        "menu.item2.desc": "Authentic curry made with a unique blend of spices. Pairs perfectly with Yakitori.",
+        "menu.item3.title": "Yakitori Assortment",
+        "menu.item3.desc": "Our pride and joy, carefully grilled over a charcoal fire. Great with drinks.",
+        "menu.link": "View Full Menu →",
+        "loc.title": "Location & Hours",
+        "loc.name.title": "Shop Name",
+        "loc.address.title": "Address",
+        "loc.hours.title": "Hours",
+        "loc.hours.desc": "10:00 AM - 8:00 PM<br>Closed on Mondays (except holidays)<br>If Monday is a holiday, we will be closed on Tuesday",
+        "loc.phone.title": "Phone",
+        "lang.toggleBtn": "JP"
+      }
+    };
+
+    let currentLang = localStorage.getItem('lang') || 'ja';
+    const langToggleBtn = document.getElementById('lang-toggle');
+
+    function updateContent() {
+      const texts = translations[currentLang];
+      
+      // Update all elements with data-i18n attribute
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (texts[key]) {
+          // Use innerHTML instead of textContent to allow <br> tags in translations
+          el.innerHTML = texts[key]; 
+        }
+      });
+      
+      // Update toggle button text
+      langToggleBtn.textContent = texts['lang.toggleBtn'];
+      document.documentElement.lang = currentLang;
+    }
+
+    langToggleBtn.addEventListener('click', () => {
+      currentLang = currentLang === 'ja' ? 'en' : 'ja';
+      localStorage.setItem('lang', currentLang);
+      updateContent();
+    });
+
+    // Initialize translations & reveal UI
+    updateContent();
+    document.body.classList.add('i18n-loaded');
+  </script>
+</body>
 </html>

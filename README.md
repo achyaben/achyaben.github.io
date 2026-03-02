@@ -1,4 +1,20 @@
-# やきべん (Yakiben)
+# 炭火焼鳥＆インドカレーあちゃー (Achyaben Web System)
+
+Welcome to the official web ordering platform and landing page for **炭火焼鳥＆インドカレーあちゃー** (Charcoal Grilled Yakitori & Indian Curry Achya).
+
+This repository contains the source code for our online presence:
+- **Landing Page**: A static HTML/Tailwind landing page built directly into the repository root (`index.html`), featuring dynamic EN/JA translations, theme toggling, and integrated Google Calendar/Maps.
+- **Ordering System**: A sophisticated Vue 3 POS/Customer ordering PWA, actively powering the `./customer` and `./admin` directories.
+
+Both the landing page and the ordering PWA are automatically built and deployed via GitHub Actions directly to our GitHub Pages domain.
+
+---
+
+## Technical Foundation: やきべん (Yakiben)
+
+Our digital ordering system leverages the powerful **Yakiben** architecture.
+
+https://github.com/Ashok314/yakiben
 
 Modern Japanese lunch box pre-order system built with Vue 3 and TypeScript.
 

@@ -1,6 +1,6 @@
 {
   "header": {
-    "title": "Yakiben",
+    "title": "Restaurant App",
     "nav": [
       { "name": "About", "link": "#about" },
       { "name": "Product", "link": "#product" },
@@ -10,8 +10,8 @@
   },
   "sections": {
     "about": {
-      "title": "About Yakiben",
-      "content": "Yakiben is a modern restaurant system designed to empower small business owners by reducing costs and providing modular, easy-to-use tools."
+      "title": "About Us",
+      "content": "Our system is a modern restaurant system designed to empower small business owners by reducing costs and providing modular, easy-to-use tools."
     },
     "product": {
       "title": "Our Product",
@@ -19,31 +19,31 @@
         {
           "group": "Cost Benefits",
           "entries": [
-            { "title": "Save Costs", "description": "Reduce commission fees to just 1-3% compared to 30-40% charged by mainstream apps.", "image": "/images/benefit.svg", "details": "This graph shows the cost benefits of using Yakiben compared to competitors." },
-            { "title": "Operational Costs", "description": "Highlight reduced operational costs with Yakiben.", "image": "/images/cost.svg", "details": "This graph highlights the reduced operational costs with Yakiben." }
+            { "title": "Save Costs", "description": "Reduce commission fees to just 1-3% compared to 30-40% charged by mainstream apps.", "image": "./images/benefit.svg", "details": "This graph shows the cost benefits of using our app compared to competitors." },
+            { "title": "Operational Costs", "description": "Highlight reduced operational costs.", "image": "./images/cost.svg", "details": "This graph highlights the reduced operational costs." }
           ]
         },
         {
           "group": "Management Tools",
           "entries": [
-            { "title": "Easy Management", "description": "Manage your menu, orders, and promotions effortlessly with our admin panel.", "image": "/images/customer-sp-screen.png", "details": "Screenshot of the customer app showcasing its user-friendly interface." },
-            { "title": "Order Management", "description": "Seamless operations with our order management app.", "image": "/images/orders-pc-screen.png", "details": "Screenshot of the order management app for seamless operations." }
+            { "title": "Easy Management", "description": "Manage your menu, orders, and promotions effortlessly with our admin panel.", "image": "./images/customer-sp-screen.png", "details": "Screenshot of the customer app showcasing its user-friendly interface." },
+            { "title": "Order Management", "description": "Seamless operations with our order management app.", "image": "./images/orders-pc-screen.png", "details": "Screenshot of the order management app for seamless operations." }
           ]
         },
         {
           "group": "Branding",
           "entries": [
-            { "title": "Your Own Branding", "description": "Promote your restaurant directly to customers without relying on third-party apps.", "image": "/images/own-branding-1.png", "details": "Promote your restaurant with personalized branding options." },
-            { "title": "Showcase Identity", "description": "Showcase your unique identity with Yakiben's branding tools.", "image": "/images/own-branding-2.png", "details": "Showcase your unique identity with Yakiben's branding tools." }
+            { "title": "Your Own Branding", "description": "Promote your restaurant directly to customers without relying on third-party apps.", "image": "./images/own-branding-1.png", "details": "Promote your restaurant with personalized branding options." },
+            { "title": "Showcase Identity", "description": "Showcase your unique identity with our branding tools.", "image": "./images/own-branding-2.png", "details": "Showcase your unique identity with our branding tools." }
           ]
         },
         {
           "group": "Modular System",
           "entries": [
-            { "title": "Modular System", "description": "Quickly set up a system tailored to your restaurant's needs with our modular design.", "image": "/images/modular-system.png" },
-            { "title": "Customizable Features", "description": "Adapt Yakiben to your specific requirements with ease.", "image": "/images/customizable-features.png" },
-            { "title": "Scalable Design", "description": "Easily scale your restaurant operations with Yakiben's flexible and scalable design.", "image": "/images/scalable-design.png", "details": "Illustration of Yakiben's scalable design enabling restaurant growth." },
-            { "title": "Integrated Ecosystem", "description": "Experience seamless integration of tools and features for a unified restaurant management system.", "image": "/images/integrated-ecosystem.png", "details": "Illustration of Yakiben's integrated ecosystem connecting all restaurant operations." }
+            { "title": "Modular System", "description": "Quickly set up a system tailored to your restaurant's needs with our modular design.", "image": "./images/modular-system.png" },
+            { "title": "Customizable Features", "description": "Adapt our system to your specific requirements with ease.", "image": "./images/customizable-features.png" },
+            { "title": "Scalable Design", "description": "Easily scale your restaurant operations with a flexible and scalable design.", "image": "./images/scalable-design.png", "details": "Illustration of our scalable design enabling restaurant growth." },
+            { "title": "Integrated Ecosystem", "description": "Experience seamless integration of tools and features for a unified restaurant management system.", "image": "./images/integrated-ecosystem.png", "details": "Illustration of our integrated ecosystem connecting all restaurant operations." }
           ]
         }
       ]
@@ -64,7 +64,7 @@
   "announcement": {
     "text": "Explore our customer app for more features and benefits!",
     "link": {
-      "url": "/customer",
+      "url": "./customer",
       "label": "Click here"
     }
   },

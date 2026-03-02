@@ -5,7 +5,7 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [vue()],
-  base: '/yakiben/admin/',
+  base: './',
   publicDir: path.resolve(__dirname, '../../public'),
   resolve: {
     alias: {

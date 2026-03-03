@@ -43,7 +43,6 @@ jobs:
           mv apps/customer/dist deploy/customer
           mv apps/admin/dist deploy/admin
           cp index.html deploy/
-          cp -r images deploy/ 2>/dev/null || true
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

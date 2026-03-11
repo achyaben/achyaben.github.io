@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Achyaben Color Asset Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            DEFAULT: '#DC143C',
+                            dark: '#B22222',
+                            ember: '#990F2A',
+                        },
+                        app: {
+                            primary: '#4f46e5',
+                            primaryDark: '#4338ca',
+                            secondary: '#fb923c',
+                            secondaryDark: '#ea580c',
+                        }
+                    }
+                }
+            }
+        }
+
+        function copyToClipboard(text, element) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast(`Copied: ${text}`);
+                
+                // Visual feedback on the card
+                const originalBg = element.style.backgroundColor;
+                element.classList.add('ring-2', 'ring-green-500');
+                setTimeout(() => element.classList.remove('ring-2', 'ring-green-500'), 1000);
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.remove('opacity-0', 'translate-y-4');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-4');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+            }, 2000);
+        }
+    </script>
+    <style>
+        .color-card { 
+            @apply p-4 rounded-xl bg-white shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center gap-3 transition-all hover:shadow-md cursor-pointer active:scale-95 relative overflow-hidden; 
+        }
+        .swatch { @apply w-20 h-20 rounded-2xl shadow-inner border border-black/5 transition-transform; }
+        .color-card:hover .swatch { @apply scale-105; }
+        .copy-icon { @apply absolute top-2 right-2 opacity-0 transition-opacity text-gray-400; }
+        .color-card:hover .copy-icon { @apply opacity-100; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 p-4 md:p-8 mb-20">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full text-sm font-medium shadow-2xl transition-all duration-300 opacity-0 translate-y-4 z-50 pointer-events-none">
+        Copied to clipboard!
+    </div>
+
+    <div class="max-w-5xl mx-auto space-y-12">
+        <header class="text-center space-y-2">
+            <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900">Brand Palette System</h1>
+            <p class="text-slate-500 text-lg">Click any color card to copy the HEX code</p>
+        </header>
+
+        <!-- 1. BRAND IDENTITY SECTION (RED) -->
+        <section class="space-y-6">
+            <div class="flex items-center justify-between border-b border-gray-200 pb-4">
+                <div class="flex items-center gap-4">
+                    <div class="h-10 w-2 bg-brand rounded-full"></div>
+                    <div>
+                        <h2 class="text-2xl font-bold">1. Brand Identity</h2>
+                        <p class="text-sm text-gray-500">achyaben.github.io (Landing Page)</p>
+                    </div>
+                </div>
+                <span class="px-3 py-1 bg-red-50 text-red-700 text-xs font-bold rounded-full uppercase tracking-wider">Traditional / Warm</span>
+            </div>
+            
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="color-card" onclick="copyToClipboard('#DC143C', this)">
+                    <svg class="copy-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                    <div class="swatch bg-brand"></div>
+                    <div>
+                        <p class="font-bold text-sm">Primary Red</p>
+                        <code class="text-xs text-gray-400">#DC143C</code>
+                    </div>
+                </div>
+                <div class="color-card" onclick="copyToClipboard('#B22222', this)">
+                    <svg class="copy-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                    <div class="swatch bg-brand-dark"></div>
+                    <div>
+                        <p class="font-bold text-sm">Brand Dark</p>
+                        <code class="text-xs text-gray-400">#B22222</code>
+                    </div>
+                </div>
+                <div class="color-card" onclick="copyToClipboard('#990F2A', this)">
+                    <svg class="copy-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                    <div class="swatch bg-brand-ember"></div>
+                    <div>
+                        <p class="font-bold text-sm">Deep Ember</p>
+                        <code class="text-xs text-gray-400">#990F2A</code>
+                    </div>
+                </div>
+                <div class="color-card" onclick="copyToClipboard('#374151', this)">
+                    <svg class="copy-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                    <div class="swatch bg-[#374151]"></div>
+                    <div>
+                        <p class="font-bold text-sm">Slate Coal</p>
+                        <code class="text-xs text-gray-400">#374151</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-8 bg-gray-900 rounded-3xl border border-gray-800 shadow-2xl group transition-all hover:ring-4 hover:ring-brand/20">
+                <p class="text-gray-500 text-xs mb-6 uppercase tracking-widest font-bold">Typography Contrast Preview (Dark Mode)</p>
+                <h3 class="text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-none">
+                    炭火焼鳥 <span class="text-brand">&</span> インドカレー
+                </h3>
+                <p class="mt-6 text-gray-400 text-lg max-w-xl">Traditional charcoal grilling meets authentic spice. Visualized using Brand Red.</p>
+            </div>
+        </section>
+
+        <!-- 2. APP IDENTITY SECTION (INDIGO) -->
+        <section class="space-y-6">
+            <div class="flex items-center justify-between border-b border-gray-200 pb-4">
+                <div class="flex items-center gap-4">
+                    <div class="h-10 w-2 bg-app-primary rounded-full"></div>
+                    <div>
+                        <h2 class="text-2xl font-bold">2. App Identity</h2>
+                        <p class="text-sm text-gray-500">achyaben.github.io/customer/ (Delivery App)</p>
+                    </div>
+                </div>
+                <span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-full uppercase tracking-wider">Functional / Modern</span>
+            </div>
+            
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="color-card" onclick="copyToClipboard('#4F46E5', this)">
+                    <svg class="copy-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                    <div class="swatch bg-app-primary"></div>
+                    <div>
+                        <p class="font-bold text-sm">App Indigo</p>
+                        <code class="text-xs text-gray-400">#4F46E5</code>
+                    </div>
+                </div>
+                <div class="color-card" onclick="copyToClipboard('#4338CA', this)">
+                    <svg class="copy-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                    <div class="swatch bg-app-primaryDark"></div>
+                    <div>
+                        <p class="font-bold text-sm">Indigo Dark</p>
+                        <code class="text-xs text-gray-400">#4338CA</code>
+                    </div>
+                </div>
+                <div class="color-card" onclick="copyToClipboard('#FB923C', this)">
+                    <svg class="copy-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                    <div class="swatch bg-app-secondary"></div>
+                    <div>
+                        <p class="font-bold text-sm">Spice Orange</p>
+                        <code class="text-xs text-gray-400">#FB923C</code>
+                    </div>
+                </div>
+                <div class="color-card" onclick="copyToClipboard('#EA580C', this)">
+                    <svg class="copy-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                    <div class="swatch bg-app-secondaryDark"></div>
+                    <div>
+                        <p class="font-bold text-sm">Orange Dark</p>
+                        <code class="text-xs text-gray-400">#EA580C</code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Functional Statuses -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="group flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 hover:border-green-200 transition-colors cursor-pointer" onclick="copyToClipboard('#059669', this)">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-[#059669] shadow-inner"></div>
+                        <span class="text-sm font-bold text-slate-700">Success Status</span>
+                    </div>
+                    <code class="text-[10px] text-gray-400 group-hover:text-green-600 transition-colors">#059669</code>
+                </div>
+                <div class="group flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 hover:border-amber-200 transition-colors cursor-pointer" onclick="copyToClipboard('#F59E0B', this)">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-[#F59E0B] shadow-inner"></div>
+                        <span class="text-sm font-bold text-slate-700">Warning Status</span>
+                    </div>
+                    <code class="text-[10px] text-gray-400 group-hover:text-amber-600 transition-colors">#F59E0B</code>
+                </div>
+                <div class="group flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 hover:border-red-200 transition-colors cursor-pointer" onclick="copyToClipboard('#DC2626', this)">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-[#DC2626] shadow-inner"></div>
+                        <span class="text-sm font-bold text-slate-700">Error Status</span>
+                    </div>
+                    <code class="text-[10px] text-gray-400 group-hover:text-red-600 transition-colors">#DC2626</code>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. BRAND INTEGRITY -->
+        <section class="bg-red-50 p-8 rounded-3xl border border-red-100">
+            <h2 class="text-2xl font-bold text-red-900 mb-6 flex items-center gap-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                Management Rules
+            </h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-red-50">
+                    <p class="font-bold text-red-800 mb-2">❌ DO NOT Mix Identities</p>
+                    <p class="text-sm text-slate-600 leading-relaxed">The <span class="text-brand font-bold">Brand Red</span> belongs on the landing page for appetite appeal. The <span class="text-app-primary font-bold">App Indigo</span> belongs on the checkout flow for clarity. Never swap them.</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-red-50">
+                    <p class="font-bold text-red-800 mb-2">❌ DO NOT Use System Reds</p>
+                    <p class="text-sm text-slate-600 leading-relaxed">Avoid standard CSS <code class="bg-gray-100 px-1 rounded">red</code> or <code class="bg-gray-100 px-1 rounded">#FF0000</code>. Only use the refined <strong>Crimson Red (#DC143C)</strong> to maintain the premium charcoal grill aesthetic.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+</body>
+</html>

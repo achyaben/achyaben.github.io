@@ -59,7 +59,7 @@ onMounted(async () => {
         <div class="container mx-auto px-4 h-16 flex justify-between items-center">
           <router-link to="/"
             class="flex items-center space-x-2 text-base md:text-xl font-bold tracking-tight text-gray-900 hover:opacity-80 transition">
-            <img :src="getImageUrl('/assets/logo.webp')" alt="App Logo" class="h-8 w-8 rounded-lg" />
+            <img :src="getImageUrl('/assets/achyaben-logo.svg')" alt="App Logo" class="h-8 w-8 rounded-lg" />
             <span>{{ info.app_name }}</span>
           </router-link>
           <UserMenu />
@@ -80,7 +80,8 @@ onMounted(async () => {
       </main>
 
       <footer class="mt-12 py-6 text-center text-sm text-gray-400">
-        <p class="mb-2">&copy; {{ info.name }}</p>
+        <a href="/" class="text-primary hover:text-primary-dark transition-colors">ホームページ </a>
+        <span class="mb-2">&copy; {{ info.name }}</span>
       </footer>
     </template>
   </div>

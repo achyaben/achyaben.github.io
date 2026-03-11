@@ -42,7 +42,7 @@ jobs:
           mkdir -p deploy
           mv apps/customer/dist deploy/customer
           mv apps/admin/dist deploy/admin
-          cp index.html identity-hub.html brand-guidelines.html deploy/
+          cp index.html identity-hub.html brand-guideline.html deploy/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

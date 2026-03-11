@@ -1,0 +1,24 @@
+<svg width="180" height="180" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer bento frame -->
+  <rect x="10" y="10" width="80" height="80" rx="2" stroke="#DC143C" stroke-width="5"/>
+  <!-- Golden ratio dividers -->
+  <path d="M59.44 10V90" stroke="#DC143C" stroke-width="4" stroke-linecap="round"/>
+  <path d="M59.44 59.44H90" stroke="#DC143C" stroke-width="4" stroke-linecap="round"/>
+  <!-- Skewer 1 -->
+  <path d="M28 20V80" stroke="#DC143C" stroke-width="2.5" stroke-linecap="round"/>
+  <rect x="23" y="28" width="10" height="8" rx="2" fill="#DC143C"/>
+  <circle cx="28" cy="48" r="4.5" fill="#DC143C"/>
+  <rect x="23" y="62" width="10" height="8" rx="2" fill="#DC143C"/>
+  <!-- Skewer 2 -->
+  <path d="M42 20V80" stroke="#DC143C" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="42" cy="32" r="4.5" fill="#DC143C"/>
+  <rect x="37" y="46" width="10" height="8" rx="2" fill="#DC143C"/>
+  <circle cx="42" cy="65" r="4.5" fill="#DC143C"/>
+  <!-- Curry pot / square -->
+  <rect x="68" y="25" width="14" height="14" rx="1" stroke="#DC143C" stroke-width="2.5"/>
+  <path d="M72 32H78" stroke="#DC143C" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Curry spiral -->
+  <path d="M84 72C84 66.4772 79.5228 62 74 62C70.134 62 67 65.134 67 69C67 71.7614 69.2386 74 72 74C74.2091 74 76 72.2091 76 70C76 68.8954 75.1046 68 74 68" stroke="#DC143C" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Dashed circle -->
+  <circle cx="74" cy="74" r="11" stroke="#DC143C" stroke-width="1" stroke-dasharray="2 2" opacity="0.4"/>
+</svg>

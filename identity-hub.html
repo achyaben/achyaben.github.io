@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="./customer/assets/achyaben-logo.svg" />
+    <title>Achya Identity Hub | Brand Guidelines</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            DEFAULT: '#DC143C',
+                            dark: '#B22222',
+                            ember: '#990F2A',
+                        },
+                        app: {
+                            primary: '#4f46e5',
+                            primaryDark: '#4338ca',
+                            secondary: '#fb923c',
+                            secondaryDark: '#ea580c',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        jp: ['Noto Serif JP', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=Noto+Serif+JP:wght@900&display=swap');
+        
+        .logo-box { @apply p-8 bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 flex flex-col items-center gap-6 shadow-sm transition-all hover:shadow-xl relative overflow-hidden; }
+        .color-card { @apply p-4 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center text-center gap-3 transition-all hover:shadow-md cursor-pointer active:scale-95; }
+        
+        .glass-nav {
+            @apply sticky top-4 z-50 mx-auto max-w-5xl px-6 py-3 rounded-full border border-white/20 bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg flex items-center justify-between shadow-lg;
+        }
+
+        @media print {
+            .glass-nav, #toast, .print-hidden { display: none !important; }
+            body { background: white !important; color: black !important; padding: 0 !important; }
+            .logo-box { border: 1px solid #eee !important; shadow: none !important; page-break-inside: avoid; }
+            main { margin-top: 2rem !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-gray-950 text-slate-900 dark:text-gray-100 transition-colors duration-300 pb-20">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full text-sm font-medium shadow-2xl transition-all duration-300 opacity-0 translate-y-4 z-[100] pointer-events-none">
+        Copied to clipboard!
+    </div>
+
+    <!-- Navigation -->
+    <nav class="mt-6 px-4 print-hidden">
+        <div class="glass-nav">
+            <div class="flex items-center gap-2">
+                <img src="./assets/achyaben-logo.svg" alt="あちゃーロゴ" class="h-8 w-8 rounded-lg" />
+                <span class="font-bold tracking-tighter text-lg hidden sm:block">Achya Identity Hub</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="window.print()" class="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors" title="Print Guidelines">
+                    <i class="fa-solid fa-print"></i>
+                </button>
+                <button onclick="toggleLang()" class="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors font-bold text-xs">
+                    <span id="lang-label">JP</span>
+                </button>
+                <button onclick="toggleDarkMode()" class="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors">
+                    <i id="theme-icon" class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto px-4 mt-16 space-y-24">
+        
+        <!-- Hero Header -->
+        <header class="text-center space-y-6">
+            <h1 id="hero-title" class="text-6xl md:text-8xl font-black tracking-tighter uppercase leading-none">
+                Identity Hub
+            </h1>
+            <p id="hero-subtitle" class="text-slate-500 dark:text-gray-400 text-lg md:text-xl italic font-serif">
+                "The Golden Bento: Ratio-Based Design for Universal Harmony"
+            </p>
+        </header>
+
+        <!-- Section: Primary Logos -->
+        <section id="logos" class="space-y-12">
+            <div class="flex items-center gap-4 border-b border-gray-200 dark:border-gray-800 pb-4">
+                <div class="h-10 w-2 bg-brand rounded-full"></div>
+                <div>
+                    <h2 data-t="logos.title" class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">The Core Logos</h2>
+                    <p data-t="logos.subtitle" class="text-sm text-gray-500 italic">Universal geometry for the heritage brand and digital service.</p>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- BRAND LOGO -->
+                <div class="logo-box">
+                    <span data-t="logos.brandLabel" class="text-[10px] font-bold text-brand uppercase tracking-widest px-3 py-1 bg-red-50 dark:bg-red-950 rounded-full">Brand Identity</span>
+                    <div class="cursor-pointer transition-transform hover:scale-105" onclick="copySVG('brand-svg')">
+                        <svg id="brand-svg" width="180" height="180" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="10" y="10" width="80" height="80" rx="2" class="stroke-brand" stroke-width="5"/>
+                            <path d="M59.44 10V90" class="stroke-brand" stroke-width="4" stroke-linecap="round"/>
+                            <path d="M59.44 59.44H90" class="stroke-brand" stroke-width="4" stroke-linecap="round"/>
+                            <path d="M28 20V80" class="stroke-brand" stroke-width="2.5" stroke-linecap="round"/>
+                            <rect x="23" y="28" width="10" height="8" rx="2" class="fill-brand"/>
+                            <circle cx="28" cy="48" r="4.5" class="fill-brand"/>
+                            <rect x="23" y="62" width="10" height="8" rx="2" class="fill-brand"/>
+                            <path d="M42 20V80" class="stroke-brand" stroke-width="2.5" stroke-linecap="round"/>
+                            <circle cx="42" cy="32" r="4.5" class="fill-brand"/>
+                            <rect x="37" y="46" width="10" height="8" rx="2" class="fill-brand"/>
+                            <circle cx="42" cy="65" r="4.5" class="fill-brand"/>
+                            <rect x="68" y="25" width="14" height="14" rx="1" class="stroke-brand" stroke-width="2.5"/>
+                            <path d="M72 32H78" class="stroke-brand" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M84 72C84 66.4772 79.5228 62 74 62C70.134 62 67 65.134 67 69C67 71.7614 69.2386 74 72 74C74.2091 74 76 72.2091 76 70C76 68.8954 75.1046 68 74 68" class="stroke-brand" stroke-width="1.5" stroke-linecap="round"/>
+                            <circle cx="74" cy="74" r="11" class="stroke-brand" stroke-width="1" stroke-dasharray="2 2" opacity="0.4"/>
+                        </svg>
+                    </div>
+                    <div class="text-center">
+                        <h4 class="text-3xl font-black font-jp text-gray-900 dark:text-white leading-tight">あちゃー</h4>
+                        <p data-t="logos.brandSub" class="text-[11px] text-brand font-bold tracking-[0.2em] uppercase mt-1">Sumibiyaki & Curry</p>
+                    </div>
+                </div>
+
+                <!-- APP LOGO -->
+                <div class="logo-box">
+                    <span data-t="logos.appLabel" class="text-[10px] font-bold text-app-primary uppercase tracking-widest px-3 py-1 bg-indigo-50 dark:bg-indigo-950 rounded-full">Digital App</span>
+                    <div class="cursor-pointer transition-transform hover:scale-105" onclick="copySVG('app-svg')">
+                        <svg id="app-svg" width="180" height="180" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="100" height="100" rx="24" class="fill-app-primary"/>
+                            <rect x="20" y="20" width="60" height="60" rx="4" stroke="white" stroke-opacity="0.2" stroke-width="2"/>
+                            <path d="M57 20V80" stroke="white" stroke-opacity="0.3" stroke-width="1.5"/>
+                            <path d="M57 57H80" stroke="white" stroke-opacity="0.3" stroke-width="1.5"/>
+                            <path d="M34 28V72" stroke="white" stroke-width="1.5"/>
+                            <rect x="30" y="34" width="8" height="6" rx="1" fill="white"/>
+                            <circle cx="34" cy="50" r="3" fill="white"/>
+                            <rect x="30" y="60" width="8" height="6" rx="1" fill="white"/>
+                            <path d="M44 28V72" stroke="white" stroke-width="1.5"/>
+                            <circle cx="44" cy="38" r="3" fill="white"/>
+                            <rect x="40" y="48" width="8" height="6" rx="1" fill="white"/>
+                            <circle cx="44" cy="62" r="3" fill="white"/>
+                            <rect x="63" y="30" width="10" height="10" class="fill-app-secondary" rx="1.5"/>
+                            <circle cx="68" cy="68" r="8" class="stroke-app-secondary" stroke-width="2"/>
+                            <path d="M73 68C73 65 71 63 68 63C66 63 65 64.5 65 66" class="stroke-app-secondary" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="text-center">
+                        <h4 class="text-2xl font-black text-app-primary dark:text-indigo-400 leading-tight uppercase tracking-tighter">Achyaben</h4>
+                        <p data-t="logos.appSub" class="text-[10px] text-app-secondary font-bold tracking-tighter uppercase">Order & Delivery</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Monochrome & Print -->
+        <section id="monochrome" class="space-y-12">
+            <div class="flex items-center gap-4 border-b border-gray-200 dark:border-gray-800 pb-4">
+                <div class="h-10 w-2 bg-gray-400 rounded-full"></div>
+                <div>
+                    <h2 data-t="mono.title" class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Monochrome & Print</h2>
+                    <p data-t="mono.subtitle" class="text-sm text-gray-500 italic">High-contrast variations for physical media and print documentation.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <!-- Black on White -->
+                <div class="logo-box !p-6 bg-white border-gray-200 cursor-pointer hover:scale-105 transition-transform" onclick="copySVG('mono-brand-black-svg')">
+                    <svg id="mono-brand-black-svg" width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="10" y="10" width="80" height="80" rx="2" stroke="black" stroke-width="5"/>
+                        <path d="M59.44 10V90" stroke="black" stroke-width="4"/>
+                        <path d="M59.44 59.44H90" stroke="black" stroke-width="4"/>
+                        <!-- Skewer 1 -->
+                        <path d="M28 20V80" stroke="black" stroke-width="2.5"/>
+                        <rect x="23" y="28" width="10" height="8" rx="2" fill="black"/>
+                        <circle cx="28" cy="48" r="4.5" fill="black"/>
+                        <rect x="23" y="62" width="10" height="8" rx="2" fill="black"/>
+                        <!-- Skewer 2 -->
+                        <path d="M42 20V80" stroke="black" stroke-width="2.5"/>
+                        <circle cx="42" cy="32" r="4.5" fill="black"/>
+                        <rect x="37" y="46" width="10" height="8" rx="2" fill="black"/>
+                        <circle cx="42" cy="65" r="4.5" fill="black"/>
+                        <!-- Square -->
+                        <rect x="68" y="25" width="14" height="14" rx="1" stroke="black" stroke-width="2.5"/>
+                        <!-- Spiral -->
+                        <circle cx="74" cy="74" r="10" stroke="black" stroke-width="2"/>
+                    </svg>
+                    <span class="text-[10px] font-bold text-gray-900 uppercase">Black Variant</span>
+                </div>
+                <!-- White on Black -->
+                <div class="logo-box !p-6 bg-gray-900 border-transparent cursor-pointer hover:scale-105 transition-transform" onclick="copySVG('mono-brand-white-svg')">
+                    <svg id="mono-brand-white-svg" width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="10" y="10" width="80" height="80" rx="2" stroke="white" stroke-width="5"/>
+                        <path d="M59.44 10V90" stroke="white" stroke-width="4"/>
+                        <path d="M59.44 59.44H90" stroke="white" stroke-width="4"/>
+                        <!-- Skewer 1 -->
+                        <path d="M28 20V80" stroke="white" stroke-width="2.5"/>
+                        <rect x="23" y="28" width="10" height="8" rx="2" fill="white"/>
+                        <circle cx="28" cy="48" r="4.5" fill="white"/>
+                        <rect x="23" y="62" width="10" height="8" rx="2" fill="white"/>
+                        <!-- Skewer 2 -->
+                        <path d="M42 20V80" stroke="white" stroke-width="2.5"/>
+                        <circle cx="42" cy="32" r="4.5" fill="white"/>
+                        <rect x="37" y="46" width="10" height="8" rx="2" fill="white"/>
+                        <circle cx="42" cy="65" r="4.5" fill="white"/>
+                        <!-- Square -->
+                        <rect x="68" y="25" width="14" height="14" rx="1" stroke="white" stroke-width="2.5"/>
+                        <!-- Spiral -->
+                        <circle cx="74" cy="74" r="10" stroke="white" stroke-width="2"/>
+                    </svg>
+                    <span class="text-[10px] font-bold text-gray-100 uppercase">White Variant</span>
+                </div>
+                <!-- App Mono Black -->
+                <div class="logo-box !p-6 bg-white border-gray-200 cursor-pointer hover:scale-105 transition-transform" onclick="copySVG('mono-app-black-svg')">
+                    <svg id="mono-app-black-svg" width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="100" height="100" rx="24" fill="black"/>
+                        <rect x="20" y="20" width="60" height="60" rx="4" stroke="white" stroke-opacity="0.3" stroke-width="2"/>
+                        <path d="M57 20V80" stroke="white" stroke-opacity="0.3" stroke-width="1.5"/>
+                        <path d="M57 57H80" stroke="white" stroke-opacity="0.3" stroke-width="1.5"/>
+                        <path d="M34 28V72" stroke="white" stroke-width="1.5"/>
+                        <rect x="30" y="34" width="8" height="6" rx="1" fill="white"/>
+                        <circle cx="34" cy="50" r="3" fill="white"/>
+                        <rect x="30" y="60" width="8" height="6" rx="1" fill="white"/>
+                        <path d="M44 28V72" stroke="white" stroke-width="1.5"/>
+                        <circle cx="44" cy="38" r="3" fill="white"/>
+                        <rect x="40" y="48" width="8" height="6" rx="1" fill="white"/>
+                        <circle cx="44" cy="62" r="3" fill="white"/>
+                        <rect x="63" y="30" width="10" height="10" fill="white" rx="1.5"/>
+                        <circle cx="68" cy="68" r="8" stroke="white" stroke-width="2"/>
+                    </svg>
+                    <span class="text-[10px] font-bold text-gray-900 uppercase">App Mono B</span>
+                </div>
+                <!-- App Mono Outline -->
+                <div class="logo-box !p-6 bg-white border-gray-200 cursor-pointer hover:scale-105 transition-transform" onclick="copySVG('mono-app-outline-svg')">
+                    <svg id="mono-app-outline-svg" width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="2" y="2" width="96" height="96" rx="24" stroke="black" stroke-width="4"/>
+                        <rect x="20" y="20" width="60" height="60" rx="4" stroke="black" stroke-opacity="0.2" stroke-width="2"/>
+                        <path d="M57 20V80" stroke="black" stroke-opacity="0.2" stroke-width="1.5"/>
+                        <path d="M57 57H80" stroke="black" stroke-opacity="0.2" stroke-width="1.5"/>
+                        <!-- Skewer 1 -->
+                        <path d="M34 28V72" stroke="black" stroke-width="1.5"/>
+                        <rect x="30" y="34" width="8" height="6" rx="1" fill="black"/>
+                        <circle cx="34" cy="50" r="3" fill="black"/>
+                        <rect x="30" y="60" width="8" height="6" rx="1" fill="black"/>
+                        <!-- Skewer 2 -->
+                        <path d="M44 28V72" stroke="black" stroke-width="1.5"/>
+                        <circle cx="44" cy="38" r="3" fill="black"/>
+                        <rect x="40" y="48" width="8" height="6" rx="1" fill="black"/>
+                        <circle cx="44" cy="62" r="3" fill="black"/>
+                        <!-- Compartments -->
+                        <rect x="63" y="30" width="10" height="10" fill="black" rx="1.5"/>
+                        <circle cx="68" cy="68" r="8" stroke="black" stroke-width="2"/>
+                    </svg>
+                    <span class="text-[10px] font-bold text-gray-900 uppercase">App Outline</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Palettes -->
+        <section id="palettes" class="space-y-12">
+            <div class="flex items-center gap-4 border-b border-gray-200 dark:border-gray-800 pb-4">
+                <div class="h-10 w-2 bg-app-primary rounded-full"></div>
+                <div>
+                    <h2 data-t="palette.title" class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Palette Management</h2>
+                    <p data-t="palette.subtitle" class="text-sm text-gray-500 italic">Core color values for the Achya ecosystem.</p>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-12">
+                <div class="space-y-4">
+                    <h3 data-t="palette.brandHead" class="text-xs font-bold text-gray-400 uppercase tracking-[0.3em]">Brand (Landing Page)</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="color-card" onclick="copyColor('#DC143C')">
+                            <div class="w-12 h-12 rounded-lg bg-brand"></div>
+                            <span class="text-xs font-bold">#DC143C</span>
+                        </div>
+                        <div class="color-card" onclick="copyColor('#B22222')">
+                            <div class="w-12 h-12 rounded-lg bg-brand-dark"></div>
+                            <span class="text-xs font-bold">#B22222</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <h3 data-t="palette.appHead" class="text-xs font-bold text-gray-400 uppercase tracking-[0.3em]">App (Digital UI)</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="color-card" onclick="copyColor('#4F46E5')">
+                            <div class="w-12 h-12 rounded-lg bg-app-primary"></div>
+                            <span class="text-xs font-bold">#4F46E5</span>
+                        </div>
+                        <div class="color-card" onclick="copyColor('#FB923C')">
+                            <div class="w-12 h-12 rounded-lg bg-app-secondary"></div>
+                            <span class="text-xs font-bold">#FB923C</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Typography -->
+        <section id="typography" class="p-12 md:p-20 bg-gray-900 rounded-[3rem] border border-gray-800 shadow-2xl text-center overflow-hidden relative">
+            <div class="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-brand via-transparent to-transparent"></div>
+            <p data-t="typo.head" class="text-brand text-[10px] font-bold tracking-[0.5em] uppercase mb-8 relative z-10">Sumibiyaki x Indian Curry</p>
+            <h3 class="text-5xl md:text-8xl font-black text-white tracking-tighter leading-none mb-6 font-jp relative z-10">
+                炭火焼鳥 <span class="text-brand">&</span> インドカレー
+            </h3>
+            <p data-t="typo.sub" class="text-gray-500 text-sm tracking-[0.3em] uppercase relative z-10">Authentic Taste. Mathematical Precision.</p>
+        </section>
+
+    </main>
+
+    <footer class="mt-24 text-center pb-12 text-gray-400 text-xs print-hidden">
+        <p>© 2026 Achya Ecosystem. All Identity Rights Reserved.</p>
+    </footer>
+
+    <script>
+        // --- TRANSLATION ENGINE ---
+        const translations = {
+            en: {
+                hero: { title: "Identity Hub", sub: '"The Golden Bento: Ratio-Based Design for Universal Harmony"' },
+                logos: { title: "The Core Logos", subtitle: "Universal geometry for the heritage brand and digital service.", brandLabel: "Brand Identity", brandSub: "Sumibiyaki & Curry", appLabel: "Digital App", appSub: "Order & Delivery" },
+                mono: { title: "Monochrome & Print", subtitle: "High-contrast variations for physical media and print documentation." },
+                palette: { title: "Palette Management", subtitle: "Core color values for the Achya ecosystem.", brandHead: "Brand (Landing Page)", appHead: "App (Digital UI)" },
+                typo: { head: "Sumibiyaki x Indian Curry", sub: "Authentic Taste. Mathematical Precision." }
+            },
+            jp: {
+                hero: { title: "アイデンティティ・ハブ", sub: "「黄金の弁当：普遍的な調和のための比率に基づいたデザイン」" },
+                logos: { title: "コア・ロゴ", subtitle: "伝統的なブランドとデジタルサービスのための普遍的な幾何学。", brandLabel: "ブランド・アイデンティティ", brandSub: "炭火焼鳥 & インドカレー", appLabel: "デジタル・アプリ", appSub: "注文 & デリバリー" },
+                mono: { title: "モノクロ & 印刷用", subtitle: "物理メディアや印刷ドキュメントのための高コントラスト・バリエーション。" },
+                palette: { title: "パレット管理", subtitle: "あちゃー・エコシステムのコアカラー値。", brandHead: "ブランド（ランディングページ）", appHead: "アプリ（デジタルUI）" },
+                typo: { head: "炭火焼鳥 x インドカレー", sub: "本物の味。数学的な精密さ。" }
+            }
+        };
+
+        let currentLang = 'en';
+
+        function updateContent() {
+            const t = translations[currentLang];
+            document.getElementById('hero-title').textContent = t.hero.title;
+            document.getElementById('hero-subtitle').textContent = t.hero.sub;
+            document.getElementById('lang-label').textContent = currentLang === 'en' ? 'JP' : 'EN';
+            
+            document.querySelectorAll('[data-t]').forEach(el => {
+                const keys = el.getAttribute('data-t').split('.');
+                let val = t;
+                keys.forEach(k => val = val[k]);
+                el.textContent = val;
+            });
+        }
+
+        function toggleLang() {
+            currentLang = currentLang === 'en' ? 'jp' : 'en';
+            updateContent();
+        }
+
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            const icon = document.getElementById('theme-icon');
+            if (document.documentElement.classList.contains('dark')) {
+                icon.className = 'fa-solid fa-sun';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                icon.className = 'fa-solid fa-moon';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            document.getElementById('theme-icon').className = 'fa-solid fa-sun';
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.remove('opacity-0', 'translate-y-4');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-4');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+            }, 2000);
+        }
+
+        function copyColor(hex) {
+            const el = document.createElement('textarea');
+            el.value = hex;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            showToast(`Copied: ${hex}`);
+        }
+
+        function copySVG(id) {
+            const svg = document.getElementById(id).outerHTML;
+            const el = document.createElement('textarea');
+            el.value = svg;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            showToast(`Copied: SVG Code`);
+        }
+    </script>
+</body>
+</html>

@@ -18,12 +18,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      - name: Set up Yarn
-        run: corepack enable && corepack prepare yarn@4.9.1 --activate
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Install dependencies
         run: yarn install

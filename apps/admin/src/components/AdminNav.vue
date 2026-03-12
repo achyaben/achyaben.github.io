@@ -12,7 +12,7 @@
         <button @click="toggleCollapse" class="text-black text-xl">
           <span>☰</span>
         </button>
-        <img src="/assets/achyaben-logo.svg" alt="App Logo" class="h-8 w-8 rounded-lg" />
+        <img :src="getImageUrl('/assets/achyaben-logo.svg')" alt="App Logo" class="h-8 w-8 rounded-lg" />
         <span v-if="!isCollapsed" class="text-lg font-bold">Admin Panel</span>
       </div>
 
@@ -78,6 +78,7 @@ import {
   BookOpenIcon,
 } from '@heroicons/vue/24/outline';
 import { USER_ROLES } from '../constants/auth';
+import { getImageUrl } from '../utils/image';
 
 export default {
   props: {
@@ -146,6 +147,7 @@ export default {
     },
   },
   methods: {
+    getImageUrl,
     toggleCollapse() {
       this.isCollapsed = !this.isCollapsed;
       // Emit the new collapse state to parent

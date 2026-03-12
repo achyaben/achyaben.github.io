@@ -8,6 +8,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     permissions:
       contents: write
       pages: write
@@ -16,14 +18,16 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        env:
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
-      - name: Set up Yarn
-        run: corepack enable && corepack prepare yarn@4.9.1 --activate
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Install dependencies
         run: yarn install
@@ -40,9 +44,10 @@ jobs:
       - name: Prepare GitHub Pages
         run: |
           mkdir -p deploy
+          cp -r public/* deploy/
           mv apps/customer/dist deploy/customer
           mv apps/admin/dist deploy/admin
-          cp index.html deploy/
+          cp index.html identity-hub.html brand-guide.html deploy/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

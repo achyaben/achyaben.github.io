@@ -18,14 +18,16 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        env:
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
       - name: Set up Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v4
         with:
           node-version: 22
 
       - name: Enable Corepack
-        run: corepack enable && corepack prepare yarn@4.9.1 --activate
+        run: corepack enable
 
       - name: Install dependencies
         run: yarn install

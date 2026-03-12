@@ -63,33 +63,6 @@ Japanese lunch box pre-order system with customer and admin interfaces.
 
 ### Configuration and Constants
 
-#### Restaurant Info
-```typescript
-export const RESTAURANT_INFO = {
-  name: string;
-  address: {
-    postal: string;
-    prefecture: string;
-    city: string;
-    line1: string;
-  };
-  phone: string;
-  hours: {
-    open: number;          // 24-hour format
-    close: number;         // 24-hour format
-    orderDeadline: number; // Last order time
-    minAdvanceTime: number;// minutes
-    maxAdvanceDays: number;
-    businessDays: number[];// Monday-Friday (0 = Sunday)
-  };
-  support: {
-    phone: string;
-    hours: string;
-    email: string;
-  };
-}
-```
-
 #### UI Text System
 Hierarchical text constant system supporting:
 - Common text (loading, errors, actions)
@@ -97,51 +70,6 @@ Hierarchical text constant system supporting:
 - Cart and order flow text
 - Print layout text
 - Future i18n integration
-
-### Data Models
-
-#### MenuItem
-```typescript
-interface MenuItem {
-  id: string;
-  name: string;
-  description?: string;
-  price: number;
-  category: string;
-  image: string;
-  customizations?: string[];
-  available: boolean;
-}
-```
-```typescript
-interface Customization {
-  id: string;
-  name: string;
-  description?: string;
-  price: number;
-  available: boolean;
-}
-```
-
-#### Order
-```typescript
-interface Order {
-  id: string;
-  trackingId: string;
-  items: OrderItem[];
-  customerName: string;
-  company: string;
-  customerContact: string;
-  delivertTime: Date;
-  notes?: string;
-  status: OrderStatus;
-  paymentMethod?: PaymentMethod;
-  paymentStatus: PaymentStatus;
-  total: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-```
 
 ### Environment Setup
 1. Root level:

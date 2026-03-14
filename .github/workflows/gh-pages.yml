@@ -47,7 +47,7 @@ jobs:
           cp -r public/* deploy/
           mv apps/customer/dist deploy/customer
           mv apps/admin/dist deploy/admin
-          cp index.html identity-hub.html brand-guide.html deploy/
+          cp static-html/*.html deploy/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

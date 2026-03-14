@@ -492,7 +492,10 @@ const openExternalBrowser = () => {
   window.location.href = url + (url.includes('?') ? '&' : '?') + 'openExternalBrowser=1'
 }
 
+const isLineCallback = new URLSearchParams(window.location.search).has('liffClientId')
+
 const handleLoginSuccess: CallbackTypes.CredentialCallback = async (response) => {
+  if (isLineCallback) return // ✅ ignore Google on LINE callback
   if (response.credential) {
     await auth.loginWithGoogle(response.credential);
   }

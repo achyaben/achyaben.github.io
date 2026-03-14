@@ -8,6 +8,10 @@ const isSoftDeleted = ref(false);
 const liffLoaded = ref(false);
 const liffError = ref<string | null>(null);
 
+// ✅ Detect LINE redirect by checking URL params
+const urlParams = new URLSearchParams(window.location.search);
+const isLineCallback = urlParams.has('liffClientId') || urlParams.has('code') && urlParams.has('liffRedirectUri');
+
 supabase.auth.onAuthStateChange(async (event, session) => {
   if (session) {
     token.value = session.access_token;
@@ -24,38 +28,44 @@ supabase.auth.onAuthStateChange(async (event, session) => {
   }
 });
 
-// Auto-init LIFF on app start (for seamless LINE login experience)
-initLiff();
-
 async function initLiff() {
   if (liffLoaded.value) return;
   try {
     await liff.init({ liffId: import.meta.env.VITE_LIFF_ID });
     liffLoaded.value = true;
 
-    // ✅ Auto-login if in LINE browser
-    if (liff.isInClient()) {
+    if (liff.isInClient() || isLineCallback) {
       if (!liff.isLoggedIn()) {
-        liff.login(); // auto redirect
+        liff.login();
         return;
       }
-      // Already logged in — complete Supabase session
+
       const idToken = liff.getIDToken();
       if (idToken && !token.value) {
         const resp = await fetch(
           `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/line-auth`,
           {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            },
             body: JSON.stringify({ id_token: idToken }),
           }
         );
+
         const result = await resp.json();
         if (result.token) {
-          await supabase.auth.setSession({
+          const { error } = await supabase.auth.setSession({
             access_token: result.token,
             refresh_token: result.refresh_token,
           });
+
+          if (!error) {
+            // ✅ Clean URL after successful login
+            const cleanUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+          }
         }
       }
     }
@@ -64,6 +74,9 @@ async function initLiff() {
     liffLoaded.value = false;
   }
 }
+
+// auto-init on store import
+initLiff();
 
 async function checkSoftDelete(userId: string) {
   try {

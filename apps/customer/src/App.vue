@@ -56,11 +56,12 @@ onMounted(async () => {
     <template v-else>
       <!-- Navbar -->
       <div class="bg-white border-b border-gray-200 sticky top-0 z-[100] shadow-sm">
-        <div class="container mx-auto px-4 h-16 flex justify-between items-center">
+        <div class="container mx-auto px-2 h-16 flex justify-between items-center">
           <router-link to="/"
             class="flex items-center space-x-2 text-base md:text-xl font-bold tracking-tight text-gray-900 hover:opacity-80 transition">
             <img :src="getImageUrl('/assets/achyaben-logo.svg')" alt="App Logo" class="h-8 w-8 rounded-lg" />
-            <span>{{ info.app_name }}</span>
+            <!--  smaller appname in sm -->
+            <span class="w-14 text-xs sm:text-base">{{ info.app_name }}</span>
           </router-link>
           <UserMenu />
         </div>

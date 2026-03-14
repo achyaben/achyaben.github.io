@@ -24,11 +24,41 @@ supabase.auth.onAuthStateChange(async (event, session) => {
   }
 });
 
+// Auto-init LIFF on app start (for seamless LINE login experience)
+initLiff();
+
 async function initLiff() {
   if (liffLoaded.value) return;
   try {
     await liff.init({ liffId: import.meta.env.VITE_LIFF_ID });
     liffLoaded.value = true;
+
+    // ✅ Auto-login if in LINE browser
+    if (liff.isInClient()) {
+      if (!liff.isLoggedIn()) {
+        liff.login(); // auto redirect
+        return;
+      }
+      // Already logged in — complete Supabase session
+      const idToken = liff.getIDToken();
+      if (idToken && !token.value) {
+        const resp = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/line-auth`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_token: idToken }),
+          }
+        );
+        const result = await resp.json();
+        if (result.token) {
+          await supabase.auth.setSession({
+            access_token: result.token,
+            refresh_token: result.refresh_token,
+          });
+        }
+      }
+    }
   } catch (e: any) {
     liffError.value = e.message || 'LIFF initialization failed';
     liffLoaded.value = false;

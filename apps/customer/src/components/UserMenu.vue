@@ -12,6 +12,8 @@ const showShopInfo = ref(false);
 const infoDropdownRef = ref<HTMLElement | null>(null);
 const authDropdownRef = ref<HTMLElement | null>(null);
 
+const isLineApp = /Line/i.test(navigator.userAgent)
+
 const toggleInfo = () => {
   isInfoOpen.value = !isInfoOpen.value;
   isAuthOpen.value = false;
@@ -49,6 +51,12 @@ const handleLoginSuccess: CallbackTypes.CredentialCallback = async (response) =>
   }
 };
 
+// ✅ Open external browser for Google login
+const openExternalBrowser = () => {
+  const url = window.location.href
+  window.location.href = url + (url.includes('?') ? '&' : '?') + 'openExternalBrowser=1'
+}
+
 const openShopInfo = () => {
   isInfoOpen.value = false;
   showShopInfo.value = true;
@@ -67,7 +75,20 @@ onUnmounted(() => {
   <div class="flex items-center gap-1.5">
     <!-- 1. Google & LINE Login (Always shown when logged out) -->
     <div v-if="!auth.isAuthenticated.value" class="flex items-center gap-2 mr-1 scale-75 sm:scale-100 origin-right">
-      <GoogleLogin :callback="handleLoginSuccess" />
+     <!-- Google login -->
+      <div v-if="!isLineApp">
+        <GoogleLogin :callback="handleLoginSuccess" />
+      </div>
+
+      <!-- In LINE browser: show open in browser button instead -->
+      <div v-else>
+        <button
+          @click="openExternalBrowser"
+          class="flex items-center px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-full font-bold text-xs shadow transition"
+        >
+          🌐 ブラウザで開く
+        </button>
+      </div>
       <button
         @click="handleLineLogin"
         class="flex items-center px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-full font-bold text-xs shadow transition"

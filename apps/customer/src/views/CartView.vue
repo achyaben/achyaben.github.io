@@ -479,7 +479,7 @@ const isLineApp = /Line/i.test(navigator.userAgent)
 
 const handleLoginSuccess: CallbackTypes.CredentialCallback = async (response) => {
   if (response.credential) {
-    await auth.loginWithGoogle(response.credential, (response as any).nonce);
+    await auth.loginWithGoogle(response.credential);
   }
 };
 

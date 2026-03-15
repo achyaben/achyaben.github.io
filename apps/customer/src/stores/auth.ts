@@ -109,7 +109,7 @@ export const useAuthStore = () => {
     const { error } = await supabase.auth.signInWithIdToken({
       provider: 'google',
       token: credential,
-      nonce: nonce || crypto.randomUUID(),
+      nonce,
     });
     if (error) {
       console.error('Google login failed:', error.message);

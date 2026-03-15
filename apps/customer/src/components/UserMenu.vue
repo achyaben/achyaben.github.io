@@ -46,7 +46,7 @@ const handleLineLogin = async () => {
 
 const handleLoginSuccess: CallbackTypes.CredentialCallback = async (response) => {
   if (response.credential) {
-    await auth.loginWithGoogle(response.credential, (response as any).nonce); // ✅ pass nonce from Google response
+    await auth.loginWithGoogle(response.credential); // ✅ pass nonce from Google response
   }
 };
 

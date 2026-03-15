@@ -190,12 +190,20 @@ export const useAuthStore = () => {
   }
 
   async function logout() {
-    await supabase.auth.signOut();
-    token.value = null;
-    user.value = null;
-    isSoftDeleted.value = false;
-    window.location.reload();
+  await supabase.auth.signOut();
+
+  // ✅ Clear LIFF session if logged in via LINE
+  if (liffLoaded.value && liff.isLoggedIn()) {
+    liff.logout(); // this reloads the page automatically
+    return; // ← stop here, liff.logout() handles reload
   }
+
+  token.value = null;
+  user.value = null;
+  isSoftDeleted.value = false;
+  lineSessionSet.value = false;
+  window.location.reload();
+}
 
   return {
     token,

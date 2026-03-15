@@ -105,11 +105,11 @@ async function checkSoftDelete(userId: string) {
 export const useAuthStore = () => {
   const isAuthenticated = computed(() => !!token.value);
 
-  async function loginWithGoogle(credential: string) {
+  async function loginWithGoogle(credential: string, nonce?: string) {
     const { error } = await supabase.auth.signInWithIdToken({
       provider: 'google',
       token: credential,
-      nonce:crypto.randomUUID(),
+      nonce: nonce || crypto.randomUUID(),
     });
     if (error) {
       console.error('Google login failed:', error.message);

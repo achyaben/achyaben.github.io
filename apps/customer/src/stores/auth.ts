@@ -87,7 +87,12 @@ async function initLiff() {
   }
 }
 
-export const liffInitPromise = initLiff();
+// ✅ Fix - only run in LINE context
+const isLineContext = /Line/i.test(navigator.userAgent) ||
+  window.location.search.includes('liffClientId') ||
+  window.location.search.includes('liffIsEscapedFromApp');
+
+export const liffInitPromise = isLineContext ? initLiff() : Promise.resolve();
 
 async function checkSoftDelete(userId: string) {
   try {
@@ -105,11 +110,10 @@ async function checkSoftDelete(userId: string) {
 export const useAuthStore = () => {
   const isAuthenticated = computed(() => !!token.value);
 
-  async function loginWithGoogle(credential: string, nonce?: string) {
+  async function loginWithGoogle(credential: string) {
     const { error } = await supabase.auth.signInWithIdToken({
       provider: 'google',
       token: credential,
-      nonce,
     });
     if (error) {
       console.error('Google login failed:', error.message);

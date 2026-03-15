@@ -7,10 +7,7 @@ const user = ref<any>(null);
 const isSoftDeleted = ref(false);
 const liffLoaded = ref(false);
 const liffError = ref<string | null>(null);
-
-// ✅ Detect LINE redirect by checking URL params
-const urlParams = new URLSearchParams(window.location.search);
-const isLineCallback = urlParams.has('liffClientId') || urlParams.has('code') && urlParams.has('liffRedirectUri');
+const lineSessionSet = ref(false);
 
 supabase.auth.onAuthStateChange(async (event, session) => {
   if (session) {
@@ -34,14 +31,21 @@ async function initLiff() {
     await liff.init({ liffId: import.meta.env.VITE_LIFF_ID });
     liffLoaded.value = true;
 
-    if (liff.isInClient() || isLineCallback) {
+    // ✅ Clean URL immediately
+    if (window.location.search.includes('liffClientId')) {
+      window.history.replaceState({}, document.title, window.location.pathname + '#/');
+    }
+
+    if (liff.isInClient() || new URLSearchParams(window.location.search).has('liffClientId')) {
       if (!liff.isLoggedIn()) {
         liff.login();
         return;
       }
 
       const idToken = liff.getIDToken();
-      if (idToken && !token.value) {
+      // ✅ prevent duplicate calls
+      if (idToken && !token.value && !lineSessionSet.value) {
+        lineSessionSet.value = true;
         const resp = await fetch(
           `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/line-auth`,
           {
@@ -53,19 +57,14 @@ async function initLiff() {
             body: JSON.stringify({ id_token: idToken }),
           }
         );
-
         const result = await resp.json();
         if (result.token) {
-          const { error } = await supabase.auth.setSession({
+          await supabase.auth.setSession({
             access_token: result.token,
             refresh_token: result.refresh_token,
           });
-
-          if (!error) {
-            // ✅ Clean URL after successful login
-            const cleanUrl = window.location.pathname;
-            window.history.replaceState({}, document.title, cleanUrl);
-          }
+        } else {
+          lineSessionSet.value = false; // reset on failure
         }
       }
     }
@@ -75,8 +74,7 @@ async function initLiff() {
   }
 }
 
-// auto-init on store import
-initLiff();
+export const liffInitPromise = initLiff();
 
 async function checkSoftDelete(userId: string) {
   try {

@@ -7,7 +7,7 @@ import NetworkErrorView from './views/NetworkErrorView.vue';
 import { getImageUrl } from './utils/image';
 import { supabase } from '@app/supabase';
 import { useRestaurantStore } from './stores/restaurant';
-import { useAuthStore } from './stores/auth';
+import { liffInitPromise, useAuthStore } from './stores/auth';
 import { useRouter } from 'vue-router';
 import { watch } from 'vue';
 
@@ -29,6 +29,7 @@ watch(
 );
 
 onMounted(async () => {
+  await liffInitPromise; // ✅ wait for LIFF before rendering
   fetchInfo();
   const { error } = await supabase
     .from('settings')

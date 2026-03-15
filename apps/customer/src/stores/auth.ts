@@ -28,22 +28,24 @@ supabase.auth.onAuthStateChange(async (event, session) => {
 async function initLiff() {
   if (liffLoaded.value) return;
   try {
+    // ✅ Save flag BEFORE cleaning URL
+    const hasLiffCallback = window.location.search.includes('liffClientId');
+
     await liff.init({ liffId: import.meta.env.VITE_LIFF_ID });
     liffLoaded.value = true;
 
-    // ✅ Clean URL immediately
-    if (window.location.search.includes('liffClientId')) {
+    // Clean URL after saving the flag
+    if (hasLiffCallback) {
       window.history.replaceState({}, document.title, window.location.pathname + '#/');
     }
 
-    if (liff.isInClient() || new URLSearchParams(window.location.search).has('liffClientId')) {
+    if (liff.isInClient() || hasLiffCallback) {
       if (!liff.isLoggedIn()) {
         liff.login();
         return;
       }
 
       const idToken = liff.getIDToken();
-      // ✅ prevent duplicate calls
       if (idToken && !token.value && !lineSessionSet.value) {
         lineSessionSet.value = true;
         const resp = await fetch(
@@ -63,8 +65,19 @@ async function initLiff() {
             access_token: result.token,
             refresh_token: result.refresh_token,
           });
+          // ✅ Wait for onAuthStateChange to actually set token
+          await new Promise<void>((resolve) => {
+            if (token.value) { resolve(); return; }
+            const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+              if (session) {
+                subscription.unsubscribe();
+                resolve();
+              }
+            });
+            setTimeout(resolve, 3000);
+          });
         } else {
-          lineSessionSet.value = false; // reset on failure
+          lineSessionSet.value = false;
         }
       }
     }

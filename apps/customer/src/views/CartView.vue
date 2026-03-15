@@ -300,20 +300,10 @@
             <div v-if="!isAuthenticated" class="text-center p-4 bg-gray-100 rounded-xl mb-4">
               <p class="text-gray-600 mb-3">注文するにはログインが必要です</p>
               <div class="flex justify-center gap-2 scale-75 sm:scale-100">
-                <!-- Google login -->
-                <div v-if="!isLineApp">
-                  <GoogleLogin :callback="handleLoginSuccess" />
-                </div>
-
-                <!-- In LINE browser: show open in browser button instead -->
-                <div v-else>
-                  <button
-                    @click="openExternalBrowser"
-                    class="flex items-center px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-full font-bold text-xs shadow transition"
-                  >
-                    🌐 ブラウザで開く
-                  </button>
-                </div>
+                <div v-if="!auth.isAuthenticated.value" class="flex items-center gap-2 mr-1 scale-75 sm:scale-100 origin-right">
+                <!-- Google: hidden in LINE browser only -->
+                <GoogleLogin v-if="!isLineApp" :callback="handleLoginSuccess" />
+                </div>  
                 <button
                   @click="handleLineLogin"
                   class="flex items-center px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-full font-bold text-xs shadow transition"
@@ -486,16 +476,8 @@ const isSubmitting = ref(false); // Add loading state
 
 const isLineApp = /Line/i.test(navigator.userAgent)
 
-// ✅ Open external browser for Google login
-const openExternalBrowser = () => {
-  const url = window.location.href
-  window.location.href = url + (url.includes('?') ? '&' : '?') + 'openExternalBrowser=1'
-}
-
-const isLineCallback = new URLSearchParams(window.location.search).has('liffClientId')
 
 const handleLoginSuccess: CallbackTypes.CredentialCallback = async (response) => {
-  if (isLineCallback) return // ✅ ignore Google on LINE callback
   if (response.credential) {
     await auth.loginWithGoogle(response.credential);
   }

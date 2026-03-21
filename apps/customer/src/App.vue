@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import HeaderStatus from './components/HeaderStatus.vue';
 import UserMenu from './components/UserMenu.vue';
+import InstallGuide from './components/InstallGuide.vue';
 import MaintenanceView from './views/MaintenanceView.vue';
 import NetworkErrorView from './views/NetworkErrorView.vue';
 import { getImageUrl } from './utils/image';
@@ -86,5 +87,8 @@ onMounted(async () => {
         <span class="mb-2">&copy; {{ info.name }}</span>
       </footer>
     </template>
+    
+    <!-- PWA Install Guide -->
+    <InstallGuide />
   </div>
 </template>

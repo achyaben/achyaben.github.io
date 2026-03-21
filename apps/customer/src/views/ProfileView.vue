@@ -272,7 +272,17 @@ async function loadProfile() {
       return;
     }
 
-    authProvider.value = user.app_metadata.provider || '';
+    // Logic to properly detect provider (handles edge case where LINE is mapped as email/google)
+    const provider = user.app_metadata.provider || '';
+    const identities = user.identities || [];
+    const hasLineIdentity = (identities as any[]).some((i: any) => i.provider === 'line' || i.provider === 'oidc');
+    const isLinePlaceholder = user.email?.includes('@line.placeholder');
+
+    if (hasLineIdentity || isLinePlaceholder) {
+      authProvider.value = 'line';
+    } else {
+      authProvider.value = provider;
+    }
 
     const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
 

@@ -25,6 +25,28 @@
     </header>
 
     <main class="container mx-auto px-4 py-6 max-w-lg">
+      <!-- Connected Account Info -->
+      <div v-if="authProvider" class="mb-6 bg-white rounded-xl shadow-sm p-4 flex items-center border-l-4" :class="authProvider === 'line' ? 'border-green-500' : 'border-blue-500'">
+        <div class="mr-3">
+          <img v-if="authProvider === 'line'" src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" alt="LINE" class="w-8 h-8" />
+          <img v-else-if="authProvider === 'google'" src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" class="w-8 h-8" />
+          <div v-else class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500 font-medium">連携中のアカウント</p>
+          <p class="text-sm font-bold text-gray-800">
+            {{ authProvider === 'line' ? 'LINE ログイン' : (authProvider === 'google' ? 'Google ログイン' : 'メールログイン') }}
+          </p>
+        </div>
+        <div class="ml-auto">
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 border border-gray-200">認証済み</span>
+        </div>
+      </div>
+
       <div class="bg-white rounded-xl shadow-sm p-6 space-y-6">
         <!-- Status Message -->
         <div
@@ -173,6 +195,7 @@ const router = useRouter();
 const isLoading = ref(false);
 const statusMessage = ref('');
 const statusType = ref<'success' | 'error'>('success');
+const authProvider = ref<string>('');
 
 const form = ref({
   firstName: '',
@@ -248,6 +271,8 @@ async function loadProfile() {
       router.push('/');
       return;
     }
+
+    authProvider.value = user.app_metadata.provider || '';
 
     const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
 

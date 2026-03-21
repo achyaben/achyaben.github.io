@@ -591,6 +591,7 @@ const saveGroup = async () => {
   const constraints = {
     max_selection: newGroup.value.max_selections,
     is_required: newGroup.value.is_required,
+    sort_order: newGroup.value.sort_order,
   };
 
   if (isEditingGroup.value && currentGroupId.value) {
@@ -652,6 +653,7 @@ const openAddModal = () => {
     description: '',
     imageUrl: '',
     outOfStock: false,
+    sort_order: 0,
     groups: [],
   };
   imagePreviewError.value = false;
@@ -670,6 +672,7 @@ const saveItem = () => {
         description: currentItem.value.description,
         imageUrl: currentItem.value.imageUrl,
         outOfStock: currentItem.value.outOfStock,
+        sort_order: currentItem.value.sort_order,
         groups: currentItem.value.groups,
       };
 

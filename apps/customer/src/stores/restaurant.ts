@@ -37,6 +37,7 @@ interface RestaurantInfo {
   email: string;
   recovery_form: string;
   hours: BusinessHours;
+  banners?: Array<{ id: string; title: string; link?: string; active: boolean }> | null;
 }
 
 const info = ref<RestaurantInfo>(RESTAURANT_INFO);
@@ -155,6 +156,7 @@ export const useRestaurantStore = () => {
           address: settings.restaurant_address,
           sns: settings.sns,
           hours: settings.business_hours,
+          banners: settings.banners,
         };
 
         info.value = mergeWithFallback(serverData, RESTAURANT_INFO);
@@ -182,6 +184,12 @@ export const useRestaurantStore = () => {
 
   return {
     info: computed(() => info.value),
+    activeBanner: computed(() => {
+      if (!info.value.banners || !Array.isArray(info.value.banners)) return null;
+      // Return the most recent active banner
+      const activeBanners = info.value.banners.filter((b) => b.active);
+      return activeBanners.length > 0 ? activeBanners[activeBanners.length - 1] : null;
+    }),
     isLoading: computed(() => isLoading.value),
     error: computed(() => error.value),
     orderingEnabled: computed(() => orderingEnabled.value),

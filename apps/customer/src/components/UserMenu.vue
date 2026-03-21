@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import { ref, onMounted, onUnmounted } from 'vue';
-import { useAuthStore } from '../stores/auth';
+import { useAuthStore, isLineContext } from '../stores/auth';
 import type { CallbackTypes } from 'vue3-google-login';
 import RestaurantInfoModal from './RestaurantInfoModal.vue';
 
@@ -11,10 +11,6 @@ const isAuthOpen = ref(false);
 const showShopInfo = ref(false);
 const infoDropdownRef = ref<HTMLElement | null>(null);
 const authDropdownRef = ref<HTMLElement | null>(null);
-
-const isLineContext = /Line/i.test(navigator.userAgent) ||
-  window.location.search.includes('liffIsEscapedFromApp') ||
-  window.location.search.includes('liffClientId')
 
 const toggleInfo = () => {
   isInfoOpen.value = !isInfoOpen.value;

@@ -8,7 +8,7 @@ export const RESTAURANT_INFO = {
     googleMapUrl:
       'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4242.804609032754!2d139.8739693!3d35.64590059999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60187da42defed25%3A0x22c78ff2f47537b2!2z54Kt54Gr54S86bOlJuOCpOODs-ODieOCq-ODrOODvOOBguOBoeOCg-ODvA!5e1!3m2!1sen!2sjp!4v1770808200764!5m2!1sen!2sjp',
   },
-  app_name: 'あちゃーべん',
+  app_name: 'あちゃー',
   phone: '03-6808-8274',
   email: 'tanka.yakitori.achya[at]gmail.com',
   calendar_link:
@@ -32,4 +32,5 @@ export const RESTAURANT_INFO = {
     maxAdvanceDays: 0,
     businessDays: [],
   },
-} as const;
+  banners: [],
+};

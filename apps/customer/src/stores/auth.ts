@@ -39,7 +39,8 @@ async function initLiff() {
       window.history.replaceState({}, document.title, window.location.pathname + '#/');
     }
 
-    if (liff.isInClient() || hasLiffCallback) {
+    const isLineBrowser = /Line/i.test(navigator.userAgent);
+    if (liff.isInClient() || hasLiffCallback || isLineBrowser) {
       if (!liff.isLoggedIn()) {
         liff.login();
         return;
@@ -88,7 +89,7 @@ async function initLiff() {
 }
 
 // ✅ Fix - only run in LINE context
-const isLineContext = /Line/i.test(navigator.userAgent) ||
+export const isLineContext = /Line/i.test(navigator.userAgent) ||
   window.location.search.includes('liffClientId') ||
   window.location.search.includes('liffIsEscapedFromApp');
 

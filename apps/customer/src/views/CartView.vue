@@ -280,18 +280,7 @@
                 </div>
               </label>
 
-              <!-- Tax Receipt Checkbox -->
-              <div class="pt-3 border-t">
-                <label class="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    v-model="orderForm.needReceipt"
-                    class="w-4 h-4 rounded text-primary border-gray-300 focus:ring-primary"
-                    @change="saveCustomerInfo"
-                  />
-                  <span class="ml-3">領収書が必要</span>
-                </label>
-              </div>
+
             </div>
           </div>
 

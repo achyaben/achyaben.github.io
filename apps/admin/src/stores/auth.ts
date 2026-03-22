@@ -20,7 +20,8 @@ export const useAuthStore = defineStore('auth', () => {
         email: session.user.email || '',
         name:
           session.user.user_metadata?.full_name || session.user.user_metadata?.name || 'Admin User',
-        picture: session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture,
+        avatar_url: session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture,
+        provider: session.user.app_metadata?.provider || 'google',
         role,
       };
       isAuthenticated.value = true;

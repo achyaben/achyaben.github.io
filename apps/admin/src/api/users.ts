@@ -13,15 +13,18 @@ export const usersApi = {
     return (data || []).map((p: any) => {
       const fName = (p.f_name || '').trim();
       const lName = (p.l_name || '').trim();
+      const displayName = (p.display_name || '').trim();
 
-      // If they are identical (often due to fallback), just use one
-      const name = fName.toLowerCase() === lName.toLowerCase() ? fName : `${fName} ${lName}`.trim();
+      // Use display_name if available, otherwise combine first and last
+      let name = displayName || (fName.toLowerCase() === lName.toLowerCase() ? fName : `${fName} ${lName}`.trim());
 
       return {
         id: p.id,
         name: name || 'Unknown User',
         email: (p.email || '').trim(),
         role: p.role as UserRole,
+        provider: p.provider as string,
+        avatar_url: p.avatar_url as string,
         deleted_at: p.deleted_at,
       };
     });

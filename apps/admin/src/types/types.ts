@@ -5,7 +5,8 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  picture?: string;
+  provider: string;
+  avatar_url?: string;
   role: UserRole;
   deleted_at?: string | null;
 }

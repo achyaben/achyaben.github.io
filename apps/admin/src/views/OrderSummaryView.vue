@@ -5,16 +5,10 @@
     <!-- Tabs -->
     <div class="mb-4">
       <div class="flex border-b border-gray-300">
-        <button
-          v-for="tab in tabs"
-          :key="tab"
-          @click="activeTab = tab"
-          :class="[
-            'px-4 py-2',
-            activeTab === tab ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500',
-          ]"
-          class="focus:outline-none"
-        >
+        <button v-for="tab in tabs" :key="tab" @click="activeTab = tab" :class="[
+          'px-4 py-2',
+          activeTab === tab ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500',
+        ]" class="focus:outline-none">
           {{ tab }}
         </button>
       </div>
@@ -27,11 +21,7 @@
         <div class="mb-4">
           <span class="mr-2">{{ UI_TEXTS.orderSummary.quickFilterLabel }}</span>
           <select v-model="selectedQuickFilter" @change="applyQuickFilter" class="form-select">
-            <option
-              v-for="(label, key) in UI_TEXTS.orderSummary.quickFilters"
-              :key="key"
-              :value="key"
-            >
+            <option v-for="(label, key) in UI_TEXTS.orderSummary.quickFilters" :key="key" :value="key">
               {{ label }}
             </option>
           </select>
@@ -47,11 +37,7 @@
           <label class="flex items-center space-x-2">
             <span>{{ UI_TEXTS.orderSummary.groupByLabel }}</span>
             <select v-model="selectedDateRange" class="form-select">
-              <option
-                v-for="(label, key) in UI_TEXTS.orderSummary.groupByOptions"
-                :key="key"
-                :value="key"
-              >
+              <option v-for="(label, key) in UI_TEXTS.orderSummary.groupByOptions" :key="key" :value="key">
                 {{ label }}
               </option>
             </select>
@@ -81,18 +67,18 @@
             <tr v-for="summary in groupedSummaries" :key="summary.date">
               <td class="py-2">{{ summary.date }}</td>
               <td class="py-2">{{ summary.totalOrders }}</td>
-              <td class="py-2">${{ summary.totalRevenue.toFixed(2) }}</td>
-              <td class="py-2">${{ summary.cash.toFixed(2) }}</td>
-              <td class="py-2">${{ summary.card.toFixed(2) }}</td>
-              <td class="py-2">${{ summary.paypay.toFixed(2) }}</td>
+              <td class="py-2">{{ summary.totalRevenue.toFixed(2) }}{{ UI_TEXTS.currency.yen }}</td>
+              <td class="py-2">{{ summary.cash.toFixed(2) }}{{ UI_TEXTS.currency.yen }}</td>
+              <td class="py-2">{{ summary.card.toFixed(2) }}{{ UI_TEXTS.currency.yen }}</td>
+              <td class="py-2">{{ summary.paypay.toFixed(2) }}{{ UI_TEXTS.currency.yen }}</td>
             </tr>
             <tr class="font-bold">
               <td class="py-2">Total</td>
               <td class="py-2">{{ totalOrders }}</td>
-              <td class="py-2">${{ totalRevenue.toFixed(2) }}</td>
-              <td class="py-2">${{ totalCash.toFixed(2) }}</td>
-              <td class="py-2">${{ totalCard.toFixed(2) }}</td>
-              <td class="py-2">${{ totalPayPay.toFixed(2) }}</td>
+              <td class="py-2">{{ totalRevenue.toFixed(2) }}{{ UI_TEXTS.currency.yen }}</td>
+              <td class="py-2">{{ totalCash.toFixed(2) }}{{ UI_TEXTS.currency.yen }}</td>
+              <td class="py-2">{{ totalCard.toFixed(2) }}{{ UI_TEXTS.currency.yen }}</td>
+              <td class="py-2">{{ totalPayPay.toFixed(2) }}{{ UI_TEXTS.currency.yen }}</td>
             </tr>
           </tbody>
         </table>
@@ -139,8 +125,14 @@ const applyQuickFilter = () => {
 
   switch (selectedQuickFilter.value.toLowerCase()) {
     case 'today':
-      startDate.value = new Date().toISOString().split('T')[0];
-      endDate.value = startDate.value;
+      {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        startDate.value = `${year}-${month}-${day}`;
+        endDate.value = startDate.value;
+      }
       break;
     case 'yesterday':
       const yesterday = new Date();

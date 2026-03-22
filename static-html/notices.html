@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/svg+xml" href="assets/achyaben-logo.svg" />
-  <title>求人情報 | あちゃー</title>
+  <title>お知らせ | あちゃー</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script>
@@ -85,12 +85,12 @@
   <!-- Navigation -->
   <nav class="glass-nav mt-6">
     <div class="flex items-center gap-2">
-      <img src="../assets/achyaben-logo.svg" alt="あちゃーロゴ" class="h-8 w-8 rounded-lg" />
+      <img src="assets/achyaben-logo.svg" alt="あちゃーロゴ" class="h-8 w-8 rounded-lg" />
       <span class="font-bold tracking-tighter text-lg hidden sm:block">あちゃー</span>
     </div>
     <div class="flex items-center gap-2">
       <a href="index.html" class="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors font-bold text-xs">ホーム</a>
-      <a href="notices.html" class="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors font-bold text-xs">お知らせ</a>
+      <a href="job-openings.html" class="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors font-bold text-xs">採用</a>
       <button onclick="toggleLang()" class="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors font-bold text-xs">
         <span id="lang-label">日本語</span>
       </button>
@@ -101,18 +101,17 @@
   </nav>
 
   <main class="max-w-5xl mx-auto mt-10 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
-    <h1 class="text-2xl font-bold mb-4 font-jp" id="page-title" data-i18n="page.title">求人情報</h1>
-    <p class="mb-6 font-jp" id="page-desc" data-i18n="page.desc">現在の求人情報は以下のGoogleドキュメントをご覧ください。</p>
+    <h1 class="text-2xl font-bold mb-4 font-jp" id="page-title" data-i18n="page.title">お知らせ</h1>
+    <p class="mb-6 font-jp" id="page-desc" data-i18n="page.desc">最新のお知らせは以下のGoogleドキュメントをご覧ください。</p>
     <div id="content">
       <div class="flex gap-3 mb-4">
-        <button onclick="window.open(JOB_DOC_URL.replace('?embedded=true',''), '_blank')" class="px-3 py-1 rounded bg-app-primary text-white text-sm font-semibold shadow hover:bg-app-primaryDark"><i class="fa-solid fa-up-right-from-square mr-1"></i><span data-i18n="btn.open">新しいタブで開く</span></button>
-
-        
+        <button onclick="window.open(NOTICE_DOC_URL.replace('?embedded=true',''), '_blank')" class="px-3 py-1 rounded bg-app-primary text-white text-sm font-semibold shadow hover:bg-app-primaryDark"><i class="fa-solid fa-up-right-from-square mr-1"></i><span data-i18n="btn.open">新しいタブで開く</span></button>
       </div>
       <script>
         // Set your Google Docs embed URL here (must be published to the web)
-        const JOB_DOC_URL = "https://docs.google.com/document/d/e/2PACX-1vTNPBRGu-bZjQf47wgE3nwFrhMkTR0hD2xEBA2cVoEC5cD9Fdo4b2tls7pbNri--jJQoUdFZAmLfkn_/pub?embedded=true";
-        document.write(`<iframe id='jobdoc-iframe' src="${JOB_DOC_URL}"></iframe>`);      </script>
+        const NOTICE_DOC_URL = "https://docs.google.com/document/d/e/2PACX-1vQFlfdxSRsbKLF_QTEUNSBrYgaQjCCBuLdKJtQW4GCa4ZUpt1updNEs6GDTnZoE-IFXr5sSTxVJhQLk/pub?embedded=true";
+        document.write(`<iframe id='noticedoc-iframe' src="${NOTICE_DOC_URL}"></iframe>`);
+      </script>
       <noscript>
         <p>JavaScriptを有効にしてください。</p>
       </noscript>
@@ -126,14 +125,14 @@
     // Language toggle
     const translations = {
       en: {
-        'page.title': 'Job Openings',
-        'page.desc': 'See current job opportunities below (Google Doc).',
+        'page.title': 'Notices',
+        'page.desc': 'Check current announcements below (Google Doc).',
         'footer.note': '© Achya 2026',
         'btn.open': 'Open in New Tab',
       },
       jp: {
-        'page.title': '求人情報',
-        'page.desc': '現在の求人情報は以下のGoogleドキュメントをご覧ください。',
+        'page.title': 'お知らせ',
+        'page.desc': '最新のお知らせは以下のGoogleドキュメントをご覧ください。',
         'footer.note': '© あちゃー 2026',
         'btn.open': '新しいタブで開く',
       }
@@ -159,8 +158,14 @@
       document.documentElement.classList.toggle('dark');
       const icon = document.getElementById('theme-icon');
       icon.className = document.documentElement.classList.contains('dark') ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+      localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
     }
 
+    // Check system preference
+    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        document.getElementById('theme-icon').className = 'fa-solid fa-sun';
+    }
 
   </script>
 </body>

@@ -14,14 +14,16 @@ export const usersApi = {
       const fName = (p.f_name || '').trim();
       const lName = (p.l_name || '').trim();
 
-      // If they are identical (often due to fallback), just use one
-      const name = fName.toLowerCase() === lName.toLowerCase() ? fName : `${fName} ${lName}`.trim();
+      // Combine f_name + l_name, or fall back to email prefix
+      let name = fName.toLowerCase() === lName.toLowerCase() ? fName : `${fName} ${lName}`.trim();
 
       return {
         id: p.id,
-        name: name || 'Unknown User',
+        name: name || p.email?.split('@')[0] || 'Unknown User',
         email: (p.email || '').trim(),
         role: p.role as UserRole,
+        provider: p.provider as string,
+        avatar_url: p.avatar_url as string,
         deleted_at: p.deleted_at,
       };
     });

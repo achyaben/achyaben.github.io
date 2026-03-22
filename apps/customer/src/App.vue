@@ -2,12 +2,13 @@
 import { ref, onMounted } from 'vue';
 import HeaderStatus from './components/HeaderStatus.vue';
 import UserMenu from './components/UserMenu.vue';
+import InstallGuide from './components/InstallGuide.vue';
 import MaintenanceView from './views/MaintenanceView.vue';
 import NetworkErrorView from './views/NetworkErrorView.vue';
 import { getImageUrl } from './utils/image';
 import { supabase } from '@app/supabase';
 import { useRestaurantStore } from './stores/restaurant';
-import { useAuthStore } from './stores/auth';
+import { liffInitPromise, useAuthStore } from './stores/auth';
 import { useRouter } from 'vue-router';
 import { watch } from 'vue';
 
@@ -29,6 +30,7 @@ watch(
 );
 
 onMounted(async () => {
+  await liffInitPromise; // ✅ wait for LIFF before rendering
   fetchInfo();
   const { error } = await supabase
     .from('settings')
@@ -56,11 +58,12 @@ onMounted(async () => {
     <template v-else>
       <!-- Navbar -->
       <div class="bg-white border-b border-gray-200 sticky top-0 z-[100] shadow-sm">
-        <div class="container mx-auto px-4 h-16 flex justify-between items-center">
+        <div class="container mx-auto px-2 h-16 flex justify-between items-center">
           <router-link to="/"
             class="flex items-center space-x-2 text-base md:text-xl font-bold tracking-tight text-gray-900 hover:opacity-80 transition">
             <img :src="getImageUrl('/assets/achyaben-logo.svg')" alt="App Logo" class="h-8 w-8 rounded-lg" />
-            <span>{{ info.app_name }}</span>
+            <!--  smaller appname in sm -->
+            <span class="w-14 text-xs sm:text-base">{{ info.app_name }}</span>
           </router-link>
           <UserMenu />
         </div>
@@ -84,5 +87,8 @@ onMounted(async () => {
         <span class="mb-2">&copy; {{ info.name }}</span>
       </footer>
     </template>
+    
+    <!-- PWA Install Guide -->
+    <InstallGuide />
   </div>
 </template>

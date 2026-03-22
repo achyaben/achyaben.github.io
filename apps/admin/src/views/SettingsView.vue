@@ -331,6 +331,86 @@
     </div>
 
     <div v-if="activeTab === 'settings'">
+      <!-- Banner Settings -->
+      <div class="border border-blue-500 p-4 rounded mb-4">
+        <h2 class="text-xl font-semibold mb-4 text-blue-800">アナウンスバナー管理</h2>
+        
+        <!-- Create New Banner -->
+        <div class="bg-blue-50 p-4 rounded-lg mb-6 border border-blue-100">
+          <h3 class="text-md font-bold mb-3 text-blue-700">新規バナー作成</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">バナーテキスト</label>
+              <input
+                v-model="newBannerRef.title"
+                type="text"
+                placeholder="例: 7月限定！からあげ弁当100円引き"
+                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">リンクURL (任意)</label>
+              <input
+                v-model="newBannerRef.link"
+                type="url"
+                placeholder="https://..."
+                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+              />
+            </div>
+          </div>
+          <button @click="addNewBanner" class="w-full md:w-auto px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium shadow-sm">
+            新規バナーを公開
+          </button>
+        </div>
+
+        <!-- Banner History / List -->
+        <div>
+          <h3 class="text-md font-bold mb-3 text-gray-700">バナー履歴</h3>
+          <div v-if="!bannersListRef.length" class="text-center py-8 text-gray-500 italic bg-gray-50 rounded-lg">
+            履歴はありません
+          </div>
+          <div v-else class="space-y-3">
+            <div 
+              v-for="(banner, index) in bannersListRef" 
+              :key="banner.id"
+              class="flex items-center justify-between p-4 rounded-lg border bg-white shadow-sm hover:border-blue-200 transition-colors"
+              :class="{ 'border-l-4 border-l-green-500': banner.active }"
+            >
+              <div class="flex-1 min-w-0 mr-4">
+                <div class="flex items-center mb-1">
+                  <span 
+                    :class="[banner.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600']"
+                    class="text-xs px-2 py-0.5 rounded-full font-bold mr-2 uppercase tracking-wider"
+                  >
+                    {{ banner.active ? '表示中' : '非表示' }}
+                  </span>
+                  <p class="font-bold text-gray-800 truncate">{{ banner.title }}</p>
+                </div>
+                <p v-if="banner.link" class="text-xs text-blue-500 truncate italic">{{ banner.link }}</p>
+              </div>
+              
+              <div class="flex items-center space-x-2 shrink-0">
+                <button 
+                  @click="toggleBannerStatus(index)" 
+                  :class="[banner.active ? 'bg-orange-100 text-orange-600 hover:bg-orange-200' : 'bg-green-100 text-green-600 hover:bg-green-200']"
+                  class="p-2 rounded-md transition-colors"
+                  :title="banner.active ? '非表示にする' : '表示する'"
+                >
+                  <i class="fas" :class="banner.active ? 'fa-eye-slash' : 'fa-eye'"></i>
+                </button>
+                <button 
+                  @click="deleteBanner(index)" 
+                  class="p-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors"
+                  title="削除"
+                >
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Settings Form -->
       <div class="border border-green-500 p-4 rounded">
         <h2 class="text-xl font-semibold mb-2">{{ UI_TEXTS.settings.title }}</h2>
@@ -411,6 +491,8 @@ export default {
       },
       support: {},
     });
+    const bannersListRef = ref([]);
+    const newBannerRef = ref({ title: '', link: '' });
     const newHoliday = ref('');
     const sensitiveSettingsRef = ref({ orderingEnabled: true });
     const showConfirmDialog = ref(false);
@@ -438,6 +520,13 @@ export default {
           },
           support: info.support_info || {},
         };
+      }
+      if (info?.banners) {
+        const rawBanners = Array.isArray(info.banners) ? info.banners : [info.banners];
+        bannersListRef.value = rawBanners.map(b => ({
+          ...b,
+          active: b.active !== undefined ? b.active : true
+        }));
       }
     });
 
@@ -511,6 +600,70 @@ export default {
       }
     };
 
+    const addNewBanner = async () => {
+      if (!newBannerRef.value.title) {
+        alert('バナーテキストを入力してください');
+        return;
+      }
+      
+      const newBanner = {
+        id: `banner-${Date.now()}`,
+        title: newBannerRef.value.title,
+        link: newBannerRef.value.link,
+        active: true,
+        created_at: new Date().toISOString()
+      };
+      
+      // Add to list (at the end so it's most recent)
+      const newList = [...bannersListRef.value, newBanner];
+      
+      try {
+        const success = await settingsApi.updateSettings('banners', newList);
+        if (success) {
+          bannersListRef.value = newList;
+          newBannerRef.value = { title: '', link: '' };
+          alert('新しいバナーを公開しました');
+        } else {
+          alert('保存に失敗しました');
+        }
+      } catch (e) {
+        console.error(e);
+        alert('エラーが発生しました');
+      }
+    };
+
+    const toggleBannerStatus = async (index) => {
+      const newList = JSON.parse(JSON.stringify(bannersListRef.value));
+      newList[index].active = !newList[index].active;
+      
+      try {
+        const success = await settingsApi.updateSettings('banners', newList);
+        if (success) {
+          bannersListRef.value = newList;
+        }
+      } catch (e) {
+        console.error(e);
+        alert('状態の更新に失敗しました');
+      }
+    };
+
+    const deleteBanner = async (index) => {
+      if (!confirm('このバナーを削除しますか？')) return;
+      
+      const newList = bannersListRef.value.filter((_, i) => i !== index);
+      
+      try {
+        const success = await settingsApi.updateSettings('banners', newList);
+        if (success) {
+          bannersListRef.value = newList;
+          alert('バナーを削除しました');
+        }
+      } catch (e) {
+        console.error(e);
+        alert('削除に失敗しました');
+      }
+    };
+
     const addHoliday = () => {
       if (
         newHoliday.value &&
@@ -568,6 +721,11 @@ export default {
       addSpecialDay,
       removeSpecialDay,
       newSpecialDay,
+      bannersListRef,
+      newBannerRef,
+      addNewBanner,
+      toggleBannerStatus,
+      deleteBanner,
       UI_TEXTS,
     };
   },

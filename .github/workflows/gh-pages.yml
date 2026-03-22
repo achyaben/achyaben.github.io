@@ -37,6 +37,7 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+          VITE_LIFF_ID: ${{ secrets.VITE_LIFF_ID }}
         run: |
           yarn workspace customer build
           yarn workspace admin build
@@ -45,9 +46,10 @@ jobs:
         run: |
           mkdir -p deploy
           cp -r public/* deploy/
+          cp apps/customer/public/manifest.json deploy/
           mv apps/customer/dist deploy/customer
           mv apps/admin/dist deploy/admin
-          cp index.html identity-hub.html brand-guide.html deploy/
+          cp static-html/*.html deploy/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

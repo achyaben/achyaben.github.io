@@ -280,18 +280,7 @@
                 </div>
               </label>
 
-              <!-- Tax Receipt Checkbox -->
-              <div class="pt-3 border-t">
-                <label class="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    v-model="orderForm.needReceipt"
-                    class="w-4 h-4 rounded text-primary border-gray-300 focus:ring-primary"
-                    @change="saveCustomerInfo"
-                  />
-                  <span class="ml-3">領収書が必要</span>
-                </label>
-              </div>
+
             </div>
           </div>
 
@@ -299,9 +288,6 @@
           <div class="space-y-3">
             <div v-if="!isAuthenticated" class="text-center p-4 bg-gray-100 rounded-xl mb-4">
               <p class="text-gray-600 mb-3">注文するにはログインが必要です</p>
-              <div class="flex justify-center scale-75 sm:scale-100">
-                <GoogleLogin :callback="handleLoginSuccess" />
-              </div>
             </div>
 
             <!-- Authenticated State -->
@@ -431,32 +417,24 @@
 </template>
 
 <script setup lang="ts">
+
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { GoogleLogin } from 'vue3-google-login';
-import type { CallbackTypes } from 'vue3-google-login';
 import CartItem from '../components/CartItem.vue';
 import { generateTrackingId } from '../data/menu';
 import { STORAGE_KEYS } from '../constants';
 import { ordersApi } from '../data/api/orders';
 import { useCart } from '../stores/cart';
 import { useRestaurantStore } from '../stores/restaurant';
-import { useAuthStore } from '../stores/auth';
 import { supabase } from '@app/supabase';
 import type { Order, OrderStatus, PaymentStatus, PaymentMethod } from '../types';
 
 const router = useRouter();
-const auth = useAuthStore();
 const { cartItems, cartTotal, clearCart } = useCart();
 const { info: restaurantInfo, fetchInfo, isLoading } = useRestaurantStore();
 const showHelp = ref(false);
 const isSubmitting = ref(false); // Add loading state
 
-const handleLoginSuccess: CallbackTypes.CredentialCallback = async (response) => {
-  if (response.credential) {
-    await auth.loginWithGoogle(response.credential);
-  }
-};
 
 onMounted(async () => {
   await fetchInfo(); // Ensure we have the latest settings

@@ -1,4 +1,4 @@
-# Yakiben Project Documentation
+# Achya Project Documentation
 
 ## Project Overview
 Japanese lunch box pre-order system with customer and admin interfaces.

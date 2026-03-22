@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="assets/achyaben-logo.svg" />
+  <title>ページタイトル | あちゃー</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              DEFAULT: '#DC143C',
+              dark: '#B22222',
+              ember: '#990F2A',
+            },
+            app: {
+              primary: '#4f46e5',
+              primaryDark: '#4338ca',
+              secondary: '#fb923c',
+              secondaryDark: '#ea580c',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            jp: ['Noto Serif JP', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=Noto+Serif+JP:wght@900&display=swap');
+    [data-i18n] { opacity: 0; transition: opacity 0.2s; }
+    .i18n-loaded [data-i18n] { opacity: 1; }
+    .glass-nav {
+      position: sticky;
+      top: 4px;
+      z-index: 50;
+      margin: 0 auto;
+      max-width: 900px;
+      padding: 1rem 1.5rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 16px #0001;
+    }
+    @media (prefers-color-scheme: dark) {
+      .glass-nav { background: rgba(30,41,59,0.7); border-color: rgba(255,255,255,0.2); }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300 antialiased min-h-screen font-sans">
+  <!-- Navigation -->
+  <nav class="glass-nav mt-6">
+    <div class="flex items-center gap-2">
+      <img src="../assets/achyaben-logo.svg" alt="あちゃーロゴ" class="h-8 w-8 rounded-lg" />
+      <span class="font-bold tracking-tighter text-lg hidden sm:block">あちゃー</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="toggleLang()" class="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors font-bold text-xs">
+        <span id="lang-label">日本語</span>
+      </button>
+      <button onclick="toggleDarkMode()" class="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors">
+        <i id="theme-icon" class="fa-solid fa-moon"></i>
+      </button>
+    </div>
+  </nav>
+
+  <main class="max-w-2xl mx-auto mt-10 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
+    <h1 class="text-2xl font-bold mb-4 font-jp" id="page-title" data-i18n="page.title">ページタイトル</h1>
+    <p class="mb-6 font-jp" id="page-desc" data-i18n="page.desc">ここに日本語の説明文を入れてください。</p>
+    <div id="content">
+      <div class="flex gap-3 mb-4">
+        <button onclick="window.open(PAGE_DOC_URL, '_blank')" class="px-3 py-1 rounded bg-app-primary text-white text-sm hover:bg-app-primaryDark"><i class="fa-solid fa-up-right-from-square mr-1"></i><span data-i18n="btn.open">新しいタブで開く</span></button>
+
+        
+      </div>
+      <!-- ページ固有のコンテンツをここに追加 -->
+      <iframe id="page-iframe" src="" style="width:100%; min-height:60vh; border:none; border-radius:6px; display:none;"></iframe>
+    </div>
+    <div class="mt-8 text-sm text-gray-500 dark:text-gray-400">
+      <span data-i18n="footer.note">© あちゃー Achya 2026</span>
+    </div>
+  </main>
+
+  <script>
+    // Language toggle
+    const translations = {
+      en: {
+        'page.title': 'Page Title',
+        'page.desc': 'Add your English description here.',
+        'footer.note': '© Achya Yakiben 2026',
+        'btn.open': 'Open in New Tab',
+      },
+      jp: {
+        'page.title': 'ページタイトル',
+        'page.desc': 'ここに日本語の説明文を入れてください。',
+        'footer.note': '© あちゃー Yakiben 2026',
+        'btn.open': '新しいタブで開く',
+      }
+    };
+
+        // Example: set PAGE_DOC_URL and show iframe if needed
+        // Uncomment and set your doc URL below to use iframe controls
+        // const PAGE_DOC_URL = "https://docs.google.com/document/d/e/EXAMPLE/pub?embedded=true";
+        // document.getElementById('page-iframe').src = PAGE_DOC_URL;
+        // document.getElementById('page-iframe').style.display = 'block';
+    let lang = 'jp';
+    function setLang(newLang) {
+      lang = newLang;
+      document.getElementById('lang-label').textContent = lang === 'jp' ? '日本語' : 'English';
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        el.textContent = translations[lang][key] || el.textContent;
+      });
+      document.body.classList.add('i18n-loaded');
+    }
+    function toggleLang() {
+      setLang(lang === 'jp' ? 'en' : 'jp');
+    }
+    setLang(lang);
+
+    // Theme toggle
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle('dark');
+      const icon = document.getElementById('theme-icon');
+      icon.className = document.documentElement.classList.contains('dark') ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    }
+  </script>
+</body>
+</html>

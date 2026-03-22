@@ -1,7 +1,12 @@
 <template>
   <div class="relative min-h-screen pb-32">
     <!-- Announcement Banner -->
-    <div v-if="showAnnouncement" class="bg-primary/10 relative z-40">
+    <a 
+      v-if="showAnnouncement && activeBanner" 
+      :href="activeBanner.link || '#'" 
+      :target="activeBanner.link ? '_blank' : undefined"
+      :class="['block bg-primary/10 relative z-40 transition-colors', { 'hover:bg-primary/20': activeBanner.link, 'cursor-default pointer-events-none': !activeBanner.link }]"
+    >
       <div class="container mx-auto px-4 py-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-2">
@@ -20,10 +25,10 @@
               />
             </svg>
             <p class="text-sm text-gray-700">
-              7月限定！からあげ弁当が¥100引き！この機会をお見逃しなく！
+              {{ activeBanner.title }}
             </p>
           </div>
-          <button @click="closeAnnouncement" class="text-gray-500 hover:text-gray-700">
+          <button @click.prevent="closeAnnouncement" class="text-gray-500 hover:text-gray-700 relative z-50 pointer-events-auto p-1">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="h-5 w-5"
@@ -41,7 +46,7 @@
           </button>
         </div>
       </div>
-    </div>
+    </a>
 
     <!-- Menu Items by Selected Category -->
     <div class="container mx-auto px-4 py-6">
@@ -117,8 +122,10 @@ import {
 } from '../data/menu';
 import MenuCard from '../components/MenuCard.vue';
 import { useCart } from '../stores/cart';
+import { useRestaurantStore } from '../stores/restaurant';
 
 const { cartItemCount, cartTotal } = useCart();
+const { info: restaurantInfo, activeBanner } = useRestaurantStore();
 
 onMounted(() => {
   fetchMenu();
@@ -181,19 +188,29 @@ const getCartCountForCategory = (category: string) => {
     .reduce((sum: number, cartItem) => sum + cartItem.quantity, 0);
 };
 
-const ANNOUNCEMENT_ID = 'banner-2025-07-limit';
-
 function checkAnnouncement() {
-  const dismissed = localStorage.getItem(`app-banner-dismissed-${ANNOUNCEMENT_ID}`);
-  showAnnouncement.value = !dismissed;
+  if (activeBanner.value) {
+    const dismissed = localStorage.getItem(`app-banner-dismissed-${activeBanner.value.id}`);
+    showAnnouncement.value = !dismissed;
+  } else {
+    showAnnouncement.value = false;
+  }
 }
 
 const showAnnouncement = ref(false);
 
 function closeAnnouncement() {
   showAnnouncement.value = false;
-  localStorage.setItem(`app-banner-dismissed-${ANNOUNCEMENT_ID}`, 'true');
+  if (activeBanner.value) {
+    localStorage.setItem(`app-banner-dismissed-${activeBanner.value.id}`, 'true');
+  }
 }
+
+watch(activeBanner, (newBanner) => {
+  if (newBanner) {
+    checkAnnouncement();
+  }
+}, { immediate: true });
 </script>
 
 <style scoped>

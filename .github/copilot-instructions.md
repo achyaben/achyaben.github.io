@@ -1,7 +1,7 @@
 # GitHub Copilot Instruction
 
 ## Project Overview
-Yakiben is a Japanese lunch box pre-order system with two primary interfaces:
+Achya is a Japanese lunch box pre-order system with two primary interfaces:
 1. **Customer App**: A mobile-first PWA for customers to browse menus, place orders, and track their purchases.
 2. **Admin App**: A role-based admin panel for managing orders, menus, users, and deliveries.
 

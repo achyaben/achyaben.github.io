@@ -1,6 +1,7 @@
 <script setup lang="ts">
+
 import { ref, onMounted, onUnmounted } from 'vue';
-import { useAuthStore } from '../stores/auth';
+import { useAuthStore, isLineContext } from '../stores/auth';
 import type { CallbackTypes } from 'vue3-google-login';
 import RestaurantInfoModal from './RestaurantInfoModal.vue';
 
@@ -30,9 +31,20 @@ const closeDropdowns = (e: MouseEvent) => {
   }
 };
 
+const isLineLoading = ref(false);
+
+const handleLineLogin = async () => {
+  isLineLoading.value = true;
+  const result = await auth.loginWithLine();
+  if (result && result.error) {
+    console.error('LINE login error:', result.error);
+  }
+  isLineLoading.value = false;
+};
+
 const handleLoginSuccess: CallbackTypes.CredentialCallback = async (response) => {
   if (response.credential) {
-    await auth.loginWithGoogle(response.credential);
+    await auth.loginWithGoogle(response.credential); // ✅ pass nonce from Google response
   }
 };
 
@@ -52,9 +64,18 @@ onUnmounted(() => {
 
 <template>
   <div class="flex items-center gap-1.5">
-    <!-- 1. Google Login (Always shown when logged out) -->
-    <div v-if="!auth.isAuthenticated.value" class="mr-1 scale-75 sm:scale-100 origin-right">
-      <GoogleLogin :callback="handleLoginSuccess" />
+    <!-- 1. Google & LINE Login (Always shown when logged out) -->
+    <div v-if="!auth.isAuthenticated.value" class="flex items-center gap-2 mr-1 scale-75 sm:scale-100 origin-right">
+     <!-- Google: hidden in LINE browser only -->
+    <GoogleLogin v-if="!isLineContext" :callback="handleLoginSuccess" :prompt="false" />
+    <button
+      @click="handleLineLogin"
+      class="flex items-center px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-full font-bold text-xs shadow transition"
+      :disabled="isLineLoading"
+    >
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" class="w-5 h-5 mr-1"><rect fill="#06C755" width="36" height="36" rx="8"/><path fill="#fff" d="M18 8C11.373 8 6 12.477 6 18c0 2.99 1.53 5.67 4.07 7.62-.13.44-.82 2.77-.85 2.95 0 .08.02.16.07.22.06.07.15.11.24.09.31-.04 3.09-2.04 3.6-2.38C14.7 26.82 16.32 27 18 27c6.627 0 12-4.477 12-9s-5.373-9-12-9z"/></svg>
+    LINEでログイン
+  </button>
     </div>
 
     <!-- 2. Auth Dropdown (Visible when logged in) -->

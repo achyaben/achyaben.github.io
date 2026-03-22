@@ -429,12 +429,23 @@ const fetchOrders = async () => {
   }
 };
 
+const getLocalDateString = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 const selectedDateDisplay = computed(() => {
-  if (selectedDateFilter.value === 'today') return new Date().toLocaleDateString();
-  if (selectedDateFilter.value === 'tomorrow')
-    return new Date(Date.now() + 86400000).toLocaleDateString();
+  const today = new Date();
+  if (selectedDateFilter.value === 'today') return getLocalDateString(today);
+  if (selectedDateFilter.value === 'tomorrow') {
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    return getLocalDateString(tomorrow);
+  }
   if (selectedDateFilter.value === 'specific' && specificDate.value)
-    return new Date(specificDate.value).toLocaleDateString();
+    return specificDate.value; // Already YYYY-MM-DD from input[type=date]
   return '--';
 });
 
@@ -444,7 +455,7 @@ const filteredDailyOrders = computed(() => {
     .filter((order) => {
       // 1. Date Filter
       const matchesDate = order.deliveryTime
-        ? new Date(order.deliveryTime).toLocaleDateString() === targetDateStr
+        ? getLocalDateString(new Date(order.deliveryTime)) === targetDateStr
         : false;
       if (!matchesDate) return false;
 

@@ -284,4 +284,7 @@ export const UI_TEXTS = {
       all: 'All',
     },
   },
+  currency: {
+    yen: '円',
+  }
 };

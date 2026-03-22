@@ -2,16 +2,10 @@
   <div class="px-4">
     <!-- Tabs -->
     <div class="tabs flex space-x-4 border-b border-gray-300 mb-6">
-      <button
-        v-for="tab in tabs"
-        :key="tab"
-        @click="activeTab = tab"
-        :class="{
-          'text-blue-500 border-blue-500': activeTab === tab,
-          'text-gray-500 hover:text-blue-500': activeTab !== tab,
-        }"
-        class="px-4 py-2 border-b-2 font-medium text-sm"
-      >
+      <button v-for="tab in tabs" :key="tab" @click="activeTab = tab" :class="{
+        'text-blue-500 border-blue-500': activeTab === tab,
+        'text-gray-500 hover:text-blue-500': activeTab !== tab,
+      }" class="px-4 py-2 border-b-2 font-medium text-sm">
         {{ tab }}
       </button>
     </div>
@@ -44,7 +38,7 @@
           <ul class="list-disc pl-5 space-y-1 mb-4">
             <li v-for="item in currentDelivery.items" :key="item.id" class="text-sm">
               <span class="font-medium">{{ item.name }}</span>
-              (x{{ item.quantity }}) - ${{ item.price.toFixed(2) }}
+              (x{{ item.quantity }}) - {{ item.price.toFixed(2) }}{{ UI_TEXTS.currency.yen }}
             </li>
           </ul>
         </div>
@@ -55,12 +49,9 @@
         <div class="space-y-1">
           <p class="text-sm">
             <span class="font-medium">Total:</span>
-            <span class="text-green-500">${{ currentDelivery.total.toFixed(2) }}</span>
-            <a
-              class="text-blue-500 hover:underline text-sm cursor-pointer px-2"
-              v-if="currentDelivery.paymentMethod === 'card'"
-              @click="handleCalculateChange"
-            >
+            <span class="text-green-500">{{ currentDelivery.total.toFixed(2) }}{{ UI_TEXTS.currency.yen }}</span>
+            <a class="text-blue-500 hover:underline text-sm cursor-pointer px-2"
+              v-if="currentDelivery.paymentMethod === 'card'" @click="handleCalculateChange">
               Calculate Change
             </a>
           </p>
@@ -89,11 +80,8 @@
               ({{ calculateCountdown(currentDelivery.deliveryTime) }})
             </span>
           </p>
-          <a
-            :href="`https://maps.google.com/?q=${currentDelivery.customer.address?.street}, ${currentDelivery.customer.address?.city}`"
-            target="_blank"
-            class="text-blue-500 hover:underline text-sm"
-          >
+          <a :href="`https://maps.google.com/?q=${currentDelivery.customer.address?.street}, ${currentDelivery.customer.address?.city}`"
+            target="_blank" class="text-blue-500 hover:underline text-sm">
             View on Map
           </a>
         </div>
@@ -101,16 +89,10 @@
 
         <!-- Action Buttons -->
         <div class="flex space-x-4">
-          <button
-            @click="markAsDelivered(currentDelivery)"
-            class="px-4 py-2 bg-green-500 text-white rounded text-sm"
-          >
+          <button @click="markAsDelivered(currentDelivery)" class="px-4 py-2 bg-green-500 text-white rounded text-sm">
             Mark as Delivered
           </button>
-          <button
-            @click="contactCustomer(currentDelivery)"
-            class="px-4 py-2 bg-blue-500 text-white rounded text-sm"
-          >
+          <button @click="contactCustomer(currentDelivery)" class="px-4 py-2 bg-blue-500 text-white rounded text-sm">
             Contact Customer
           </button>
         </div>
@@ -125,19 +107,11 @@
       <h2 class="text-lg font-bold mb-4 text-center">My Deliveries</h2>
       <div class="flex justify-between items-center mb-4">
         <label class="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            v-model="hideDelivered"
-            class="form-checkbox h-4 w-4 text-blue-500"
-          />
+          <input type="checkbox" v-model="hideDelivered" class="form-checkbox h-4 w-4 text-blue-500" />
           <span class="text-sm">Hide Delivered</span>
         </label>
       </div>
-      <div
-        v-for="order in visibleDeliveries"
-        :key="order.id"
-        class="p-4 mb-4 bg-white shadow-lg rounded-md"
-      >
+      <div v-for="order in visibleDeliveries" :key="order.id" class="p-4 mb-4 bg-white shadow-lg rounded-md">
         <div class="flex justify-between items-center mb-2">
           <h3 class="text-base font-semibold">Order ID: {{ order.id }}</h3>
           <span class="text-sm text-gray-500">{{ order.status }}</span>
@@ -164,8 +138,7 @@
               {{ calculateCountdown(order.deliveryTime) }}
             </span>
             <span v-else class="text-sm text-green-500">
-              Delivered at: {{ formatTime(order.deliveredAt) }} </span
-            >)
+              Delivered at: {{ formatTime(order.deliveredAt) }} </span>)
           </p>
         </div>
         <hr class="border-gray-300 my-2" />
@@ -174,19 +147,16 @@
           <ul class="list-disc pl-5 space-y-1 mt-2">
             <li v-for="item in order.items" :key="item.id" class="text-sm">
               <span class="font-medium">{{ item.name }}</span>
-              (x{{ item.quantity }}) - ${{ item.price.toFixed(2) }}
+              (x{{ item.quantity }}) - {{ item.price.toFixed(2) }}{{ UI_TEXTS.currency.yen }}
             </li>
           </ul>
           <p class="text-sm mt-2">
-            <span class="font-medium">Total:</span> ${{ order.total.toFixed(2) }}
+            <span class="font-medium">Total:</span> {{ order.total.toFixed(2) }}{{ UI_TEXTS.currency.yen }}
           </p>
         </details>
         <div class="flex justify-end mt-2">
-          <button
-            v-if="order.status !== 'completed'"
-            @click="startDelivery(order)"
-            class="px-4 py-2 bg-blue-500 text-white rounded text-sm"
-          >
+          <button v-if="order.status !== 'completed'" @click="startDelivery(order)"
+            class="px-4 py-2 bg-blue-500 text-white rounded text-sm">
             Start Delivery
           </button>
         </div>
@@ -194,14 +164,9 @@
     </div>
 
     <!-- Confirm Dialog -->
-    <ConfirmDialog
-      v-if="showConfirmDialog"
-      :isOpen="showConfirmDialog"
-      :title="confirmDialogProps.title"
-      :message="confirmDialogProps.message"
-      @cancel="showConfirmDialog = false"
-      @confirm="currentDelivery && handleConfirm(currentDelivery)"
-    />
+    <ConfirmDialog v-if="showConfirmDialog" :isOpen="showConfirmDialog" :title="confirmDialogProps.title"
+      :message="confirmDialogProps.message" @cancel="showConfirmDialog = false"
+      @confirm="currentDelivery && handleConfirm(currentDelivery)" />
 
     <!-- Modal for Change Calculation -->
     <template v-if="showChangeModal">
@@ -209,26 +174,16 @@
         <div class="bg-white p-6 rounded shadow-lg w-80">
           <h3 class="text-lg font-semibold mb-4">Calculate Change</h3>
           <label class="block text-sm font-medium mb-2">Given Amount:</label>
-          <input
-            v-model="givenAmount"
-            type="number"
-            class="w-full border border-gray-300 rounded px-3 py-2 mb-4"
-            placeholder="Enter amount"
-          />
+          <input v-model="givenAmount" type="number" class="w-full border border-gray-300 rounded px-3 py-2 mb-4"
+            placeholder="Enter amount" />
           <p v-if="changeAmount !== null" class="text-sm text-green-500 mb-4">
-            Change to return: ${{ changeAmount.toFixed(2) }}
+            Change to return: {{ changeAmount.toFixed(2) }}{{ UI_TEXTS.currency.yen }}
           </p>
           <div class="flex justify-end space-x-2">
-            <button
-              @click="closeChangeModal"
-              class="px-4 py-2 bg-gray-500 text-white rounded text-sm"
-            >
+            <button @click="closeChangeModal" class="px-4 py-2 bg-gray-500 text-white rounded text-sm">
               Cancel
             </button>
-            <button
-              @click="calculateChangeAmount"
-              class="px-4 py-2 bg-blue-500 text-white rounded text-sm"
-            >
+            <button @click="calculateChangeAmount" class="px-4 py-2 bg-blue-500 text-white rounded text-sm">
               Calculate
             </button>
           </div>
@@ -248,6 +203,7 @@ const tabs = ['Current Delivery', 'My Deliveries'];
 const activeTab = ref('Current Delivery');
 
 import { useAuthStore } from '../stores/auth';
+import { UI_TEXTS } from '@/constants/ui-texts';
 
 const auth = useAuthStore();
 const currentDriver = computed(() => auth.user?.name || '');
@@ -272,9 +228,9 @@ const fetchOrders = async () => {
 };
 
 const formatTime = (time: string | undefined) => {
-  if (!time) return 'N/A'; // Fallback for undefined values
+  if (!time) return 'N/A';
   const date = new Date(time);
-  return `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')} ${date.getHours() >= 12 ? 'PM' : 'AM'}`;
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 };
 
 const contactCustomer = (order: Order) => {
@@ -326,9 +282,17 @@ const handleConfirm = async (order: Order) => {
 const hideDelivered = ref(true);
 
 const filteredDeliveries = computed(() => {
-  const today = '2025-07-02T12:30:00Z'.split('T')[0];
-  // const today = new Date().toISOString().split('T')[0];
-  return myDeliveries.value.filter((order) => order.deliveryTime?.startsWith(today));
+  const getLocalDateString = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  const today = getLocalDateString(new Date());
+  return myDeliveries.value.filter((order) => {
+    if (!order.deliveryTime) return false;
+    return getLocalDateString(new Date(order.deliveryTime)) === today;
+  });
 });
 
 const visibleDeliveries = computed(() => {

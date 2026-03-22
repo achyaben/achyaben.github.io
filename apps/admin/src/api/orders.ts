@@ -95,8 +95,15 @@ export const ordersApi = {
     const orders = await this.getOrders();
     const summaries: Record<string, any> = {};
     orders.forEach((order) => {
-      const date = (order.createdAt || '').split('T')[0];
-      if (!date) return;
+      // Use deliveryTime for grouping summaries as requested by the user
+      const dateToUse = order.deliveryTime ? new Date(order.deliveryTime) : null;
+      if (!dateToUse) return;
+      
+      const year = dateToUse.getFullYear();
+      const month = String(dateToUse.getMonth() + 1).padStart(2, '0');
+      const day = String(dateToUse.getDate()).padStart(2, '0');
+      const date = `${year}-${month}-${day}`;
+
       if (!summaries[date]) {
         summaries[date] = { date, totalOrders: 0, totalRevenue: 0, cash: 0, card: 0, paypay: 0 };
       }

@@ -46,6 +46,7 @@ jobs:
         run: |
           mkdir -p deploy
           cp -r public/* deploy/
+          cp apps/customer/public/manifest.json deploy/
           mv apps/customer/dist deploy/customer
           mv apps/admin/dist deploy/admin
           cp static-html/*.html deploy/

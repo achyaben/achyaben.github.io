@@ -72,7 +72,8 @@ const statusText = {
 } as const;
 
 // Format date for display
-function formatDate(date: string | Date) {
+function formatDate(date: string | Date | undefined) {
+  if (!date) return '-';
   const d = new Date(date);
   return new Intl.DateTimeFormat('ja-JP', {
     month: 'numeric',

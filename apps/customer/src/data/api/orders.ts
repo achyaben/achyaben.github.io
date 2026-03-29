@@ -100,8 +100,10 @@ export const ordersApi = {
           price_at_order: (() => {
             let total = item.item.price;
             if (item.customizations && item.customizations.length > 0 && item.item.customizations) {
-              item.customizations.forEach((customId: string) => {
-                const found = item.item.customizations.find((c: any) => c.id === (customId.id || customId));
+              item.customizations.forEach((customId: any) => {
+                const found = item.item.customizations.find(
+                  (c: any) => c.id === (customId?.id || customId)
+                );
                 if (found?.price) total += found.price;
               });
             }

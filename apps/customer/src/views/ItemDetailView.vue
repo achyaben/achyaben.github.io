@@ -107,7 +107,8 @@
               </span>
             </div>
 
-            <div class="space-y-3">
+            <!-- Radio behavior for single selection -->
+            <div v-if="group.max_selection === 1" class="space-y-3">
               <div
                 v-for="custom in group.options"
                 :key="custom.id"
@@ -131,6 +132,45 @@
                 <span v-if="custom.price > 0" class="text-gray-600 text-sm font-medium">
                   +¥{{ custom.price }}
                 </span>
+              </div>
+            </div>
+
+            <!-- Quantity behavior for multiple selection -->
+            <div v-else class="space-y-3">
+              <div
+                v-for="custom in group.options"
+                :key="'multi-' + custom.id"
+                class="flex items-center justify-between p-3 rounded-lg border transition-colors"
+                :class="
+                  getOptionQuantity(custom.id) > 0
+                    ? 'border-primary bg-primary/5'
+                    : 'border-gray-200'
+                "
+              >
+                <div class="flex flex-col">
+                  <span class="font-medium text-gray-700">{{ custom.name }}</span>
+                  <span v-if="custom.price > 0" class="text-gray-600 text-sm font-medium">
+                    +¥{{ custom.price }}
+                  </span>
+                </div>
+                
+                <div class="flex items-center space-x-3 bg-white border rounded-full px-1 py-1 shadow-sm">
+                  <button
+                    @click.stop="removeOptionQuantity(custom.id)"
+                    class="w-7 h-7 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+                    :disabled="getOptionQuantity(custom.id) === 0"
+                  >
+                    -
+                  </button>
+                  <span class="w-4 text-center font-bold text-gray-800">{{ getOptionQuantity(custom.id) }}</span>
+                  <button
+                    @click.stop="addOptionQuantity(group, custom.id)"
+                    class="w-7 h-7 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+                    :disabled="group.max_selection > 0 && getGroupTotalSelections(group) >= group.max_selection"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -254,29 +294,42 @@ const isSelectionValid = computed(() => {
 
 // Override v-model behavior with manual handling for better control
 const isSelected = (optionId: string) => selectedCustomizations.value.includes(optionId);
+
+const getOptionQuantity = (optionId: string) => {
+  return selectedCustomizations.value.filter((id) => id === optionId).length;
+};
+
+const getGroupTotalSelections = (group: any) => {
+  return selectedCustomizations.value.filter((id) =>
+    group.options.some((opt: any) => opt.id === id)
+  ).length;
+};
+
+const removeOptionQuantity = (optionId: string) => {
+  const index = selectedCustomizations.value.lastIndexOf(optionId);
+  if (index !== -1) {
+    selectedCustomizations.value.splice(index, 1);
+  }
+};
+
+const addOptionQuantity = (group: any, optionId: string) => {
+  if (group.max_selection === 0 || getGroupTotalSelections(group) < group.max_selection) {
+    selectedCustomizations.value.push(optionId);
+  }
+};
+
 const toggleOption = (group: any, optionId: string) => {
   const isCurrentlySelected = isSelected(optionId);
   if (isCurrentlySelected) {
     // Deselect
     selectedCustomizations.value = selectedCustomizations.value.filter((id) => id !== optionId);
   } else {
-    // Select
-    const currentGroupSelections = selectedCustomizations.value.filter((id) =>
-      group.options.some((opt: any) => opt.id === id)
-    );
-
-    if (group.max_selection === 1) {
-      // Radio behavior
-      const otherIds = group.options.map((o: any) => o.id);
-      selectedCustomizations.value = [
-        ...selectedCustomizations.value.filter((id) => !otherIds.includes(id)),
-        optionId,
-      ];
-    } else {
-      if (currentGroupSelections.length < group.max_selection) {
-        selectedCustomizations.value.push(optionId);
-      }
-    }
+    // Select (Radio behavior)
+    const otherIds = group.options.map((o: any) => o.id);
+    selectedCustomizations.value = [
+      ...selectedCustomizations.value.filter((id) => !otherIds.includes(id)),
+      optionId,
+    ];
   }
 };
 
@@ -338,6 +391,6 @@ function addToCartAndNavigate() {
   // Add to cart with quantity
   addToCart(item.value, selectedCustomizations.value, quantity.value);
 
-  router.push('/cart');
+  router.push('/');
 }
 </script>

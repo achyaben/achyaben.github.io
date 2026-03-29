@@ -464,10 +464,21 @@ const getCustomizationNames = (itemId: string, customizationIds: string[]) => {
   const item = menuItems.value.find((i) => i.id === itemId);
   if (!item || !item.customizations) return '';
 
-  return customizationIds
-    .map((id) => {
+  const counts: Record<string, number> = {};
+  customizationIds.forEach((id) => {
+    counts[id] = (counts[id] || 0) + 1;
+  });
+
+  return Object.entries(counts)
+    .map(([id, quantity]) => {
       const option = item.customizations?.find((c) => c.id === id);
-      return option?.name;
+      if (!option) return null;
+      let text = quantity > 1 ? `${option.name} ×${quantity}` : option.name;
+      const price = option.price || 0;
+      if (price > 0) {
+        text += ` (+¥${price * quantity})`;
+      }
+      return text;
     })
     .filter(Boolean)
     .join('、');
@@ -491,26 +502,22 @@ async function reorder() {
     clearCart();
 
     // Add all items from the old order
-    const { cartItems, saveCart } = useCart();
+    const { addToCart } = useCart();
 
     order.value.items.forEach((orderItem) => {
       // Robust handling: Check if it's nested (formatted) or flat (legacy/raw)
       const itemData: any = orderItem.item ? orderItem.item : orderItem;
       const quantity = orderItem.quantity || 1;
-      const subtotal = orderItem.subtotal || itemData.price * quantity;
       const customizations = orderItem.customizations || [];
 
-      const fullItem = menuItems.value.find((i) => i.id === itemData.id) || itemData;
+      // Find the current menu item to get updated prices
+      const fullItem = menuItems.value.find((i) => i.id === itemData.id);
 
-      cartItems.value.push({
-        item: { ...fullItem },
-        quantity: quantity,
-        subtotal: subtotal,
-        customizations: [...customizations],
-      });
+      if (fullItem && fullItem.available) {
+        // Automatically fetches the current price and calculates the correct subtotal!
+        addToCart(fullItem, customizations, quantity);
+      }
     });
-
-    saveCart();
 
     // Extract customer name parts
     const [lastName = '', firstName = ''] = (order.value.customer.name || '').split(' ');

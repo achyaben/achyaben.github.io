@@ -203,7 +203,7 @@ const tabs = ['Current Delivery', 'My Deliveries'];
 const activeTab = ref('Current Delivery');
 
 import { useAuthStore } from '../stores/auth';
-import { UI_TEXTS } from '@/constants/ui-texts';
+import { UI_TEXTS } from '../constants/ui-texts';
 
 const auth = useAuthStore();
 const currentDriver = computed(() => auth.user?.name || '');

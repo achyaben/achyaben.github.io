@@ -12,7 +12,12 @@ export const ordersApi = {
                     *,
                     menu_item:menu_items(name, price),
                     customizations:order_item_customizations(
-                        option:customization_options(name, price_add)
+                        option:customization_options(
+                            name, 
+                            price_add, 
+                            sort_order,
+                            group:customization_groups(sort_order, is_required)
+                        )
                     )
                 )
             `
@@ -47,6 +52,9 @@ export const ordersApi = {
           name: c.option?.name || '',
           choice: c.option?.name || '',
           price: c.option?.price_add || 0,
+          sort_order: c.option?.sort_order || 0,
+          group_sort_order: c.option?.group?.sort_order || 0,
+          group_required: c.option?.group?.is_required || false,
         })),
       })),
       total: Number(order.total),
@@ -98,7 +106,7 @@ export const ordersApi = {
       // Use deliveryTime for grouping summaries as requested by the user
       const dateToUse = order.deliveryTime ? new Date(order.deliveryTime) : null;
       if (!dateToUse) return;
-      
+
       const year = dateToUse.getFullYear();
       const month = String(dateToUse.getMonth() + 1).padStart(2, '0');
       const day = String(dateToUse.getDate()).padStart(2, '0');

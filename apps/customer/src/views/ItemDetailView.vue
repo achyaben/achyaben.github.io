@@ -153,8 +153,10 @@
                     +¥{{ custom.price }}
                   </span>
                 </div>
-                
-                <div class="flex items-center space-x-3 bg-white border rounded-full px-1 py-1 shadow-sm">
+
+                <div
+                  class="flex items-center space-x-3 bg-white border rounded-full px-1 py-1 shadow-sm"
+                >
                   <button
                     @click.stop="removeOptionQuantity(custom.id)"
                     class="w-7 h-7 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
@@ -162,11 +164,16 @@
                   >
                     -
                   </button>
-                  <span class="w-4 text-center font-bold text-gray-800">{{ getOptionQuantity(custom.id) }}</span>
+                  <span class="w-4 text-center font-bold text-gray-800">{{
+                    getOptionQuantity(custom.id)
+                  }}</span>
                   <button
                     @click.stop="addOptionQuantity(group, custom.id)"
                     class="w-7 h-7 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
-                    :disabled="group.max_selection > 0 && getGroupTotalSelections(group) >= group.max_selection"
+                    :disabled="
+                      group.max_selection > 0 &&
+                      getGroupTotalSelections(group) >= group.max_selection
+                    "
                   >
                     +
                   </button>
@@ -257,7 +264,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { menuItems, fetchMenu } from '../data/menu';
+import { fetchMenuItem } from '../data/menu';
 import { useCart } from '../stores/cart';
 import type { MenuItem } from '../types';
 import { useRestaurantStore } from '../stores/restaurant';
@@ -336,12 +343,8 @@ const toggleOption = (group: any, optionId: string) => {
 onMounted(async () => {
   const id = route.params.id as string;
 
-  // If menu is not loaded, fetch it first
-  if (menuItems.value.length === 0) {
-    await fetchMenu();
-  }
-
-  item.value = menuItems.value.find((i) => String(i.id) === id);
+  // Use the optimized fetchMenuItem which handles caching and selective loading
+  item.value = await fetchMenuItem(id);
 
   if (!item.value) {
     router.push('/');

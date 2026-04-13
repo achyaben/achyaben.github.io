@@ -177,10 +177,10 @@
                 </td>
               </tr>
               <!-- Group Orders -->
-              <tr 
-                v-for="order in group" 
-                :key="order.id" 
-                @click="selectOrder(order)" 
+              <tr
+                v-for="order in group"
+                :key="order.id"
+                @click="selectOrder(order)"
                 class="hover:bg-gray-100 cursor-pointer border-b text-sm transition-colors"
               >
                 <td class="px-4 py-3 font-medium text-gray-700">
@@ -347,9 +347,7 @@
           </div>
           <div class="space-y-4">
             <div class="p-4 bg-gray-50 rounded-xl">
-              <p class="text-[10px] font-black text-gray-400 uppercase mb-2">
-                Delivery Address
-              </p>
+              <p class="text-[10px] font-black text-gray-400 uppercase mb-2">Delivery Address</p>
               <p class="text-sm font-bold">[{{ selectedOrder.customer.address.postalCode }}]</p>
               <p class="text-sm">{{ selectedOrder.customer.address.street }}</p>
             </div>
@@ -367,11 +365,7 @@
               </tr>
             </thead>
             <tbody class="text-sm">
-              <tr
-                v-for="item in selectedOrder.items"
-                :key="item.id"
-                class="border-b last:border-0"
-              >
+              <tr v-for="item in selectedOrder.items" :key="item.id" class="border-b last:border-0">
                 <td class="py-3">
                   <div class="font-bold">{{ item.name }}</div>
                   <div
@@ -399,7 +393,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import type { Order, OrderItem } from '../types/types';
+import type { Order, OrderItem, OrderItemOption } from '../types/types';
 import { ordersApi } from '../api/orders';
 import {
   ArrowLeftIcon,
@@ -441,24 +435,57 @@ const getLocalDateString = (date: Date) => {
   return `${year}-${month}-${day}`;
 };
 
-const formatOptionsList = (options?: { name: string; choice?: string; price?: number }[]) => {
+const formatOptionsList = (options?: OrderItemOption[]) => {
   if (!options || !options.length) return [];
-  const counts: Record<string, { qty: number; unitPrice: number }> = {};
+  const counts: Record<
+    string,
+    {
+      qty: number;
+      unitPrice: number;
+      sort_order: number;
+      group_sort_order: number;
+      group_required: boolean;
+    }
+  > = {};
   options.forEach((opt) => {
     const name = opt.choice || opt.name;
     if (name) {
-      if (!counts[name]) counts[name] = { qty: 0, unitPrice: opt.price || 0 };
+      if (!counts[name])
+        counts[name] = {
+          qty: 0,
+          unitPrice: opt.price || 0,
+          sort_order: opt.sort_order || 0,
+          group_sort_order: opt.group_sort_order || 0,
+          group_required: opt.group_required || false,
+        };
       counts[name].qty += 1;
       if (opt.price) counts[name].unitPrice = opt.price;
     }
   });
-  return Object.entries(counts).map(([name, data]) => {
-    let text = data.qty > 1 ? `${name} ×${data.qty}` : name;
-    if (data.unitPrice > 0) {
-      text += ` (+¥${data.unitPrice * data.qty})`;
-    }
-    return text;
-  });
+  return Object.entries(counts)
+    .sort(([nameA, aData], [nameB, bData]) => {
+      // 1. Group Sort Order
+      if (aData.group_sort_order !== bData.group_sort_order) {
+        return aData.group_sort_order - bData.group_sort_order;
+      }
+      // 2. Group Required (Tie-breaker for group)
+      if (aData.group_required !== bData.group_required) {
+        return aData.group_required ? -1 : 1;
+      }
+      // 3. Option Sort Order (Tie-breaker within group)
+      if (aData.sort_order !== bData.sort_order) {
+        return aData.sort_order - bData.sort_order;
+      }
+      // 4. Name (Final stability)
+      return (nameA || '').localeCompare(nameB || '');
+    })
+    .map(([name, data]) => {
+      let text = data.qty > 1 ? `${name} ×${data.qty}` : name;
+      if (data.unitPrice > 0) {
+        text += ` (+¥${data.unitPrice * data.qty})`;
+      }
+      return text;
+    });
 };
 
 const formatOptionsStr = (options?: any[]) => formatOptionsList(options).join(', ');
@@ -471,8 +498,7 @@ const selectedDateDisplay = computed(() => {
     tomorrow.setDate(today.getDate() + 1);
     return getLocalDateString(tomorrow);
   }
-  if (selectedDateFilter.value === 'specific' && specificDate.value)
-    return specificDate.value; // Already YYYY-MM-DD from input[type=date]
+  if (selectedDateFilter.value === 'specific' && specificDate.value) return specificDate.value; // Already YYYY-MM-DD from input[type=date]
   return '--';
 });
 

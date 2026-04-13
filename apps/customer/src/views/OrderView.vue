@@ -472,6 +472,28 @@ const getCustomizationNames = (itemId: string, customizationIds: string[]) => {
   return Object.entries(counts)
     .map(([id, quantity]) => {
       const option = item.customizations?.find((c) => c.id === id);
+      return { id, quantity, option };
+    })
+    .sort((a, b) => {
+      // 1. Group Sort Order
+      const aGSO = a.option?.group_sort_order || 0;
+      const bGSO = b.option?.group_sort_order || 0;
+      if (aGSO !== bGSO) return aGSO - bGSO;
+
+      // 2. Group Required (Tie-breaker for group)
+      const aGR = a.option?.group_required ? -1 : 1;
+      const bGR = b.option?.group_required ? -1 : 1;
+      if (aGR !== bGR) return aGR - bGR;
+
+      // 3. Option Sort Order (Tie-breaker within group)
+      if ((a.option?.sort_order || 0) !== (b.option?.sort_order || 0)) {
+        return (a.option?.sort_order || 0) - (b.option?.sort_order || 0);
+      }
+
+      // 4. Name (Final stability)
+      return (a.option?.name || '').localeCompare(b.option?.name || '');
+    })
+    .map(({ quantity, option }) => {
       if (!option) return null;
       let text = quantity > 1 ? `${option.name} ×${quantity}` : option.name;
       const price = option.price || 0;

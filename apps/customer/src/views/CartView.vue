@@ -4,19 +4,42 @@
       <div class="container mx-auto px-4 py-4 flex items-center justify-between">
         <div class="flex items-center">
           <router-link to="/" class="text-gray-600 hover:text-gray-900">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </router-link>
           <h1 class="text-xl font-bold ml-4">メニューに戻る</h1>
         </div>
 
         <!-- Help Button -->
-        <button @click="showHelp = true" class="p-2 text-gray-600 hover:text-gray-900 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <button
+          @click="showHelp = true"
+          class="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
         </button>
       </div>
@@ -30,8 +53,10 @@
 
       <div v-else-if="!cartItems.length" class="text-center py-12">
         <p class="text-gray-600 mb-4">注文が空です</p>
-        <router-link to="/"
-          class="inline-block bg-primary text-white px-6 py-2 rounded-full font-medium hover:bg-primary-dark transition-colors">
+        <router-link
+          to="/"
+          class="inline-block bg-primary text-white px-6 py-2 rounded-full font-medium hover:bg-primary-dark transition-colors"
+        >
           メニューに戻る
         </router-link>
       </div>
@@ -43,8 +68,11 @@
             <h2 class="text-lg font-bold">注文内容</h2>
           </div>
           <div class="divide-y">
-            <CartItem v-for="item in cartItems" :key="item.item.id + JSON.stringify(item.customizations)"
-              :cartItem="item" />
+            <CartItem
+              v-for="item in cartItems"
+              :key="item.item.id + JSON.stringify(item.customizations)"
+              :cartItem="item"
+            />
           </div>
           <div class="p-4 border-t bg-gray-50">
             <div class="flex justify-between items-center text-xl font-bold">
@@ -54,8 +82,120 @@
           </div>
         </div>
 
-        <!-- Customer Information Section -->
+        <!-- Order Selection Flow -->
         <form @submit.prevent="submitOrder" class="space-y-6">
+          <!-- Order Type Selection Card -->
+          <div
+            class="bg-white rounded-lg shadow-sm border-t-4"
+            :class="orderForm.order_type === 'pickup' ? 'border-blue-500' : 'border-green-500'"
+          >
+            <div class="p-4 border-b flex items-center justify-between">
+              <h2 class="text-lg font-bold">受け取り方法</h2>
+              <span
+                class="text-xs font-bold px-2 py-0.5 rounded-full"
+                :class="
+                  orderForm.order_type === 'pickup'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'bg-green-100 text-green-700'
+                "
+              >
+                {{ orderForm.order_type === 'pickup' ? '店頭受取' : '配達' }}
+              </span>
+            </div>
+            <div class="p-4">
+              <div class="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  @click="
+                    orderForm.order_type = 'pickup';
+                    onOrderTypeChange();
+                  "
+                  class="flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all duration-300 gap-2"
+                  :class="
+                    orderForm.order_type === 'pickup'
+                      ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-md ring-2 ring-blue-500/20'
+                      : 'border-gray-200 bg-white text-gray-500 hover:border-blue-200'
+                  "
+                >
+                  <div
+                    class="p-2 rounded-full"
+                    :class="
+                      orderForm.order_type === 'pickup'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-100 text-gray-400'
+                    "
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                      />
+                    </svg>
+                  </div>
+                  <span class="font-bold text-sm">店頭受取</span>
+                  <span
+                    class="text-[10px] opacity-70 border-t border-blue-200 mt-1 pt-1 w-full text-center"
+                  >
+                    {{ earliestPickupInfo }}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  @click="
+                    orderForm.order_type = 'delivery';
+                    onOrderTypeChange();
+                  "
+                  class="flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all duration-300 gap-2"
+                  :class="
+                    orderForm.order_type === 'delivery'
+                      ? 'border-green-500 bg-green-50 text-green-700 shadow-md ring-2 ring-green-500/20'
+                      : 'border-gray-200 bg-white text-gray-500 hover:border-green-200'
+                  "
+                >
+                  <div
+                    class="p-2 rounded-full"
+                    :class="
+                      orderForm.order_type === 'delivery'
+                        ? 'bg-green-500 text-white'
+                        : 'bg-gray-100 text-gray-400'
+                    "
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1zM13 16l5 2V7l-5 2m0 7h5"
+                      />
+                    </svg>
+                  </div>
+                  <span class="font-bold text-sm">お届け</span>
+                  <span
+                    class="text-[10px] opacity-70 border-t border-green-200 mt-1 pt-1 w-full text-center"
+                  >
+                    {{ earliestDeliveryInfo }}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Customer Information Section -->
           <div class="bg-white rounded-lg shadow-sm">
             <div class="p-4 border-b">
               <h2 class="text-lg font-bold">お客様情報</h2>
@@ -64,24 +204,38 @@
               <!-- Name Fields -->
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">姓<span
-                      class="text-red-500">*</span></label>
-                  <input v-model="orderForm.lastName" type="text" required placeholder="山田" :class="[
-                    'w-full rounded-lg focus:ring-primary transition-colors',
-                    validationErrors.lastName
-                      ? 'border-red-300 focus:border-red-500 bg-red-50'
-                      : 'border-gray-300 focus:border-primary',
-                  ]" @input="saveCustomerInfo" />
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >姓<span class="text-red-500">*</span></label
+                  >
+                  <input
+                    v-model="orderForm.lastName"
+                    type="text"
+                    required
+                    placeholder="山田"
+                    :class="[
+                      'w-full rounded-lg focus:ring-primary transition-colors',
+                      validationErrors.lastName
+                        ? 'border-red-300 focus:border-red-500 bg-red-50'
+                        : 'border-gray-300 focus:border-primary',
+                    ]"
+                    @input="saveCustomerInfo"
+                  />
                   <p v-if="validationErrors.lastName" class="mt-1 text-sm text-red-500">
                     {{ validationErrors.lastName }}
                   </p>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">名<span
-                      class="text-red-500">*</span></label>
-                  <input v-model="orderForm.firstName" type="text" required placeholder="太郎"
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >名<span class="text-red-500">*</span></label
+                  >
+                  <input
+                    v-model="orderForm.firstName"
+                    type="text"
+                    required
+                    placeholder="太郎"
                     class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
-                    @input="saveCustomerInfo" />
+                    @input="saveCustomerInfo"
+                  />
                   <p v-if="validationErrors.firstName" class="mt-1 text-sm text-red-500">
                     {{ validationErrors.firstName }}
                   </p>
@@ -91,24 +245,37 @@
               <!-- Address Fields -->
               <div class="space-y-3">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">郵便番号<span
-                      class="text-red-500">*</span></label>
-                  <input v-model="orderForm.postalCode" type="text" required placeholder="100-0005"
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >郵便番号<span class="text-red-500">*</span></label
+                  >
+                  <input
+                    v-model="orderForm.postalCode"
+                    type="text"
+                    required
+                    placeholder="100-0005"
                     pattern="^\d{3}-?\d{4}$"
                     class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
-                    @input="saveCustomerInfo" />
+                    @input="saveCustomerInfo"
+                  />
                   <p v-if="validationErrors.postalCode" class="mt-1 text-sm text-red-500">
                     {{ validationErrors.postalCode }}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">お届け先住所
-                    <span class="text-xs font-normal text-gray-500">(お勤め先・配達先)</span><span
-                      class="text-red-500">*</span></label>
-                  <textarea v-model="orderForm.addressLine" required rows="3" placeholder="江戸川区南葛西5-13-10 ヤキベンビル 3F 会議室"
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >お届け先住所
+                    <span class="text-xs font-normal text-gray-500">(お勤め先・配達先)</span
+                    ><span class="text-red-500">*</span></label
+                  >
+                  <textarea
+                    v-model="orderForm.addressLine"
+                    required
+                    rows="3"
+                    placeholder="江戸川区南葛西5-13-10 ヤキベンビル 3F 会議室"
                     class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
-                    @input="saveCustomerInfo"></textarea>
+                    @input="saveCustomerInfo"
+                  ></textarea>
                   <p v-if="validationErrors.addressLine" class="mt-1 text-sm text-red-500">
                     {{ validationErrors.addressLine }}
                   </p>
@@ -116,34 +283,52 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">電話番号<span
-                    class="text-red-500">*</span></label>
-                <input v-model="orderForm.companyContact" type="tel" required pattern="^[0-9]{10,11}$"
-                  title="10桁または11桁の電話番号を入力してください" placeholder="個人の携帯または会社の番号 (ハイフンなし)"
+                <label class="block text-sm font-medium text-gray-700 mb-1"
+                  >電話番号<span class="text-red-500">*</span></label
+                >
+                <input
+                  v-model="orderForm.companyContact"
+                  type="tel"
+                  required
+                  pattern="^[0-9]{10,11}$"
+                  title="10桁または11桁の電話番号を入力してください"
+                  placeholder="個人の携帯または会社の番号 (ハイフンなし)"
                   class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
-                  @input="saveCustomerInfo" />
+                  @input="saveCustomerInfo"
+                />
                 <p v-if="validationErrors.companyContact" class="mt-1 text-sm text-red-500">
                   {{ validationErrors.companyContact }}
                 </p>
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">受け取り日<span
-                    class="text-red-500">*</span></label>
-                <input v-model="orderForm.deliveryDate" type="date" required :min="minDate" :max="maxDate"
+                <label class="block text-sm font-medium text-gray-700 mb-1"
+                  >受け取り日<span class="text-red-500">*</span></label
+                >
+                <input
+                  v-model="orderForm.deliveryDate"
+                  type="date"
+                  required
+                  :min="minDate"
+                  :max="maxDate"
                   class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
-                  @change="onDateChange" />
+                  @change="onDateChange"
+                />
                 <p v-if="validationErrors.deliveryDate" class="mt-1 text-sm text-red-500">
                   {{ validationErrors.deliveryDate }}
                 </p>
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">受け取り時間<span
-                    class="text-red-500">*</span></label>
-                <select v-model="orderForm.deliveryTimeSlot" required
+                <label class="block text-sm font-medium text-gray-700 mb-1"
+                  >受け取り時間<span class="text-red-500">*</span></label
+                >
+                <select
+                  v-model="orderForm.deliveryTimeSlot"
+                  required
                   class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
-                  :disabled="!orderForm.deliveryDate || !availableTimeSlots.length">
+                  :disabled="!orderForm.deliveryDate || !availableTimeSlots.length"
+                >
                   <option value="" disabled>時間を選択してください</option>
                   <option v-for="time in availableTimeSlots" :key="time" :value="time">
                     {{ time }}
@@ -152,15 +337,22 @@
                 <p v-if="validationErrors.deliveryTimeSlot" class="mt-1 text-sm text-red-500">
                   {{ validationErrors.deliveryTimeSlot }}
                 </p>
-                <p v-if="orderForm.deliveryDate && !availableTimeSlots.length" class="mt-1 text-sm text-red-500">
+                <p
+                  v-if="orderForm.deliveryDate && !availableTimeSlots.length"
+                  class="mt-1 text-sm text-red-500"
+                >
                   選択された日は予約可能な時間がありません
                 </p>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">備考</label>
-                <textarea v-model="orderForm.notes" rows="2" placeholder="アレルギーなどの注意事項があればご記入ください"
-                  class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"></textarea>
+                <textarea
+                  v-model="orderForm.notes"
+                  rows="2"
+                  placeholder="アレルギーなどの注意事項があればご記入ください"
+                  class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
+                ></textarea>
               </div>
             </div>
           </div>
@@ -171,24 +363,34 @@
               <h2 class="text-lg font-bold">お支払い方法</h2>
             </div>
             <div class="p-4 space-y-3">
-              <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
-                :class="{ 'border-primary bg-primary/5': orderForm.paymentMethod === 'cash' }">
-                <input type="radio" v-model="orderForm.paymentMethod" value="cash"
-                  class="w-4 h-4 text-primary border-gray-300 focus:ring-primary" />
+              <label
+                class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                :class="{ 'border-primary bg-primary/5': orderForm.paymentMethod === 'cash' }"
+              >
+                <input
+                  type="radio"
+                  v-model="orderForm.paymentMethod"
+                  value="cash"
+                  class="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
+                />
                 <span class="ml-3">現金</span>
               </label>
 
-              <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
-                :class="{ 'border-primary bg-primary/5': orderForm.paymentMethod === 'paypay' }">
-                <input type="radio" v-model="orderForm.paymentMethod" value="paypay"
-                  class="w-4 h-4 text-primary border-gray-300 focus:ring-primary" />
+              <label
+                class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                :class="{ 'border-primary bg-primary/5': orderForm.paymentMethod === 'paypay' }"
+              >
+                <input
+                  type="radio"
+                  v-model="orderForm.paymentMethod"
+                  value="paypay"
+                  class="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
+                />
                 <div class="ml-3">
                   <span class="font-bold text-[#0095EE]">PayPay</span>
                   <span class="text-sm text-gray-500 ml-2">(受け取り時に決済)</span>
                 </div>
               </label>
-
-
             </div>
           </div>
 
@@ -199,14 +401,51 @@
             </div>
 
             <!-- Authenticated State -->
-            <button v-else type="submit" :disabled="!isFormValid || isSubmitting"
-              class="w-full bg-primary text-white py-4 rounded-xl font-bold shadow-lg hover:bg-primary-dark transition-all duration-300 transform hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center justify-center">
+            <div
+              v-if="isAuthenticated && !isMinPriceMet"
+              class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-3 flex items-start gap-3 animate-pulse"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 text-amber-600 shrink-0 mt-0.5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <div>
+                <p class="text-sm font-bold text-amber-800">最低注文金額に達していません</p>
+                <p class="text-xs text-amber-700">
+                  合計で ¥{{ MIN_ORDER_PRICE }} 以上の注文が必要です（現在: ¥{{ cartTotal }}）
+                </p>
+              </div>
+            </div>
+
+            <button
+              v-else-if="isAuthenticated"
+              type="submit"
+              :disabled="!isFormValid || isSubmitting || !isMinPriceMet"
+              class="w-full bg-primary text-white py-4 rounded-xl font-bold shadow-lg hover:bg-primary-dark transition-all duration-300 transform hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center justify-center font-black text-lg"
+            >
               <span v-if="isSubmitting" class="inline-block animate-spin mr-2">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                  </path>
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
               </span>
               {{ isSubmitting ? '処理中...' : `注文を確定する (¥${cartTotal})` }}
@@ -222,11 +461,13 @@
                 <li v-if="validationErrors.postalCode">
                   郵便番号は半角数字7桁で入力してください（例：100-0005）
                 </li>
-                <li v-if="
-                  validationErrors.prefecture ||
-                  validationErrors.city ||
-                  validationErrors.addressLine
-                ">
+                <li
+                  v-if="
+                    validationErrors.prefecture ||
+                    validationErrors.city ||
+                    validationErrors.addressLine
+                  "
+                >
                   住所を正しく入力してください（都道府県、市区町村、番地・建物名）
                 </li>
                 <li v-if="validationErrors.companyContact">
@@ -246,15 +487,28 @@
     </main>
 
     <!-- Help Modal -->
-    <div v-if="showHelp" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-      @click.self="showHelp = false">
+    <div
+      v-if="showHelp"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      @click.self="showHelp = false"
+    >
       <div class="bg-white rounded-xl p-6 max-w-md w-full">
         <div class="flex justify-between items-start mb-4">
           <h3 class="text-lg font-bold">お問い合わせ</h3>
           <button @click="showHelp = false" class="text-gray-500 hover:text-gray-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -280,9 +534,17 @@
               }}</a>
             </p>
             <p>営業時間：{{ restaurantInfo.hours.open }}:00〜{{ restaurantInfo.hours.close }}:00</p>
+            <p v-if="restaurantInfo.delivery_hours">
+              配達時間：{{ restaurantInfo.delivery_hours.start }}〜{{
+                restaurantInfo.delivery_hours.end
+              }}
+            </p>
             <p>
-              LINE：<a :href="`https://line.me/R/ti/p/${restaurantInfo.sns.line}`" target="_blank"
-                class="text-primary">{{ restaurantInfo.sns.line }}
+              LINE：<a
+                :href="`https://line.me/R/ti/p/${restaurantInfo.sns.line}`"
+                target="_blank"
+                class="text-primary"
+                >{{ restaurantInfo.sns.line }}
               </a>
             </p>
           </div>
@@ -294,7 +556,6 @@
 </template>
 
 <script setup lang="ts">
-
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import CartItem from '../components/CartItem.vue';
@@ -312,6 +573,8 @@ const { info: restaurantInfo, fetchInfo, isLoading } = useRestaurantStore();
 const showHelp = ref(false);
 const isSubmitting = ref(false); // Add loading state
 
+const MIN_ORDER_PRICE = 650;
+const isMinPriceMet = computed(() => cartTotal.value >= MIN_ORDER_PRICE);
 
 onMounted(async () => {
   await fetchInfo(); // Ensure we have the latest settings
@@ -387,6 +650,7 @@ const orderForm = ref({
   companyContact: '',
   deliveryDate: '',
   deliveryTimeSlot: '',
+  order_type: 'delivery' as 'pickup' | 'delivery',
   notes: '',
   paymentMethod: 'cash' as PaymentMethod,
   needReceipt: false,
@@ -574,32 +838,46 @@ const maxDate = computed(() => {
 });
 
 // Generate available time slots based on selected date
-const availableTimeSlots = computed(() => {
-  if (!orderForm.value.deliveryDate || !restaurantInfo.value?.hours) return [];
+const getTimeSlots = (type: 'pickup' | 'delivery', dateStr: string) => {
+  if (!dateStr || !restaurantInfo.value?.hours) return [];
 
   const slots: string[] = [];
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const selectedDate = new Date(y, m - 1, d);
+  const now = new Date();
 
-  // Safe Local Date Construction
-  const [y, m, d] = orderForm.value.deliveryDate.split('-').map(Number);
-  const selectedDate = new Date(y, m - 1, d); // Local Midnight
-  const now = new Date(); // Local Now
-
-  const startHour = restaurantInfo.value.hours.open || 10;
-  const endHour = restaurantInfo.value.hours.orderDeadline || 20;
-
-  // Logic: Iterate from startHour to endHour in 30 min increments
-  let current = new Date(selectedDate);
-  current.setHours(startHour, 0, 0, 0);
-
-  const end = new Date(selectedDate);
-  end.setHours(endHour, 0, 0, 0);
-
-  // Check min advance time if selected date is today
   const minTime = new Date();
   minTime.setMinutes(minTime.getMinutes() + (restaurantInfo.value.hours.minAdvanceTime || 30));
 
+  let startHour = restaurantInfo.value.hours.open || 10;
+  let startMinute = 0;
+  let endHour = restaurantInfo.value.hours.orderDeadline || 20;
+  let endMinute = 0;
+
+  if (type === 'delivery' && restaurantInfo.value.delivery_hours) {
+    const dHours = restaurantInfo.value.delivery_hours;
+    if (dHours.start) {
+      const parts = dHours.start.split(':');
+      startHour = parseInt(parts[0]);
+      startMinute = parseInt(parts[1] || '0');
+    }
+    if (dHours.end) {
+      const parts = dHours.end.split(':');
+      endHour = parseInt(parts[0]);
+      endMinute = parseInt(parts[1] || '0');
+    }
+  } else {
+    startHour = restaurantInfo.value.hours.open || 10;
+    endHour = restaurantInfo.value.hours.orderDeadline || 20;
+  }
+
+  let current = new Date(selectedDate);
+  current.setHours(startHour, startMinute, 0, 0);
+
+  const end = new Date(selectedDate);
+  end.setHours(endHour, endMinute, 0, 0);
+
   while (current <= end) {
-    // If selected date is today, filter out past times
     const isToday =
       selectedDate.getFullYear() === now.getFullYear() &&
       selectedDate.getMonth() === now.getMonth() &&
@@ -610,17 +888,39 @@ const availableTimeSlots = computed(() => {
         slots.push(toLocalISOString(current).slice(11, 16));
       }
     } else {
-      // Future date, all slots valid
       slots.push(toLocalISOString(current).slice(11, 16));
     }
     current.setMinutes(current.getMinutes() + 30);
   }
 
   return slots;
+};
+
+const availableTimeSlots = computed(() => {
+  return getTimeSlots(orderForm.value.order_type, orderForm.value.deliveryDate);
 });
 
-// Reset time slot when date changes
+const earliestPickupInfo = computed(() => {
+  const date = orderForm.value.deliveryDate || minDate.value;
+  const slots = getTimeSlots('pickup', date);
+  if (slots.length === 0) return '本日不可';
+  return `${slots[0]} 〜 ${slots[slots.length - 1]}`;
+});
+
+const earliestDeliveryInfo = computed(() => {
+  const date = orderForm.value.deliveryDate || minDate.value;
+  const slots = getTimeSlots('delivery', date);
+  if (slots.length === 0) return '本日不可';
+  return `${slots[0]} 〜 ${slots[slots.length - 1]}`;
+});
+
+// Reset time slot when date or type changes
 const onDateChange = () => {
+  orderForm.value.deliveryTimeSlot = '';
+  validateForm();
+};
+
+const onOrderTypeChange = () => {
   orderForm.value.deliveryTimeSlot = '';
   validateForm();
 };
@@ -770,6 +1070,7 @@ async function submitOrder() {
       } as any,
       // Flat properties for the Edge Function mapper
       deliveryTime: new Date(deliveryDateTime).toISOString(),
+      order_type: orderForm.value.order_type,
       notes: orderForm.value.notes,
       status: 'pending' as OrderStatus,
       paymentMethod: orderForm.value.paymentMethod,

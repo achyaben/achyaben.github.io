@@ -74,6 +74,7 @@ export const ordersApi = {
       status: 'pending',
       payment_method: payload.paymentMethod || 'cash',
       payment_status: payload.paymentMethod === 'paypay' ? 'pending' : 'pending',
+      order_type: payload.order_type || 'delivery',
       notes: payload.notes,
     };
 
@@ -225,6 +226,7 @@ export const ordersApi = {
           paymentMethod: o.payment_method,
           paymentStatus: o.payment_status,
           deliveryTime: o.delivery_datetime,
+          order_type: o.order_type,
           createdAt: o.created_at,
           updatedAt: o.updated_at,
           customer: {

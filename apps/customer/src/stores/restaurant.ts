@@ -37,6 +37,7 @@ interface RestaurantInfo {
   email: string;
   recovery_form: string;
   hours: BusinessHours;
+  delivery_hours: { start: string; end: string };
   banners?: Array<{ id: string; title: string; link?: string; active: boolean }> | null;
 }
 
@@ -156,6 +157,7 @@ export const useRestaurantStore = () => {
           address: settings.restaurant_address,
           sns: settings.sns,
           hours: settings.business_hours,
+          delivery_hours: settings.delivery_hours,
           banners: settings.banners,
         };
 

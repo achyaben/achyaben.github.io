@@ -32,5 +32,9 @@ export const RESTAURANT_INFO = {
     maxAdvanceDays: 0,
     businessDays: [],
   },
+  delivery_hours: {
+    start: '',
+    end: '',
+  },
   banners: [],
 };

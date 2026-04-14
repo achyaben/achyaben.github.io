@@ -31,6 +31,7 @@ export interface Order {
   paymentMethod: 'cash' | 'card' | 'paypay';
   paymentStatus: 'pending' | 'completed';
   deliveryTime?: string;
+  orderType?: 'pickup' | 'delivery';
   createdAt: string;
   updatedAt: string;
   comments?: string;
@@ -91,6 +92,10 @@ export interface RestaurantSettings {
     minAdvanceTime: number;
     maxAdvanceDays: number;
     businessDays: number[];
+  };
+  delivery_hours?: {
+    start: string;
+    end: string;
   };
   support: {
     phone: string;

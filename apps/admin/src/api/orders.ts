@@ -64,6 +64,7 @@ export const ordersApi = {
       deliveryTime: order.delivery_datetime,
       paymentMethod: order.payment_method as any,
       paymentStatus: order.payment_status as any,
+      orderType: order.order_type as any,
       comments: order.notes,
     }));
   },

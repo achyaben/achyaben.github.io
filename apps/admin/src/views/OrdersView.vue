@@ -102,9 +102,24 @@
               {{ item.quantity }}
             </td>
             <td class="border border-gray-300 px-4 py-2 text-sm">
-              <div v-for="(comment, idx) in item.comments" :key="idx" class="mb-1 leading-tight">
-                <span class="text-blue-600 font-bold">#{{ comment.orderNumber }}</span
-                >: {{ comment.text }}
+              <div
+                v-for="(comment, idx) in item.comments"
+                :key="idx"
+                class="mb-1 leading-tight flex items-center flex-wrap gap-1"
+              >
+                <span class="text-blue-600 font-bold">#{{ comment.orderNumber }}</span>
+                <span
+                  v-if="comment.orderType"
+                  class="px-1 rounded text-[10px] font-black uppercase border"
+                  :class="
+                    comment.orderType === 'pickup'
+                      ? 'bg-blue-50 text-blue-700 border-blue-200'
+                      : 'bg-green-50 text-green-700 border-green-200'
+                  "
+                >
+                  {{ comment.orderType === 'pickup' ? 'PICKUP' : 'DELIVERY' }}
+                </span>
+                <span v-if="comment.text" class="text-gray-700">: {{ comment.text }}</span>
               </div>
             </td>
           </tr>
@@ -187,7 +202,20 @@
                   {{ formatTime(order.deliveryTime) }}
                 </td>
                 <td class="px-4 py-3">
-                  <div class="font-bold">#{{ order.trackingId }}</div>
+                  <div class="flex items-center gap-2">
+                    <div class="font-bold">#{{ order.trackingId }}</div>
+                    <span
+                      v-if="order.orderType"
+                      :class="
+                        order.orderType === 'pickup'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-green-100 text-green-800'
+                      "
+                      class="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase"
+                    >
+                      {{ order.orderType }}
+                    </span>
+                  </div>
                   <div class="text-xs text-gray-500">{{ order.customer.name }}</div>
                   <div class="text-xs text-blue-500">{{ order.customer.phone }}</div>
                 </td>
@@ -270,7 +298,20 @@
               @click="selectOrder(order)"
             >
               <div class="flex justify-between items-start mb-2">
-                <div class="text-sm font-black">#{{ order.trackingId }}</div>
+                <div class="flex flex-col">
+                  <div class="text-sm font-black">#{{ order.trackingId }}</div>
+                  <span
+                    v-if="order.orderType"
+                    :class="
+                      order.orderType === 'pickup'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-green-100 text-green-800'
+                    "
+                    class="text-[8px] px-1 py-0.5 rounded font-bold uppercase w-fit mt-1"
+                  >
+                    {{ order.orderType }}
+                  </span>
+                </div>
                 <div
                   class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 uppercase"
                 >
@@ -322,6 +363,17 @@
 
         <div class="flex items-center gap-3 mb-6">
           <h2 class="text-3xl font-black">#{{ selectedOrder.trackingId }}</h2>
+          <span
+            v-if="selectedOrder.orderType"
+            :class="
+              selectedOrder.orderType === 'pickup'
+                ? 'bg-blue-100 text-blue-800'
+                : 'bg-green-100 text-green-800'
+            "
+            class="px-2 py-1 rounded text-xs font-black uppercase"
+          >
+            {{ selectedOrder.orderType }}
+          </span>
           <span
             :class="
               getStatusColor(selectedOrder.status) +
@@ -403,6 +455,7 @@ import {
   MapPinIcon,
 } from '@heroicons/vue/24/solid';
 import { UI_TEXTS } from '../constants/ui-texts';
+import { onUnmounted } from 'vue';
 
 const activeTab = ref<keyof typeof UI_TEXTS.orders.tabs>('deliveryList');
 const orders = ref<Order[]>([]);
@@ -416,8 +469,17 @@ const specificDate = ref('');
 const searchQuery = ref('');
 const postalCodeFilter = ref('');
 
+const handleGlobalNewOrder = async () => {
+  await fetchOrders();
+};
+
 onMounted(async () => {
   await fetchOrders();
+  window.addEventListener('new-order-notification', handleGlobalNewOrder);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('new-order-notification', handleGlobalNewOrder);
 });
 
 const fetchOrders = async () => {
@@ -555,7 +617,7 @@ const groupedPrepItems = computed(() => {
       name: string;
       customizations: string[];
       quantity: number;
-      comments: { text: string; orderNumber: string }[];
+      comments: { text: string; orderNumber: string; orderType?: string }[];
     }
   > = {};
 
@@ -575,9 +637,12 @@ const groupedPrepItems = computed(() => {
           };
         }
         itemMap[itemKey].quantity += item.quantity;
-        if (order.comments) {
-          itemMap[itemKey].comments.push({ text: order.comments, orderNumber: order.trackingId });
-        }
+        // Always push order info even if no comments exist
+        itemMap[itemKey].comments.push({
+          text: order.comments || '', // Use comments if present
+          orderNumber: order.trackingId,
+          orderType: order.orderType,
+        });
       }
     });
   });
@@ -721,12 +786,24 @@ const printBatchPrep = () => {
             ${groupedPrepItems.value
               .map(
                 (item) => `
-              <tr>
-                <td><strong>${item.name}</strong></td>
-                <td>${item.customizations.join(', ')}</td>
-                <td class="qty">${item.quantity}</td>
-                <td>${item.comments.map((c) => `#${c.orderNumber}: ${c.text}`).join('<br>')}</td>
-              </tr>
+               <tr>
+                 <td><strong>${item.name}</strong></td>
+                 <td>${item.customizations.join(', ')}</td>
+                 <td class="qty">${item.quantity}</td>
+                 <td>${item.comments
+                   .map(
+                     (c) => `
+                    <div style="margin-bottom: 2px;">
+                      <strong>#${c.orderNumber}</strong> 
+                      <small style="border: 1px solid #ccc; padding: 0 2px; border-radius: 2px; text-transform: uppercase;">
+                        ${c.orderType || ''}
+                      </small>
+                      ${c.text ? `: ${c.text}` : ''}
+                    </div>
+                 `
+                   )
+                   .join('')}</td>
+               </tr>
             `
               )
               .join('')}
@@ -765,29 +842,30 @@ const printDeliveryList = () => {
             <div class="area-head">AREA: ${pc} (${group.length} orders)</div>
             <table>
               <thead>
-                <tr>
-                  <th>Time</th><th>ID</th><th>Company</th><th>Customer</th><th>Phone</th><th>Address</th><th>Items</th>
-                </tr>
+                 <tr>
+                   <th>Time</th><th>Type</th><th>ID</th><th>Company</th><th>Customer</th><th>Phone</th><th>Address</th><th>Items</th>
+                 </tr>
               </thead>
               <tbody>
                 ${group
                   .map(
                     (order) => `
-                  <tr>
-                    <td>${formatTime(order.deliveryTime)}</td>
-                    <td>#${order.trackingId}</td>
-                    <td>${order.customer.company || '-'}</td>
-                    <td>${order.customer.name}</td>
-                    <td>${order.customer.phone}</td>
-                     <td>${order.customer.address.street}</td>
-                     <td>${order.items
-                       .map((i) => {
-                         const optsStr = formatOptionsStr(i.options);
-                         const opts = optsStr ? ` (${optsStr})` : '';
-                         return `${i.quantity}x ${i.name}${opts}`;
-                       })
-                       .join(', ')}</td>
-                  </tr>
+                   <tr>
+                     <td>${formatTime(order.deliveryTime)}</td>
+                     <td style="text-transform: uppercase; font-weight: bold; font-size: 10px;">${order.orderType || ''}</td>
+                     <td>#${order.trackingId}</td>
+                     <td>${order.customer.company || '-'}</td>
+                     <td>${order.customer.name}</td>
+                     <td>${order.customer.phone}</td>
+                      <td>${order.customer.address.street}</td>
+                      <td>${order.items
+                        .map((i) => {
+                          const optsStr = formatOptionsStr(i.options);
+                          const opts = optsStr ? ` (${optsStr})` : '';
+                          return `${i.quantity}x ${i.name}${opts}`;
+                        })
+                        .join(', ')}</td>
+                   </tr>
                 `
                   )
                   .join('')}
@@ -814,3 +892,5 @@ const closeOrderDetail = () => {
   selectedOrder.value = null;
 };
 </script>
+
+<style scoped></style>

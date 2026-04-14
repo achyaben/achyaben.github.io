@@ -50,6 +50,9 @@ export interface OrderItemOption {
   name: string;
   choice: string;
   price?: number;
+  sort_order?: number;
+  group_sort_order?: number;
+  group_required?: boolean;
 }
 
 export interface Customization {

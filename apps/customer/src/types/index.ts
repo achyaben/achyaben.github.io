@@ -9,6 +9,7 @@ export interface MenuItem {
   customizationGroups?: CustomizationGroup[];
   available: boolean;
   quantity?: number; // UI state for menu list
+  sort_order?: number;
 }
 
 export interface CustomizationGroup {
@@ -17,6 +18,7 @@ export interface CustomizationGroup {
   min_selection: number; // calculated from is_required
   max_selection: number;
   options: Customization[];
+  sort_order?: number;
 }
 
 export interface Customization {
@@ -25,6 +27,9 @@ export interface Customization {
   price: number;
   available: boolean;
   is_default?: boolean;
+  sort_order?: number;
+  group_sort_order?: number;
+  group_required?: boolean;
 }
 
 export interface CartItem {

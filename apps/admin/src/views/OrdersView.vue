@@ -177,7 +177,12 @@
                 </td>
               </tr>
               <!-- Group Orders -->
-              <tr v-for="order in group" :key="order.id" class="hover:bg-gray-50 border-b text-sm">
+              <tr
+                v-for="order in group"
+                :key="order.id"
+                @click="selectOrder(order)"
+                class="hover:bg-gray-100 cursor-pointer border-b text-sm transition-colors"
+              >
                 <td class="px-4 py-3 font-medium text-gray-700">
                   {{ formatTime(order.deliveryTime) }}
                 </td>
@@ -197,14 +202,14 @@
                       v-if="item.options && item.options.length"
                       class="text-xs text-gray-500 pl-4"
                     >
-                      {{ item.options.map((o) => o.name).join(', ') }}
+                      {{ formatOptionsStr(item.options) }}
                     </div>
                   </div>
                 </td>
                 <td class="px-4 py-3 text-right font-bold text-gray-900">
                   ¥{{ order.total.toFixed(0) }}
                 </td>
-                <td class="px-4 py-3 text-center">
+                <td class="px-4 py-3 text-center" @click.stop>
                   <select
                     v-model="order.status"
                     @change="manualStatusUpdate(order)"
@@ -296,96 +301,90 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
 
-        <!-- Full-Screen Modal for Order Details -->
-        <div
-          v-if="selectedOrder"
-          class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 transition-all"
-          @click.self="closeOrderDetail"
+    <!-- Full-Screen Modal for Order Details (Global) -->
+    <div
+      v-if="selectedOrder"
+      class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[100] p-4 transition-all"
+      @click.self="closeOrderDetail"
+    >
+      <div
+        class="bg-white w-full max-w-2xl p-8 rounded-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto"
+      >
+        <button
+          @click="closeOrderDetail"
+          class="absolute top-6 right-6 text-gray-400 hover:text-gray-600"
         >
-          <div
-            class="bg-white w-full max-w-2xl p-8 rounded-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto"
+          <XMarkIcon class="h-6 w-6" />
+        </button>
+
+        <div class="flex items-center gap-3 mb-6">
+          <h2 class="text-3xl font-black">#{{ selectedOrder.trackingId }}</h2>
+          <span
+            :class="
+              getStatusColor(selectedOrder.status) +
+              ' px-3 py-1 rounded-full text-xs font-black uppercase'
+            "
+            >{{ selectedOrder.status }}</span
           >
-            <button
-              @click="closeOrderDetail"
-              class="absolute top-6 right-6 text-gray-400 hover:text-gray-600"
-            >
-              <XMarkIcon class="h-6 w-6" />
-            </button>
+        </div>
 
-            <div class="flex items-center gap-3 mb-6">
-              <h2 class="text-3xl font-black">#{{ selectedOrder.trackingId }}</h2>
-              <span
-                :class="
-                  getStatusColor(selectedOrder.status) +
-                  ' px-3 py-1 rounded-full text-xs font-black uppercase'
-                "
-                >{{ selectedOrder.status }}</span
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          <div class="space-y-4">
+            <div class="p-4 bg-gray-50 rounded-xl">
+              <p class="text-[10px] font-black text-gray-400 uppercase mb-2">Customer</p>
+              <p class="font-black text-lg">{{ selectedOrder.customer.name }}</p>
+              <p class="text-sm text-gray-600">{{ selectedOrder.customer.phone }}</p>
+              <p
+                v-if="selectedOrder.customer.company"
+                class="mt-2 text-xs italic text-blue-500 font-bold"
               >
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-              <div class="space-y-4">
-                <div class="p-4 bg-gray-50 rounded-xl">
-                  <p class="text-[10px] font-black text-gray-400 uppercase mb-2">Customer</p>
-                  <p class="font-black text-lg">{{ selectedOrder.customer.name }}</p>
-                  <p class="text-sm text-gray-600">{{ selectedOrder.customer.phone }}</p>
-                  <p
-                    v-if="selectedOrder.customer.company"
-                    class="mt-2 text-xs italic text-blue-500 font-bold"
-                  >
-                    {{ selectedOrder.customer.company }}
-                  </p>
-                </div>
-              </div>
-              <div class="space-y-4">
-                <div class="p-4 bg-gray-50 rounded-xl">
-                  <p class="text-[10px] font-black text-gray-400 uppercase mb-2">
-                    Delivery Address
-                  </p>
-                  <p class="text-sm font-bold">[{{ selectedOrder.customer.address.postalCode }}]</p>
-                  <p class="text-sm">{{ selectedOrder.customer.address.street }}</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="mb-8">
-              <p class="text-[10px] font-black text-gray-400 uppercase mb-4">Items Summary</p>
-              <table class="w-full text-left">
-                <thead class="text-xs text-gray-400 uppercase">
-                  <tr class="border-b">
-                    <th class="pb-2">Item</th>
-                    <th class="pb-2 text-center">Qty</th>
-                    <th class="pb-2 text-right">Price</th>
-                  </tr>
-                </thead>
-                <tbody class="text-sm">
-                  <tr
-                    v-for="item in selectedOrder.items"
-                    :key="item.id"
-                    class="border-b last:border-0"
-                  >
-                    <td class="py-3">
-                      <div class="font-bold">{{ item.name }}</div>
-                      <div
-                        v-if="item.options && item.options.length"
-                        class="text-xs text-gray-500 mt-1"
-                      >
-                        + {{ item.options.map((o) => o.name).join(', ') }}
-                      </div>
-                    </td>
-                    <td class="py-3 text-center align-top">x{{ item.quantity }}</td>
-                    <td class="py-3 text-right align-top">¥{{ item.price.toFixed(0) }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div class="flex justify-between items-center pt-6 border-t font-black text-2xl">
-              <span class="text-gray-400 uppercase text-xs">Total Order Value</span>
-              <span class="text-blue-600">¥{{ selectedOrder.total.toFixed(0) }}</span>
+                {{ selectedOrder.customer.company }}
+              </p>
             </div>
           </div>
+          <div class="space-y-4">
+            <div class="p-4 bg-gray-50 rounded-xl">
+              <p class="text-[10px] font-black text-gray-400 uppercase mb-2">Delivery Address</p>
+              <p class="text-sm font-bold">[{{ selectedOrder.customer.address.postalCode }}]</p>
+              <p class="text-sm">{{ selectedOrder.customer.address.street }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-8">
+          <p class="text-[10px] font-black text-gray-400 uppercase mb-4">Items Summary</p>
+          <table class="w-full text-left">
+            <thead class="text-xs text-gray-400 uppercase">
+              <tr class="border-b">
+                <th class="pb-2">Item</th>
+                <th class="pb-2 text-center">Qty</th>
+                <th class="pb-2 text-right">Price</th>
+              </tr>
+            </thead>
+            <tbody class="text-sm">
+              <tr v-for="item in selectedOrder.items" :key="item.id" class="border-b last:border-0">
+                <td class="py-3">
+                  <div class="font-bold">{{ item.name }}</div>
+                  <div
+                    v-if="item.options && item.options.length"
+                    class="text-xs text-gray-500 mt-1"
+                  >
+                    + {{ formatOptionsStr(item.options) }}
+                  </div>
+                </td>
+                <td class="py-3 text-center align-top">x{{ item.quantity }}</td>
+                <td class="py-3 text-right align-top">¥{{ item.price.toFixed(0) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="flex justify-between items-center pt-6 border-t font-black text-2xl">
+          <span class="text-gray-400 uppercase text-xs">Total Order Value</span>
+          <span class="text-blue-600">¥{{ selectedOrder.total.toFixed(0) }}</span>
         </div>
       </div>
     </div>
@@ -394,7 +393,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import type { Order, OrderItem } from '../types/types';
+import type { Order, OrderItem, OrderItemOption } from '../types/types';
 import { ordersApi } from '../api/orders';
 import {
   ArrowLeftIcon,
@@ -436,6 +435,61 @@ const getLocalDateString = (date: Date) => {
   return `${year}-${month}-${day}`;
 };
 
+const formatOptionsList = (options?: OrderItemOption[]) => {
+  if (!options || !options.length) return [];
+  const counts: Record<
+    string,
+    {
+      qty: number;
+      unitPrice: number;
+      sort_order: number;
+      group_sort_order: number;
+      group_required: boolean;
+    }
+  > = {};
+  options.forEach((opt) => {
+    const name = opt.choice || opt.name;
+    if (name) {
+      if (!counts[name])
+        counts[name] = {
+          qty: 0,
+          unitPrice: opt.price || 0,
+          sort_order: opt.sort_order || 0,
+          group_sort_order: opt.group_sort_order || 0,
+          group_required: opt.group_required || false,
+        };
+      counts[name].qty += 1;
+      if (opt.price) counts[name].unitPrice = opt.price;
+    }
+  });
+  return Object.entries(counts)
+    .sort(([nameA, aData], [nameB, bData]) => {
+      // 1. Group Sort Order
+      if (aData.group_sort_order !== bData.group_sort_order) {
+        return aData.group_sort_order - bData.group_sort_order;
+      }
+      // 2. Group Required (Tie-breaker for group)
+      if (aData.group_required !== bData.group_required) {
+        return aData.group_required ? -1 : 1;
+      }
+      // 3. Option Sort Order (Tie-breaker within group)
+      if (aData.sort_order !== bData.sort_order) {
+        return aData.sort_order - bData.sort_order;
+      }
+      // 4. Name (Final stability)
+      return (nameA || '').localeCompare(nameB || '');
+    })
+    .map(([name, data]) => {
+      let text = data.qty > 1 ? `${name} ×${data.qty}` : name;
+      if (data.unitPrice > 0) {
+        text += ` (+¥${data.unitPrice * data.qty})`;
+      }
+      return text;
+    });
+};
+
+const formatOptionsStr = (options?: any[]) => formatOptionsList(options).join(', ');
+
 const selectedDateDisplay = computed(() => {
   const today = new Date();
   if (selectedDateFilter.value === 'today') return getLocalDateString(today);
@@ -444,8 +498,7 @@ const selectedDateDisplay = computed(() => {
     tomorrow.setDate(today.getDate() + 1);
     return getLocalDateString(tomorrow);
   }
-  if (selectedDateFilter.value === 'specific' && specificDate.value)
-    return specificDate.value; // Already YYYY-MM-DD from input[type=date]
+  if (selectedDateFilter.value === 'specific' && specificDate.value) return specificDate.value; // Already YYYY-MM-DD from input[type=date]
   return '--';
 });
 
@@ -509,7 +562,7 @@ const groupedPrepItems = computed(() => {
   filteredDailyOrders.value.forEach((order: Order) => {
     order.items.forEach((item: OrderItem) => {
       const itemName = item.name;
-      const itemOptions = item.options?.map((o: any) => o.choice || o.name) || [];
+      const itemOptions = formatOptionsList(item.options);
       const itemKey = `${itemName} - ${itemOptions.join(', ')}`;
 
       if (itemName) {
@@ -729,10 +782,8 @@ const printDeliveryList = () => {
                      <td>${order.customer.address.street}</td>
                      <td>${order.items
                        .map((i) => {
-                         const opts =
-                           i.options && i.options.length
-                             ? ` (${i.options.map((o) => o.name).join(', ')})`
-                             : '';
+                         const optsStr = formatOptionsStr(i.options);
+                         const opts = optsStr ? ` (${optsStr})` : '';
                          return `${i.quantity}x ${i.name}${opts}`;
                        })
                        .join(', ')}</td>

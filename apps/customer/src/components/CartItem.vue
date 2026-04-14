@@ -14,15 +14,24 @@
           <div>
             <router-link
               :to="`/item/${cartItem.item.id}`"
-              class="font-medium hover:text-primary transition-colors"
+              class="font-medium hover:text-primary transition-colors pr-1"
             >
               {{ cartItem.item.name }}
             </router-link>
+            <span
+              v-if="cartItem.customizations?.length"
+              class="text-xs font-medium text-gray-400 whitespace-nowrap"
+            >
+              (¥{{ cartItem.item.price }})
+            </span>
             <div v-if="cartItem.customizations?.length" class="text-sm text-gray-600 mt-1">
-              <div v-for="customId in cartItem.customizations" :key="customId">
-                {{ getCustomizationName(customId) }}
-                <span class="text-gray-500" v-if="getCustomizationPrice(customId)">
-                  (+¥{{ getCustomizationPrice(customId) }})
+              <div v-for="custom in groupedCustomizations" :key="custom.id">
+                {{ custom.name }}
+                <span class="font-medium text-gray-800" v-if="custom.quantity > 1"
+                  >×{{ custom.quantity }}</span
+                >
+                <span class="text-gray-500" v-if="custom.totalPrice">
+                  (+¥{{ custom.totalPrice }})
                 </span>
               </div>
             </div>
@@ -64,6 +73,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useCart } from '../stores/cart';
 import { getImageUrl } from '../utils/image';
 import type { MenuItem } from '../types';
@@ -81,13 +91,46 @@ const props = defineProps<{
 
 const { updateQuantity, removeFromCart } = useCart();
 
-function getCustomizationName(customId: string): string {
-  return props.cartItem.item.customizations?.find((c) => c.id === customId)?.name || '';
-}
+const groupedCustomizations = computed(() => {
+  const counts: Record<string, number> = {};
+  if (!props.cartItem.customizations) return [];
 
-function getCustomizationPrice(customId: string): number | undefined {
-  return props.cartItem.item.customizations?.find((c) => c.id === customId)?.price;
-}
+  props.cartItem.customizations.forEach((id) => {
+    counts[id] = (counts[id] || 0) + 1;
+  });
+
+  return Object.entries(counts)
+    .map(([id, quantity]) => {
+      const customization = props.cartItem.item.customizations?.find((c: any) => c.id === id);
+      const price = customization?.price || 0;
+      return {
+        id,
+        quantity,
+        name: customization?.name || '',
+        unitPrice: price,
+        totalPrice: price ? price * quantity : undefined,
+        sort_order: customization?.sort_order || 0,
+        group_sort_order: customization?.group_sort_order || 0,
+        group_required: customization?.group_required || false,
+      };
+    })
+    .sort((a, b) => {
+      // 1. Group Sort Order
+      if (a.group_sort_order !== b.group_sort_order) {
+        return a.group_sort_order - b.group_sort_order;
+      }
+      // 2. Group Required (Tie-breaker for group)
+      if (a.group_required !== b.group_required) {
+        return a.group_required ? -1 : 1;
+      }
+      // 3. Option Sort Order (Tie-breaker within group)
+      if (a.sort_order !== b.sort_order) {
+        return a.sort_order - b.sort_order;
+      }
+      // 4. Name (Final stability)
+      return (a.name || '').localeCompare(b.name || '');
+    });
+});
 
 function incrementQuantity() {
   updateQuantity(

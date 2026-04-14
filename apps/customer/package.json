@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
     "lint": "yarn run -T eslint . --ext .ts,.js,.vue",
     "format": "yarn run -T prettier --write ."

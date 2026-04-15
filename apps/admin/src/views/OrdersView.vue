@@ -515,6 +515,7 @@ import { ordersApi } from '../api/orders';
 import { PrinterIcon, XMarkIcon, MapPinIcon } from '@heroicons/vue/24/solid';
 import { UI_TEXTS } from '../constants/ui-texts';
 import { settingsApi } from '../api/settings';
+import { formatTime, formatOrderedAt } from '../utils/date';
 import { onUnmounted } from 'vue';
 
 const activeTab = ref<keyof typeof UI_TEXTS.orders.tabs>('singleOrders');
@@ -763,27 +764,6 @@ const filteredStatuses = computed(() => {
   // Default for singleOrders and deliveryList
   return STATUS_FLOW.filter((s) => !['delivering', 'completed'].includes(s));
 });
-
-const formatTime = (isoString?: string) => {
-  if (!isoString) return '--:--';
-  const date = new Date(isoString);
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-};
-
-// Shows HH:MM for today, M/D HH:MM for any other day
-const formatOrderedAt = (isoString?: string) => {
-  if (!isoString) return '--';
-  const date = new Date(isoString);
-  const today = new Date();
-  const isToday =
-    date.getFullYear() === today.getFullYear() &&
-    date.getMonth() === today.getMonth() &&
-    date.getDate() === today.getDate();
-  if (isToday) {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-  }
-  return `${date.getMonth() + 1}/${date.getDate()} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}`;
-};
 
 const canUpdateStatus = (order: Order) => {
   return STATUS_FLOW.indexOf(order.status) < STATUS_FLOW.length - 1;

@@ -114,6 +114,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { ordersApi } from '../data/api/orders';
+import { formatDate } from '../utils/date';
 import type { Order } from '../types';
 
 const orders = ref<Order[]>([]);
@@ -143,14 +144,4 @@ const sortedOrders = computed(() => {
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 });
-
-function formatDate(date: string | Date) {
-  const d = new Date(date);
-  return new Intl.DateTimeFormat('ja-JP', {
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(d);
-}
 </script>

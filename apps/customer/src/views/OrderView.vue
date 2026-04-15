@@ -403,19 +403,7 @@ const isReordering = ref(false);
 const isLoading = ref(true);
 
 import { getImageUrl } from '../utils/image';
-
-// Format date for display
-function formatDate(date: string | Date) {
-  const d = new Date(date);
-  return new Intl.DateTimeFormat('ja-JP', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    weekday: 'short',
-  }).format(d);
-}
+import { formatDate, formatDateLong } from '../utils/date';
 
 // Helper to look up full menu item (including image)
 function getMenuItem(id: string) {
@@ -605,17 +593,7 @@ function printReceipt() {
 }
 
 // Add date format for printing
-function formatDateForPrint(date: string | Date) {
-  const d = new Date(date);
-  return new Intl.DateTimeFormat('ja-JP', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    weekday: 'short',
-  }).format(d);
-}
+const formatDateForPrint = formatDateLong;
 
 // Add print styles
 const style = document.createElement('style');

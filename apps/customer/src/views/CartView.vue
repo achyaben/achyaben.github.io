@@ -645,6 +645,7 @@ import { STORAGE_KEYS } from '../constants';
 import { ordersApi } from '../data/api/orders';
 import { useCart } from '../stores/cart';
 import { useRestaurantStore } from '../stores/restaurant';
+import { toJSTDateString, toJSTTimeString } from '../utils/date';
 import { supabase } from '@app/supabase';
 import type { Order, OrderStatus, PaymentStatus, PaymentMethod } from '../types';
 
@@ -806,15 +807,9 @@ onMounted(async () => {
     dDate.setHours(0, 0, 0, 0); // compare dates only
 
     if (dDate >= min && dDate <= max) {
-      orderForm.value.deliveryDate = deliveryTime.toISOString().slice(0, 10);
-      const hours = deliveryTime.getHours().toString().padStart(2, '0');
-      const mins = deliveryTime.getMinutes().toString().padStart(2, '0');
-      // We might want to check if this slot is in availableTimeSlots,
-      // but availableTimeSlots depends on deliveryDate being set.
-      // Since the watcher is deep, setting deliveryDate triggers validateForm?
-      // But availableTimeSlots is computed.
-      // Let's set it, and let the UI validate it.
-      orderForm.value.deliveryTimeSlot = `${hours}:${mins}`;
+      orderForm.value.deliveryDate = toJSTDateString(deliveryTime);
+      const hours = toJSTTimeString(deliveryTime);
+      orderForm.value.deliveryTimeSlot = hours;
     }
     // Remove the saved pickup time
     localStorage.removeItem(STORAGE_KEYS.REORDER_PICKUP_TIME);
@@ -872,26 +867,26 @@ const isDateValid = (d: Date) => {
 
 const minDeliveryTime = computed(() => {
   const now = new Date();
-  now.setMinutes(now.getMinutes() + (restaurantInfo.value?.hours.minAdvanceTime || 30));
+  now.setMinutes(now.getMinutes() + (restaurantInfo.value?.hours.minAdvanceTime ?? 30));
 
   // If after closing time (or order deadline), set to next business day
-  const closingHour = restaurantInfo.value?.hours.orderDeadline || 20;
+  const closingHour = restaurantInfo.value?.hours.orderDeadline ?? 20;
 
   if (now.getHours() >= closingHour) {
     do {
       now.setDate(now.getDate() + 1);
     } while (!isDateValid(now));
-    now.setHours(restaurantInfo.value?.hours.open || 10, 0, 0, 0);
-  } else if (now.getHours() < (restaurantInfo.value?.hours.open || 10)) {
+    now.setHours(restaurantInfo.value?.hours.open ?? 10, 0, 0, 0);
+  } else if (now.getHours() < (restaurantInfo.value?.hours.open ?? 10)) {
     // If before opening time, set to today's open time
-    now.setHours(restaurantInfo.value?.hours.open || 10, 0, 0, 0);
+    now.setHours(restaurantInfo.value?.hours.open ?? 10, 0, 0, 0);
   }
 
   // If current day is not a business day, find next business day
   let safetyCounter = 0;
   while (!isDateValid(now) && safetyCounter < 365) {
     now.setDate(now.getDate() + 1);
-    now.setHours(restaurantInfo.value?.hours.open || 10, 0, 0, 0);
+    now.setHours(restaurantInfo.value?.hours.open ?? 10, 0, 0, 0);
     safetyCounter++;
   }
 
@@ -903,17 +898,17 @@ const maxDeliveryTime = computed(() => {
   let daysChecked = 0;
   let validDaysFound = 0;
 
-  while (validDaysFound < (restaurantInfo.value?.hours.maxAdvanceDays || 30) && daysChecked < 90) {
+  while (validDaysFound < (restaurantInfo.value?.hours.maxAdvanceDays ?? 30) && daysChecked < 90) {
     if (isDateValid(max)) {
       validDaysFound++;
     }
-    if (validDaysFound < (restaurantInfo.value?.hours.maxAdvanceDays || 30)) {
+    if (validDaysFound < (restaurantInfo.value?.hours.maxAdvanceDays ?? 30)) {
       max.setDate(max.getDate() + 1);
     }
     daysChecked++;
   }
 
-  max.setHours(restaurantInfo.value?.hours.orderDeadline || 20, 0, 0, 0);
+  max.setHours(restaurantInfo.value?.hours.orderDeadline ?? 20, 0, 0, 0);
   return toLocalISOString(max);
 });
 
@@ -939,11 +934,11 @@ const getTimeSlots = (type: 'pickup' | 'delivery', dateStr: string) => {
   const now = new Date();
 
   const minTime = new Date();
-  minTime.setMinutes(minTime.getMinutes() + (restaurantInfo.value.hours.minAdvanceTime || 30));
+  minTime.setMinutes(minTime.getMinutes() + (restaurantInfo.value.hours.minAdvanceTime ?? 30));
 
-  let startHour = restaurantInfo.value.hours.open || 10;
+  let startHour = restaurantInfo.value.hours.open ?? 10;
   let startMinute = 0;
-  let endHour = restaurantInfo.value.hours.orderDeadline || 20;
+  let endHour = restaurantInfo.value.hours.orderDeadline ?? 20;
   let endMinute = 0;
 
   if (type === 'delivery' && restaurantInfo.value.delivery_hours) {
@@ -959,8 +954,8 @@ const getTimeSlots = (type: 'pickup' | 'delivery', dateStr: string) => {
       endMinute = parseInt(parts[1] || '0');
     }
   } else {
-    startHour = restaurantInfo.value.hours.open || 10;
-    endHour = restaurantInfo.value.hours.orderDeadline || 20;
+    startHour = restaurantInfo.value.hours.open ?? 10;
+    endHour = restaurantInfo.value.hours.orderDeadline ?? 20;
   }
 
   let current = new Date(selectedDate);

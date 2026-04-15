@@ -88,7 +88,7 @@ const authStore = useAuthStore();
 const isMobile = ref(window.innerWidth <= 640);
 const isCollapsed = ref(false);
 const newOrderAlert = ref(null);
-const deliveryHours = ref(null);
+const businessHour = ref(null);
 
 // Audio
 const chime = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
@@ -113,25 +113,26 @@ const handleNavToggle = (collapsed) => {
 const fetchDeliveryHours = async () => {
   try {
     const settings = await settingsApi.getRestaurantInfo();
-    deliveryHours.value = settings.delivery_hours;
+    // settings.business_hour = { open: "11:00", close: "20:00", businessDays: [...], ... }
+    businessHour.value = settings.business_hour || null;
   } catch (err) {
-    console.error('Failed to fetch delivery hours:', err);
+    console.error('Failed to fetch business hours:', err);
   }
 };
 
-const isWithinDeliveryHours = () => {
-  if (!deliveryHours.value) return true; // Default to true if not set
+const isWithinBusinessHours = () => {
+  if (!businessHour.value) return true; // Default to allow chime if settings not loaded
 
   const now = new Date();
   const currentTime = now.getHours() * 60 + now.getMinutes();
 
-  const [startH, startM] = deliveryHours.value.start.split(':').map(Number);
-  const [endH, endM] = deliveryHours.value.end.split(':').map(Number);
+  const [openH, openM] = (businessHour.value.open || '11:00').split(':').map(Number);
+  const [closeH, closeM] = (businessHour.value.close || '20:00').split(':').map(Number);
 
-  const startTime = startH * 60 + startM;
-  const endTime = endH * 60 + endM;
+  const openTime = openH * 60 + openM;
+  const closeTime = closeH * 60 + closeM;
 
-  return currentTime >= startTime && currentTime <= endTime;
+  return currentTime >= openTime && currentTime <= closeTime;
 };
 
 // Realtime
@@ -146,30 +147,32 @@ const setupRealtimeNotification = () => {
       'postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'orders' },
       async (payload) => {
-        console.log('Global notification: New order received!', payload);
+        const withinHours = isWithinBusinessHours();
+        console.log(
+          `%c[Realtime] 🛎 New order #${payload.new.tracking_id} — chime ${withinHours ? '🔔 ON' : '🔇 suppressed (outside hours)'}`,
+          'color:#16a34a;font-weight:bold;'
+        );
 
-        // Show visual alert (Permanently until manual dismissal)
         newOrderAlert.value = { trackingId: payload.new.tracking_id };
 
-        // Play Chime ONLY if within delivery hours or if delivery hours aren't set
-        if (isWithinDeliveryHours()) {
+        if (withinHours) {
           try {
             chime.currentTime = 0;
             await chime.play();
           } catch (err) {
-            console.warn('Global audio blocked. Interaction needed.', err);
+            console.warn('[Realtime] Audio blocked — user interaction needed first.', err);
           }
-        } else {
-          console.log('New order arrived outside delivery hours. Chime suppressed.');
         }
 
-        // Notify other components (like OrdersView) to refresh
         window.dispatchEvent(new CustomEvent('new-order-notification', { detail: payload.new }));
-
-        // REMOVED auto-dismiss setTimeout as per user request
       }
     )
-    .subscribe();
+    .subscribe((status) => {
+      const icon = status === 'SUBSCRIBED' ? '✅' : status === 'CHANNEL_ERROR' ? '❌' : '⚠️';
+      const color =
+        status === 'SUBSCRIBED' ? '#16a34a' : status === 'CHANNEL_ERROR' ? '#dc2626' : '#f59e0b';
+      console.log(`%c[Realtime] ${icon} ${status}`, `color:${color};font-weight:bold;`);
+    });
 };
 
 onMounted(() => {
@@ -191,10 +194,12 @@ onUnmounted(() => {
 .fade-leave-active {
   transition: all 0.5s ease;
 }
+
 .fade-enter-from {
   opacity: 0;
   transform: translateX(30px);
 }
+
 .fade-leave-to {
   opacity: 0;
   transform: translateX(30px);

@@ -48,8 +48,16 @@
 
     <main v-if="item" class="container mx-auto px-4 py-6">
       <!-- Item Image -->
-      <div class="aspect-video rounded-xl overflow-hidden mb-6">
+      <div class="aspect-video rounded-xl overflow-hidden mb-6 relative">
         <img :src="getImageUrl(item.image)" :alt="item.name" class="w-full h-full object-cover" />
+        <div
+          v-if="!item.available"
+          class="absolute inset-0 bg-black/60 flex items-center justify-center"
+        >
+          <span class="text-white font-bold text-xl px-6 py-3 bg-red-500/90 rounded-xl"
+            >売り切れ</span
+          >
+        </div>
       </div>
 
       <!-- Description (moved from bottom) -->
@@ -202,8 +210,11 @@
             :disabled="!item.available || !isSelectionValid"
             class="w-full bg-primary text-white py-4 rounded-xl font-bold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary-dark transition-all duration-300 flex justify-center items-center gap-2"
           >
-            <span v-if="!isSelectionValid" class="text-sm font-normal">(選択が不完全です)</span>
-            {{ UI_TEXT.menu.item.addToCart }}
+            <span v-if="!item.available">売り切れ — カートに追加できません</span>
+            <template v-else>
+              <span v-if="!isSelectionValid" class="text-sm font-normal">(選択が不完全です)</span>
+              {{ UI_TEXT.menu.item.addToCart }}
+            </template>
           </button>
         </div>
       </div>

@@ -197,162 +197,243 @@
 
           <!-- Customer Information Section -->
           <div class="bg-white rounded-lg shadow-sm">
-            <div class="p-4 border-b">
-              <h2 class="text-lg font-bold">お客様情報</h2>
+            <div class="p-4 border-b flex items-center justify-between">
+              <h2 class="text-lg font-bold text-gray-800">お客様情報 (お届け先)</h2>
+              <button
+                v-if="isProfileComplete && !isEditingProfile"
+                type="button"
+                @click="isEditingProfile = true"
+                class="text-sm font-bold text-primary hover:text-primary-dark transition-colors flex items-center gap-1"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                  />
+                </svg>
+                変更する
+              </button>
             </div>
+
             <div class="p-4 space-y-4">
-              <!-- Name Fields -->
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >姓<span class="text-red-500">*</span></label
+              <!-- Profile Summary View -->
+              <div
+                v-if="isProfileComplete && !isEditingProfile"
+                class="bg-gray-50 rounded-xl p-4 border border-gray-100 divide-y divide-gray-200"
+              >
+                <div class="pb-3 flex justify-between">
+                  <span class="text-xs text-gray-400 font-bold uppercase">お名前</span>
+                  <span class="font-bold"
+                    >{{ orderForm.lastName }} {{ orderForm.firstName }} 様</span
                   >
-                  <input
-                    v-model="orderForm.lastName"
-                    type="text"
-                    required
-                    placeholder="山田"
-                    :class="[
-                      'w-full rounded-lg focus:ring-primary transition-colors',
-                      validationErrors.lastName
-                        ? 'border-red-300 focus:border-red-500 bg-red-50'
-                        : 'border-gray-300 focus:border-primary',
-                    ]"
-                    @input="saveCustomerInfo"
-                  />
-                  <p v-if="validationErrors.lastName" class="mt-1 text-sm text-red-500">
-                    {{ validationErrors.lastName }}
-                  </p>
                 </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >名<span class="text-red-500">*</span></label
-                  >
-                  <input
-                    v-model="orderForm.firstName"
-                    type="text"
-                    required
-                    placeholder="太郎"
-                    class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
-                    @input="saveCustomerInfo"
-                  />
-                  <p v-if="validationErrors.firstName" class="mt-1 text-sm text-red-500">
-                    {{ validationErrors.firstName }}
+                <div class="py-3 flex justify-between">
+                  <span class="text-xs text-gray-400 font-bold uppercase">電話番号</span>
+                  <span class="font-bold">{{ orderForm.companyContact }}</span>
+                </div>
+                <div class="pt-3">
+                  <span class="text-xs text-gray-400 font-bold uppercase block mb-1">お届け先</span>
+                  <p class="text-sm font-bold leading-relaxed">
+                    〒{{ orderForm.postalCode }}<br />
+                    {{ orderForm.addressLine }}
                   </p>
                 </div>
               </div>
 
-              <!-- Address Fields -->
-              <div class="space-y-3">
+              <!-- Full Form View -->
+              <div v-else class="space-y-4">
+                <!-- Name Fields -->
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >姓<span class="text-red-500">*</span></label
+                    >
+                    <input
+                      v-model="orderForm.lastName"
+                      type="text"
+                      required
+                      placeholder="山田"
+                      :class="[
+                        'w-full rounded-lg focus:ring-primary transition-colors',
+                        validationErrors.lastName
+                          ? 'border-red-300 focus:border-red-500 bg-red-50'
+                          : 'border-gray-300 focus:border-primary',
+                      ]"
+                      @input="saveCustomerInfo"
+                    />
+                    <p v-if="validationErrors.lastName" class="mt-1 text-sm text-red-500">
+                      {{ validationErrors.lastName }}
+                    </p>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >名<span class="text-red-500">*</span></label
+                    >
+                    <input
+                      v-model="orderForm.firstName"
+                      type="text"
+                      required
+                      placeholder="太郎"
+                      class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
+                      @input="saveCustomerInfo"
+                    />
+                    <p v-if="validationErrors.firstName" class="mt-1 text-sm text-red-500">
+                      {{ validationErrors.firstName }}
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Address Fields -->
+                <div class="space-y-3">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >郵便番号<span class="text-red-500">*</span></label
+                    >
+                    <input
+                      v-model="orderForm.postalCode"
+                      type="text"
+                      required
+                      placeholder="100-0005"
+                      pattern="^\d{3}-?\d{4}$"
+                      class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
+                      @input="saveCustomerInfo"
+                    />
+                    <p v-if="validationErrors.postalCode" class="mt-1 text-sm text-red-500">
+                      {{ validationErrors.postalCode }}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >お届け先住所
+                      <span class="text-xs font-normal text-gray-500">(お勤め先・配達先)</span
+                      ><span class="text-red-500">*</span></label
+                    >
+                    <textarea
+                      v-model="orderForm.addressLine"
+                      required
+                      rows="3"
+                      placeholder="江戸川区南葛西5-13-10 ヤキベンビル 3F 会議室"
+                      class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
+                      @input="saveCustomerInfo"
+                    ></textarea>
+                    <p v-if="validationErrors.addressLine" class="mt-1 text-sm text-red-500">
+                      {{ validationErrors.addressLine }}
+                    </p>
+                  </div>
+                </div>
+
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >郵便番号<span class="text-red-500">*</span></label
+                    >電話番号<span class="text-red-500">*</span></label
                   >
                   <input
-                    v-model="orderForm.postalCode"
-                    type="text"
+                    v-model="orderForm.companyContact"
+                    type="tel"
                     required
-                    placeholder="100-0005"
-                    pattern="^\d{3}-?\d{4}$"
+                    pattern="^[0-9]{10,11}$"
+                    title="10桁または11桁の電話番号を入力してください"
+                    placeholder="個人の携帯または会社の番号 (ハイフンなし)"
                     class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
                     @input="saveCustomerInfo"
                   />
-                  <p v-if="validationErrors.postalCode" class="mt-1 text-sm text-red-500">
-                    {{ validationErrors.postalCode }}
+                  <p v-if="validationErrors.companyContact" class="mt-1 text-sm text-red-500">
+                    {{ validationErrors.companyContact }}
+                  </p>
+                </div>
+
+                <div v-if="isEditingProfile" class="pt-2 flex justify-end">
+                  <button
+                    type="button"
+                    @click="isEditingProfile = false"
+                    class="bg-primary text-white px-6 py-2 rounded-lg font-bold text-sm hover:bg-primary-dark shadow-sm transition-all"
+                  >
+                    入力を完了する
+                  </button>
+                </div>
+              </div>
+
+              <!-- Fulfillment Section (Always Visible) -->
+              <div class="pt-4 border-t border-gray-100 space-y-4">
+                <h3 class="font-bold text-gray-700 flex items-center gap-2">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4 text-primary"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  受け取り希望日時
+                </h3>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >受け取り日<span class="text-red-500">*</span></label
+                  >
+                  <input
+                    v-model="orderForm.deliveryDate"
+                    type="date"
+                    required
+                    :min="minDate"
+                    :max="maxDate"
+                    class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
+                    @change="onDateChange"
+                  />
+                  <p v-if="validationErrors.deliveryDate" class="mt-1 text-sm text-red-500">
+                    {{ validationErrors.deliveryDate }}
                   </p>
                 </div>
 
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >お届け先住所
-                    <span class="text-xs font-normal text-gray-500">(お勤め先・配達先)</span
-                    ><span class="text-red-500">*</span></label
+                    >受け取り時間<span class="text-red-500">*</span></label
                   >
+                  <select
+                    v-model="orderForm.deliveryTimeSlot"
+                    required
+                    class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
+                    :disabled="!orderForm.deliveryDate || !availableTimeSlots.length"
+                  >
+                    <option value="" disabled>時間を選択してください</option>
+                    <option v-for="time in availableTimeSlots" :key="time" :value="time">
+                      {{ time }}
+                    </option>
+                  </select>
+                  <p v-if="validationErrors.deliveryTimeSlot" class="mt-1 text-sm text-red-500">
+                    {{ validationErrors.deliveryTimeSlot }}
+                  </p>
+                  <p
+                    v-if="orderForm.deliveryDate && !availableTimeSlots.length"
+                    class="mt-1 text-sm text-red-500"
+                  >
+                    選択された日は予約可能な時間がありません
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">備考</label>
                   <textarea
-                    v-model="orderForm.addressLine"
-                    required
-                    rows="3"
-                    placeholder="江戸川区南葛西5-13-10 ヤキベンビル 3F 会議室"
+                    v-model="orderForm.notes"
+                    rows="2"
+                    placeholder="アレルギーなどの注意事項があればご記入ください"
                     class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
-                    @input="saveCustomerInfo"
                   ></textarea>
-                  <p v-if="validationErrors.addressLine" class="mt-1 text-sm text-red-500">
-                    {{ validationErrors.addressLine }}
-                  </p>
                 </div>
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1"
-                  >電話番号<span class="text-red-500">*</span></label
-                >
-                <input
-                  v-model="orderForm.companyContact"
-                  type="tel"
-                  required
-                  pattern="^[0-9]{10,11}$"
-                  title="10桁または11桁の電話番号を入力してください"
-                  placeholder="個人の携帯または会社の番号 (ハイフンなし)"
-                  class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
-                  @input="saveCustomerInfo"
-                />
-                <p v-if="validationErrors.companyContact" class="mt-1 text-sm text-red-500">
-                  {{ validationErrors.companyContact }}
-                </p>
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1"
-                  >受け取り日<span class="text-red-500">*</span></label
-                >
-                <input
-                  v-model="orderForm.deliveryDate"
-                  type="date"
-                  required
-                  :min="minDate"
-                  :max="maxDate"
-                  class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
-                  @change="onDateChange"
-                />
-                <p v-if="validationErrors.deliveryDate" class="mt-1 text-sm text-red-500">
-                  {{ validationErrors.deliveryDate }}
-                </p>
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1"
-                  >受け取り時間<span class="text-red-500">*</span></label
-                >
-                <select
-                  v-model="orderForm.deliveryTimeSlot"
-                  required
-                  class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
-                  :disabled="!orderForm.deliveryDate || !availableTimeSlots.length"
-                >
-                  <option value="" disabled>時間を選択してください</option>
-                  <option v-for="time in availableTimeSlots" :key="time" :value="time">
-                    {{ time }}
-                  </option>
-                </select>
-                <p v-if="validationErrors.deliveryTimeSlot" class="mt-1 text-sm text-red-500">
-                  {{ validationErrors.deliveryTimeSlot }}
-                </p>
-                <p
-                  v-if="orderForm.deliveryDate && !availableTimeSlots.length"
-                  class="mt-1 text-sm text-red-500"
-                >
-                  選択された日は予約可能な時間がありません
-                </p>
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">備考</label>
-                <textarea
-                  v-model="orderForm.notes"
-                  rows="2"
-                  placeholder="アレルギーなどの注意事項があればご記入ください"
-                  class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
-                ></textarea>
               </div>
             </div>
           </div>
@@ -572,6 +653,17 @@ const { cartItems, cartTotal, clearCart } = useCart();
 const { info: restaurantInfo, fetchInfo, isLoading } = useRestaurantStore();
 const showHelp = ref(false);
 const isSubmitting = ref(false); // Add loading state
+const isEditingProfile = ref(false);
+
+const isProfileComplete = computed(() => {
+  return !!(
+    orderForm.value.lastName &&
+    orderForm.value.firstName &&
+    orderForm.value.postalCode &&
+    orderForm.value.addressLine &&
+    orderForm.value.companyContact
+  );
+});
 
 const MIN_ORDER_PRICE = 650;
 const isMinPriceMet = computed(() => cartTotal.value >= MIN_ORDER_PRICE);

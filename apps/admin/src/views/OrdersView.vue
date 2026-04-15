@@ -107,18 +107,12 @@
                 :key="idx"
                 class="mb-1 leading-tight flex items-center flex-wrap gap-1"
               >
-                <span class="text-blue-600 font-bold">#{{ comment.orderNumber }}</span>
-                <span
-                  v-if="comment.orderType"
-                  class="px-1 rounded text-[10px] font-black uppercase border"
-                  :class="
-                    comment.orderType === 'pickup'
-                      ? 'bg-blue-50 text-blue-700 border-blue-200'
-                      : 'bg-green-50 text-green-700 border-green-200'
-                  "
+                <a
+                  href="#"
+                  class="text-blue-600 font-bold underline"
+                  @click.prevent="selectOrderByNumber(comment.orderNumber)"
+                  >#{{ comment.orderNumber }}</a
                 >
-                  {{ comment.orderType === 'pickup' ? 'PICKUP' : 'DELIVERY' }}
-                </span>
                 <span v-if="comment.text" class="text-gray-700">: {{ comment.text }}</span>
               </div>
             </td>
@@ -138,7 +132,15 @@
         <h2 class="text-xl font-bold">
           {{ UI_TEXTS.orders.deliveryList.title }} - {{ selectedDateDisplay }}
         </h2>
-        <div class="flex gap-2">
+        <div class="flex gap-2 items-center">
+          <label class="flex items-center space-x-1 bg-white px-2 py-1 rounded border shadow-sm">
+            <input
+              type="checkbox"
+              v-model="showDeliveryCompleted"
+              class="form-checkbox text-blue-500"
+            />
+            <span class="text-xs">完了を表示</span>
+          </label>
           <button
             @click="batchUpdateStatus('delivering')"
             class="px-3 py-1 bg-yellow-500 text-white text-xs rounded hover:bg-yellow-600"
@@ -198,8 +200,11 @@
                 @click="selectOrder(order)"
                 class="hover:bg-gray-100 cursor-pointer border-b text-sm transition-colors"
               >
-                <td class="px-4 py-3 font-medium text-gray-700">
-                  {{ formatTime(order.deliveryTime) }}
+                <td class="px-4 py-3">
+                  <div class="font-medium text-gray-700">{{ formatTime(order.deliveryTime) }}</div>
+                  <div class="text-[10px] text-gray-400 mt-0.5">
+                    注文日時: {{ formatOrderedAt(order.createdAt) }}
+                  </div>
                 </td>
                 <td class="px-4 py-3">
                   <div class="flex items-center gap-2">
@@ -235,13 +240,27 @@
                   </div>
                 </td>
                 <td class="px-4 py-3 text-right font-bold text-gray-900">
-                  ¥{{ order.total.toFixed(0) }}
+                  <div>¥{{ order.total.toFixed(0) }}</div>
+                  <div class="mt-1">
+                    <span
+                      :class="
+                        order.paymentMethod === 'cash'
+                          ? 'bg-amber-100 text-amber-800'
+                          : order.paymentMethod === 'paypay'
+                            ? 'bg-pink-100 text-pink-800'
+                            : 'bg-indigo-100 text-indigo-800'
+                      "
+                      class="text-[10px] px-1.5 py-0.5 rounded font-black uppercase tracking-tight"
+                    >
+                      {{ order.paymentMethod }}
+                    </span>
+                  </div>
                 </td>
                 <td class="px-4 py-3 text-center" @click.stop>
                   <select
                     v-model="order.status"
                     @change="manualStatusUpdate(order)"
-                    class="text-xs border rounded p-1"
+                    class="text-xs border rounded py-1 pl-1 pr-6 w-full appearance-auto"
                     :class="getStatusBg(order.status)"
                   >
                     <option v-for="s in STATUS_FLOW" :key="s" :value="s">{{ s }}</option>
@@ -300,17 +319,31 @@
               <div class="flex justify-between items-start mb-2">
                 <div class="flex flex-col">
                   <div class="text-sm font-black">#{{ order.trackingId }}</div>
-                  <span
-                    v-if="order.orderType"
-                    :class="
-                      order.orderType === 'pickup'
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'bg-green-100 text-green-800'
-                    "
-                    class="text-[8px] px-1 py-0.5 rounded font-bold uppercase w-fit mt-1"
-                  >
-                    {{ order.orderType }}
-                  </span>
+                  <div class="flex flex-wrap gap-1 mt-1">
+                    <span
+                      v-if="order.orderType"
+                      :class="
+                        order.orderType === 'pickup'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-green-100 text-green-800'
+                      "
+                      class="text-[8px] px-1.5 py-0.5 rounded font-black uppercase tracking-tight"
+                    >
+                      {{ order.orderType }}
+                    </span>
+                    <span
+                      :class="
+                        order.paymentMethod === 'cash'
+                          ? 'bg-amber-100 text-amber-800'
+                          : order.paymentMethod === 'paypay'
+                            ? 'bg-pink-100 text-pink-800'
+                            : 'bg-indigo-100 text-indigo-800'
+                      "
+                      class="text-[8px] px-1.5 py-0.5 rounded font-black uppercase tracking-tight"
+                    >
+                      {{ order.paymentMethod }}
+                    </span>
+                  </div>
                 </div>
                 <div
                   class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 uppercase"
@@ -318,24 +351,47 @@
                   {{ formatTime(order.deliveryTime) }}
                 </div>
               </div>
-              <p class="text-xs italic text-gray-500 mb-1">{{ order.customer.company || '-' }}</p>
-              <p class="text-sm font-medium mb-2">{{ order.customer.name }}</p>
-              <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-50">
+              <p class="text-xs italic text-gray-500 mb-0.5">{{ order.customer.company || '-' }}</p>
+              <p class="text-sm font-medium mb-1">{{ order.customer.name }}</p>
+              <p class="text-[10px] text-gray-400">{{ timeUntilDelivery(order.deliveryTime) }}</p>
+              <div class="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
                 <span class="font-black text-blue-600">¥{{ order.total.toFixed(0) }}</span>
                 <div class="flex gap-1">
                   <button
                     v-if="order.status !== 'pending'"
                     @click.stop="updateOrderStatus(order, 'prev')"
-                    class="p-1 text-gray-400 hover:text-gray-600"
+                    :class="
+                      STATUS_FLOW.indexOf(order.status) === 1
+                        ? 'bg-orange-100 hover:bg-orange-200 text-orange-700 border-orange-300'
+                        : STATUS_FLOW.indexOf(order.status) === 2
+                          ? 'bg-blue-100 hover:bg-blue-200 text-blue-700 border-blue-300'
+                          : STATUS_FLOW.indexOf(order.status) === 3
+                            ? 'bg-purple-100 hover:bg-purple-200 text-purple-700 border-purple-300'
+                            : STATUS_FLOW.indexOf(order.status) === 4
+                              ? 'bg-green-100 hover:bg-green-200 text-green-700 border-green-300'
+                              : 'bg-yellow-100 hover:bg-yellow-200 text-yellow-700 border-yellow-300'
+                    "
+                    class="px-2 py-1 rounded text-xs font-black border"
                   >
-                    <ArrowLeftIcon class="h-4 w-4" />
+                    ← 戻す
                   </button>
                   <button
                     v-if="canUpdateStatus(order)"
                     @click.stop="updateOrderStatus(order)"
-                    class="p-1 text-blue-500 hover:text-blue-700"
+                    :class="
+                      STATUS_FLOW.indexOf(order.status) === 0
+                        ? 'bg-blue-500 hover:bg-blue-600'
+                        : STATUS_FLOW.indexOf(order.status) === 1
+                          ? 'bg-purple-500 hover:bg-purple-600'
+                          : STATUS_FLOW.indexOf(order.status) === 2
+                            ? 'bg-green-500 hover:bg-green-600'
+                            : STATUS_FLOW.indexOf(order.status) === 3
+                              ? 'bg-yellow-500 hover:bg-yellow-600'
+                              : 'bg-gray-500 hover:bg-gray-600'
+                    "
+                    class="px-2 py-1 rounded text-xs font-black text-white"
                   >
-                    <ArrowRightIcon class="h-4 w-4" />
+                    次へ →
                   </button>
                 </div>
               </div>
@@ -344,100 +400,109 @@
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Full-Screen Modal for Order Details (Global) -->
+  <!-- Full-Screen Modal for Order Details (Global) -->
+  <div
+    v-if="selectedOrder"
+    class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[100] p-4 transition-all"
+    @click.self="closeOrderDetail"
+  >
     <div
-      v-if="selectedOrder"
-      class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[100] p-4 transition-all"
-      @click.self="closeOrderDetail"
+      class="bg-white w-full max-w-2xl p-8 rounded-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto"
     >
-      <div
-        class="bg-white w-full max-w-2xl p-8 rounded-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto"
+      <button
+        @click="closeOrderDetail"
+        class="absolute top-6 right-6 text-gray-400 hover:text-gray-600"
       >
-        <button
-          @click="closeOrderDetail"
-          class="absolute top-6 right-6 text-gray-400 hover:text-gray-600"
+        <XMarkIcon class="h-6 w-6" />
+      </button>
+
+      <div class="flex items-center gap-3 mb-6">
+        <h2 class="text-3xl font-black">#{{ selectedOrder.trackingId }}</h2>
+        <span
+          v-if="selectedOrder.orderType"
+          :class="
+            selectedOrder.orderType === 'pickup'
+              ? 'bg-blue-100 text-blue-800'
+              : 'bg-green-100 text-green-800'
+          "
+          class="px-2 py-1 rounded text-xs font-black uppercase"
         >
-          <XMarkIcon class="h-6 w-6" />
-        </button>
+          {{ selectedOrder.orderType }}
+        </span>
+        <span
+          :class="
+            getStatusColor(selectedOrder.status) +
+            ' px-3 py-1 rounded-full text-xs font-black uppercase'
+          "
+          >{{ selectedOrder.status }}</span
+        >
+        <span
+          :class="
+            selectedOrder.paymentMethod === 'cash'
+              ? 'bg-amber-100 text-amber-800'
+              : selectedOrder.paymentMethod === 'paypay'
+                ? 'bg-pink-100 text-pink-800'
+                : 'bg-indigo-100 text-indigo-800'
+          "
+          class="px-3 py-1 rounded-full text-xs font-black uppercase"
+        >
+          {{ selectedOrder.paymentMethod }}
+        </span>
+      </div>
 
-        <div class="flex items-center gap-3 mb-6">
-          <h2 class="text-3xl font-black">#{{ selectedOrder.trackingId }}</h2>
-          <span
-            v-if="selectedOrder.orderType"
-            :class="
-              selectedOrder.orderType === 'pickup'
-                ? 'bg-blue-100 text-blue-800'
-                : 'bg-green-100 text-green-800'
-            "
-            class="px-2 py-1 rounded text-xs font-black uppercase"
-          >
-            {{ selectedOrder.orderType }}
-          </span>
-          <span
-            :class="
-              getStatusColor(selectedOrder.status) +
-              ' px-3 py-1 rounded-full text-xs font-black uppercase'
-            "
-            >{{ selectedOrder.status }}</span
-          >
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          <div class="space-y-4">
-            <div class="p-4 bg-gray-50 rounded-xl">
-              <p class="text-[10px] font-black text-gray-400 uppercase mb-2">Customer</p>
-              <p class="font-black text-lg">{{ selectedOrder.customer.name }}</p>
-              <p class="text-sm text-gray-600">{{ selectedOrder.customer.phone }}</p>
-              <p
-                v-if="selectedOrder.customer.company"
-                class="mt-2 text-xs italic text-blue-500 font-bold"
-              >
-                {{ selectedOrder.customer.company }}
-              </p>
-            </div>
-          </div>
-          <div class="space-y-4">
-            <div class="p-4 bg-gray-50 rounded-xl">
-              <p class="text-[10px] font-black text-gray-400 uppercase mb-2">Delivery Address</p>
-              <p class="text-sm font-bold">[{{ selectedOrder.customer.address.postalCode }}]</p>
-              <p class="text-sm">{{ selectedOrder.customer.address.street }}</p>
-            </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <div class="space-y-4">
+          <div class="p-4 bg-gray-50 rounded-xl">
+            <p class="text-[10px] font-black text-gray-400 uppercase mb-2">Customer</p>
+            <p class="font-black text-lg">{{ selectedOrder.customer.name }}</p>
+            <p class="text-sm text-gray-600">{{ selectedOrder.customer.phone }}</p>
+            <p
+              v-if="selectedOrder.customer.company"
+              class="mt-2 text-xs italic text-blue-500 font-bold"
+            >
+              {{ selectedOrder.customer.company }}
+            </p>
           </div>
         </div>
-
-        <div class="mb-8">
-          <p class="text-[10px] font-black text-gray-400 uppercase mb-4">Items Summary</p>
-          <table class="w-full text-left">
-            <thead class="text-xs text-gray-400 uppercase">
-              <tr class="border-b">
-                <th class="pb-2">Item</th>
-                <th class="pb-2 text-center">Qty</th>
-                <th class="pb-2 text-right">Price</th>
-              </tr>
-            </thead>
-            <tbody class="text-sm">
-              <tr v-for="item in selectedOrder.items" :key="item.id" class="border-b last:border-0">
-                <td class="py-3">
-                  <div class="font-bold">{{ item.name }}</div>
-                  <div
-                    v-if="item.options && item.options.length"
-                    class="text-xs text-gray-500 mt-1"
-                  >
-                    + {{ formatOptionsStr(item.options) }}
-                  </div>
-                </td>
-                <td class="py-3 text-center align-top">x{{ item.quantity }}</td>
-                <td class="py-3 text-right align-top">¥{{ item.price.toFixed(0) }}</td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="space-y-4">
+          <div class="p-4 bg-gray-50 rounded-xl">
+            <p class="text-[10px] font-black text-gray-400 uppercase mb-2">Delivery Address</p>
+            <p class="text-sm font-bold">[{{ selectedOrder.customer.address.postalCode }}]</p>
+            <p class="text-sm">{{ selectedOrder.customer.address.street }}</p>
+          </div>
         </div>
+      </div>
 
-        <div class="flex justify-between items-center pt-6 border-t font-black text-2xl">
-          <span class="text-gray-400 uppercase text-xs">Total Order Value</span>
-          <span class="text-blue-600">¥{{ selectedOrder.total.toFixed(0) }}</span>
-        </div>
+      <div class="mb-8">
+        <p class="text-[10px] font-black text-gray-400 uppercase mb-4">Items Summary</p>
+        <table class="w-full text-left">
+          <thead class="text-xs text-gray-400 uppercase">
+            <tr class="border-b">
+              <th class="pb-2">Item</th>
+              <th class="pb-2 text-center">Qty</th>
+              <th class="pb-2 text-right">Price</th>
+            </tr>
+          </thead>
+          <tbody class="text-sm">
+            <tr v-for="item in selectedOrder.items" :key="item.id" class="border-b last:border-0">
+              <td class="py-3">
+                <div class="font-bold">{{ item.name }}</div>
+                <div v-if="item.options && item.options.length" class="text-xs text-gray-500 mt-1">
+                  + {{ formatOptionsStr(item.options) }}
+                </div>
+              </td>
+              <td class="py-3 text-center align-top">x{{ item.quantity }}</td>
+              <td class="py-3 text-right align-top">¥{{ item.price.toFixed(0) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex justify-between items-center pt-6 border-t font-black text-2xl">
+        <span class="text-gray-400 uppercase text-xs">Total Order Value</span>
+        <span class="text-blue-600">¥{{ selectedOrder.total.toFixed(0) }}</span>
       </div>
     </div>
   </div>
@@ -447,21 +512,18 @@
 import { ref, computed, onMounted } from 'vue';
 import type { Order, OrderItem, OrderItemOption } from '../types/types';
 import { ordersApi } from '../api/orders';
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  PrinterIcon,
-  XMarkIcon,
-  MapPinIcon,
-} from '@heroicons/vue/24/solid';
+import { PrinterIcon, XMarkIcon, MapPinIcon } from '@heroicons/vue/24/solid';
 import { UI_TEXTS } from '../constants/ui-texts';
+import { settingsApi } from '../api/settings';
 import { onUnmounted } from 'vue';
 
-const activeTab = ref<keyof typeof UI_TEXTS.orders.tabs>('deliveryList');
+const activeTab = ref<keyof typeof UI_TEXTS.orders.tabs>('singleOrders');
+const restaurantAddress = ref('');
 const orders = ref<Order[]>([]);
 const STATUS_FLOW = ['pending', 'accepted', 'preparing', 'ready', 'delivering', 'completed'];
 const selectedOrder = ref<Order | null>(null);
 const hideDeliveredAndDelivering = ref(true);
+const showDeliveryCompleted = ref(false);
 
 // Filters
 const selectedDateFilter = ref('today');
@@ -476,6 +538,16 @@ const handleGlobalNewOrder = async () => {
 onMounted(async () => {
   await fetchOrders();
   window.addEventListener('new-order-notification', handleGlobalNewOrder);
+  try {
+    const info = await settingsApi.getRestaurantInfo();
+    const addr = info.restaurant_address;
+    if (addr) {
+      restaurantAddress.value =
+        typeof addr === 'string'
+          ? addr
+          : [addr.line1, addr.city, addr.prefecture, addr.postal].filter(Boolean).join(' ');
+    }
+  } catch {}
 });
 
 onUnmounted(() => {
@@ -550,7 +622,7 @@ const formatOptionsList = (options?: OrderItemOption[]) => {
     });
 };
 
-const formatOptionsStr = (options?: any[]) => formatOptionsList(options).join(', ');
+const formatOptionsStr = (options?: OrderItemOption[]) => formatOptionsList(options).join(', ');
 
 const selectedDateDisplay = computed(() => {
   const today = new Date();
@@ -602,11 +674,13 @@ const filteredDailyOrders = computed(() => {
 
 const ordersByPostalCode = computed(() => {
   const groups: Record<string, Order[]> = {};
-  filteredDailyOrders.value.forEach((order) => {
-    const pc = order.customer.address.postalCode || 'Other';
-    if (!groups[pc]) groups[pc] = [];
-    groups[pc].push(order);
-  });
+  filteredDailyOrders.value
+    .filter((order) => showDeliveryCompleted.value || order.status !== 'completed')
+    .forEach((order) => {
+      const pc = order.customer.address.postalCode || 'Other';
+      if (!groups[pc]) groups[pc] = [];
+      groups[pc].push(order);
+    });
   return groups;
 });
 
@@ -621,31 +695,33 @@ const groupedPrepItems = computed(() => {
     }
   > = {};
 
-  filteredDailyOrders.value.forEach((order: Order) => {
-    order.items.forEach((item: OrderItem) => {
-      const itemName = item.name;
-      const itemOptions = formatOptionsList(item.options);
-      const itemKey = `${itemName} - ${itemOptions.join(', ')}`;
+  filteredDailyOrders.value
+    .filter((order: Order) => order.status === 'preparing')
+    .forEach((order: Order) => {
+      order.items.forEach((item: OrderItem) => {
+        const itemName = item.name;
+        const itemOptions = formatOptionsList(item.options);
+        const itemKey = `${itemName} - ${itemOptions.join(', ')}`;
 
-      if (itemName) {
-        if (!itemMap[itemKey]) {
-          itemMap[itemKey] = {
-            name: itemName,
-            customizations: itemOptions,
-            quantity: 0,
-            comments: [],
-          };
+        if (itemName) {
+          if (!itemMap[itemKey]) {
+            itemMap[itemKey] = {
+              name: itemName,
+              customizations: itemOptions,
+              quantity: 0,
+              comments: [],
+            };
+          }
+          itemMap[itemKey].quantity += item.quantity;
+          // Always push order info even if no comments exist
+          itemMap[itemKey].comments.push({
+            text: order.comments || '', // Use comments if present
+            orderNumber: order.trackingId,
+            orderType: order.orderType,
+          });
         }
-        itemMap[itemKey].quantity += item.quantity;
-        // Always push order info even if no comments exist
-        itemMap[itemKey].comments.push({
-          text: order.comments || '', // Use comments if present
-          orderNumber: order.trackingId,
-          orderType: order.orderType,
-        });
-      }
+      });
     });
-  });
 
   return Object.values(itemMap);
 });
@@ -655,10 +731,20 @@ const filteredOrdersByStatus = computed(() => {
     (acc: Record<string, Order[]>, status: string) => {
       acc[status] = filteredDailyOrders.value.filter((order: Order) => {
         const matchesStatus = order.status === status;
-        const isVisible = !(
-          hideDeliveredAndDelivering.value &&
-          (order.status === 'completed' || order.status === 'delivering')
-        );
+
+        // Smart Filtering Logic per Tab
+        let isVisible = true;
+        if (activeTab.value === 'kitchenPrep') {
+          // Only show 'preparing' orders in kitchen tab
+          isVisible = order.status === 'preparing';
+        } else if (activeTab.value === 'deliveryList') {
+          // Delivery tab hides completed
+          isVisible = order.status !== 'completed';
+        } else if (hideDeliveredAndDelivering.value) {
+          // General view hides delivering and completed
+          isVisible = !['delivering', 'completed'].includes(order.status);
+        }
+
         return matchesStatus && isVisible;
       });
       return acc;
@@ -668,15 +754,35 @@ const filteredOrdersByStatus = computed(() => {
 });
 
 const filteredStatuses = computed(() => {
-  return hideDeliveredAndDelivering.value
-    ? STATUS_FLOW.filter((status: string) => !['completed', 'delivering'].includes(status))
-    : STATUS_FLOW;
+  if (!hideDeliveredAndDelivering.value) return STATUS_FLOW;
+
+  if (activeTab.value === 'kitchenPrep') {
+    return STATUS_FLOW.filter((s) => !['ready', 'delivering', 'completed'].includes(s));
+  }
+
+  // Default for singleOrders and deliveryList
+  return STATUS_FLOW.filter((s) => !['delivering', 'completed'].includes(s));
 });
 
 const formatTime = (isoString?: string) => {
   if (!isoString) return '--:--';
   const date = new Date(isoString);
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+};
+
+// Shows HH:MM for today, M/D HH:MM for any other day
+const formatOrderedAt = (isoString?: string) => {
+  if (!isoString) return '--';
+  const date = new Date(isoString);
+  const today = new Date();
+  const isToday =
+    date.getFullYear() === today.getFullYear() &&
+    date.getMonth() === today.getMonth() &&
+    date.getDate() === today.getDate();
+  if (isToday) {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+  }
+  return `${date.getMonth() + 1}/${date.getDate()} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}`;
 };
 
 const canUpdateStatus = (order: Order) => {
@@ -710,18 +816,21 @@ const updateOrderStatus = async (order: Order, direction: 'next' | 'prev' = 'nex
 };
 
 const batchUpdateStatus = async (status: string) => {
-  if (
-    !confirm(
-      `Are you sure you want to mark all ${filteredDailyOrders.value.length} orders as ${status}?`
-    )
-  )
+  const eligible = Object.values(ordersByPostalCode.value)
+    .flat()
+    .filter((order) => {
+      if (status === 'delivering') return !['delivering', 'completed'].includes(order.status);
+      if (status === 'completed') return order.status !== 'completed';
+      return true;
+    });
+
+  if (!eligible.length) {
+    alert('No eligible orders to update.');
     return;
+  }
+  if (!confirm(`Mark ${eligible.length} order(s) as ${status}?`)) return;
 
-  const promises = filteredDailyOrders.value.map((order) =>
-    ordersApi.updateOrderStatus(order.id, status)
-  );
-
-  await Promise.all(promises);
+  await Promise.all(eligible.map((order) => ordersApi.updateOrderStatus(order.id, status)));
   await fetchOrders();
 };
 
@@ -825,16 +934,21 @@ const printDeliveryList = () => {
       <head>
         <title>Delivery Area List</title>
         <style>
-          body { font-family: sans-serif; padding: 20px; }
-          .group { margin-bottom: 40px; border: 2px solid #000; padding: 10px; }
-          .area-head { background: #000; color: #fff; padding: 10px; font-size: 20px; font-weight: bold; }
-          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-          th, td { border: 1px solid #000; padding: 8px; font-size: 12px; }
-          .order-row { background: #fff; }
+          body { font-family: sans-serif; padding: 10px; }
+          h1 { font-size: 13px; margin: 0 0 4px 0; }
+          .group { margin-bottom: 16px; border: 1px solid #000; padding: 4px 6px; }
+          .area-head { background: #fff; color: #000; border-bottom: 1px solid #000; padding: 3px 6px; font-size: 11px; font-weight: bold; }
+          table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+          th, td { border: 1px solid #000; padding: 3px 5px; font-size: 10px; }
+          th { background: #eee; }
         </style>
       </head>
       <body>
-        <h1>Delivery Routes - ${selectedDateDisplay.value}</h1>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;border:1px solid #000;padding:3px 6px;margin-bottom:10px;font-size:9px;">
+          <strong style="font-size:12px;">Delivery Routes - ${selectedDateDisplay.value}</strong>
+          <span>${restaurantAddress.value}</span>
+          <span><strong>[Confidential / 機密]</strong> 個人情報を含む。使用後シュレッダー処分。拾得した場合は店舗へご返却ください。</span>
+        </div>
         ${Object.entries(ordersByPostalCode.value)
           .map(
             ([pc, group]) => `
@@ -843,7 +957,7 @@ const printDeliveryList = () => {
             <table>
               <thead>
                  <tr>
-                   <th>Time</th><th>Type</th><th>ID</th><th>Company</th><th>Customer</th><th>Phone</th><th>Address</th><th>Items</th>
+                   <th>Time</th><th>Type / Payment</th><th>ID</th><th>Company</th><th>Customer</th><th>Phone</th><th>Address</th><th>Items</th>
                  </tr>
               </thead>
               <tbody>
@@ -852,7 +966,7 @@ const printDeliveryList = () => {
                     (order) => `
                    <tr>
                      <td>${formatTime(order.deliveryTime)}</td>
-                     <td style="text-transform: uppercase; font-weight: bold; font-size: 10px;">${order.orderType || ''}</td>
+                     <td style="text-transform: uppercase; font-weight: bold; font-size: 10px;">${order.orderType || ''}<br><span style="color:#666;font-weight:normal;">${order.paymentMethod || ''}</span></td>
                      <td>#${order.trackingId}</td>
                      <td>${order.customer.company || '-'}</td>
                      <td>${order.customer.name}</td>
@@ -885,9 +999,29 @@ const printDeliveryList = () => {
   win?.print();
 };
 
+const timeUntilDelivery = (isoString?: string): string => {
+  if (!isoString) return '';
+  const diff = new Date(isoString).getTime() - Date.now();
+  if (diff <= 0) {
+    const past = Math.floor(-diff / 60000);
+    return `${past}分超過`;
+  }
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `あと ${mins}分`;
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return `あと ${h}時間${m > 0 ? m + '分' : ''}`;
+};
+
 const selectOrder = (order: Order) => {
   selectedOrder.value = order;
 };
+
+const selectOrderByNumber = (orderNumber: string | number) => {
+  const found = orders.value.find((o) => o.trackingId == orderNumber || o.id == orderNumber);
+  if (found) selectOrder(found);
+};
+
 const closeOrderDetail = () => {
   selectedOrder.value = null;
 };

@@ -452,6 +452,67 @@
         </div>
       </div>
 
+      <!-- Notification Sound Test -->
+      <div class="border border-yellow-400 p-4 rounded mb-4">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="bg-yellow-100 p-2 rounded-full">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 text-yellow-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+              />
+            </svg>
+          </div>
+          <h2 class="text-lg font-semibold text-yellow-800">通知音テスト</h2>
+        </div>
+        <p class="text-sm text-gray-500 mb-3">
+          ボタンを押して注文通知音を確認できます。ブラウザが音声を許可している場合のみ再生されます。
+        </p>
+        <div class="flex items-center gap-3">
+          <button
+            @click="testNotificationSound"
+            :disabled="isSoundTesting"
+            :class="
+              isSoundTesting
+                ? 'bg-yellow-300 cursor-not-allowed'
+                : 'bg-yellow-500 hover:bg-yellow-600'
+            "
+            class="flex items-center gap-2 px-4 py-2 text-white rounded-md font-medium transition-colors shadow-sm"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              :class="['h-4 w-4', isSoundTesting ? 'animate-bounce' : '']"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15.536 8.464a5 5 0 010 7.072M12 6v12m0 0l-3-3m3 3l3-3"
+              />
+            </svg>
+            {{ isSoundTesting ? '✅ テスト通知を送信しました' : '🔔 新規注文をシミュレート' }}
+          </button>
+          <span
+            v-if="soundTestResult"
+            :class="soundTestResult === 'ok' ? 'text-green-600' : 'text-red-500'"
+            class="text-sm font-medium"
+          >
+            {{ soundTestResult === 'ok' ? '👆 右上の通知を確認してください' : '' }}
+          </span>
+        </div>
+      </div>
+
       <!-- Settings Form -->
       <div class="border border-green-500 p-4 rounded">
         <h2 class="text-xl font-semibold mb-2">{{ UI_TEXTS.settings.title }}</h2>
@@ -516,6 +577,20 @@ export default {
   },
   setup() {
     const activeTab = ref('restaurantInfo');
+
+    // Sound test
+    const isSoundTesting = ref(false);
+    const soundTestResult = ref(null);
+    const testNotificationSound = async () => {
+      isSoundTesting.value = true;
+      soundTestResult.value = null;
+      window.dispatchEvent(new CustomEvent('test-order-notification'));
+      soundTestResult.value = 'ok';
+      setTimeout(() => {
+        isSoundTesting.value = false;
+        soundTestResult.value = null;
+      }, 4000);
+    };
     const restaurantSettingsRef = ref({
       name: '',
       address: { line1: '' },
@@ -748,6 +823,9 @@ export default {
 
     return {
       activeTab,
+      isSoundTesting,
+      soundTestResult,
+      testNotificationSound,
       restaurantSettingsRef,
       sensitiveSettingsRef,
       showConfirmDialog,

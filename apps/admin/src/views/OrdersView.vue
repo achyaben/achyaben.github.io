@@ -345,15 +345,15 @@
                     </span>
                   </div>
                 </div>
-                <div
-                  class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 uppercase"
-                >
+                <div class="text-sm font-black px-2 py-0.5 rounded bg-gray-100 text-gray-700">
                   {{ formatTime(order.deliveryTime) }}
                 </div>
               </div>
-              <p class="text-xs italic text-gray-500 mb-0.5">{{ order.customer.company || '-' }}</p>
-              <p class="text-sm font-medium mb-1">{{ order.customer.name }}</p>
-              <p class="text-[10px] text-gray-400">{{ timeUntilDelivery(order.deliveryTime) }}</p>
+              <p class="text-xs italic text-gray-400 mb-0.5">{{ order.customer.company || '' }}</p>
+              <p class="text-sm font-medium text-gray-400 mb-1">{{ order.customer.name }}</p>
+              <p class="text-xs font-bold text-red-500">
+                {{ timeUntilDelivery(order.deliveryTime) }}
+              </p>
               <div class="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
                 <span class="font-black text-blue-600">¥{{ order.total.toFixed(0) }}</span>
                 <div class="flex gap-1">
@@ -411,72 +411,60 @@
     <div
       class="bg-white w-full max-w-2xl p-8 rounded-2xl shadow-2xl relative max-h-[90vh] overflow-y-auto"
     >
-      <button
-        @click="closeOrderDetail"
-        class="absolute top-6 right-6 text-gray-400 hover:text-gray-600"
-      >
-        <XMarkIcon class="h-6 w-6" />
-      </button>
-
-      <div class="flex items-center gap-3 mb-6">
-        <h2 class="text-3xl font-black">#{{ selectedOrder.trackingId }}</h2>
-        <span
-          v-if="selectedOrder.orderType"
-          :class="
-            selectedOrder.orderType === 'pickup'
-              ? 'bg-blue-100 text-blue-800'
-              : 'bg-green-100 text-green-800'
-          "
-          class="px-2 py-1 rounded text-xs font-black uppercase"
-        >
-          {{ selectedOrder.orderType }}
-        </span>
-        <span
-          :class="
-            getStatusColor(selectedOrder.status) +
-            ' px-3 py-1 rounded-full text-xs font-black uppercase'
-          "
-          >{{ selectedOrder.status }}</span
-        >
-        <span
-          :class="
-            selectedOrder.paymentMethod === 'cash'
-              ? 'bg-amber-100 text-amber-800'
-              : selectedOrder.paymentMethod === 'paypay'
-                ? 'bg-pink-100 text-pink-800'
-                : 'bg-indigo-100 text-indigo-800'
-          "
-          class="px-3 py-1 rounded-full text-xs font-black uppercase"
-        >
-          {{ selectedOrder.paymentMethod }}
-        </span>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-        <div class="space-y-4">
-          <div class="p-4 bg-gray-50 rounded-xl">
-            <p class="text-[10px] font-black text-gray-400 uppercase mb-2">Customer</p>
-            <p class="font-black text-lg">{{ selectedOrder.customer.name }}</p>
-            <p class="text-sm text-gray-600">{{ selectedOrder.customer.phone }}</p>
-            <p
-              v-if="selectedOrder.customer.company"
-              class="mt-2 text-xs italic text-blue-500 font-bold"
+      <!-- Header: ID + badges + delivery time inline -->
+      <div class="flex items-start justify-between gap-3 mb-5">
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h2 class="text-2xl font-black">#{{ selectedOrder.trackingId }}</h2>
+            <span
+              v-if="selectedOrder.orderType"
+              :class="
+                selectedOrder.orderType === 'pickup'
+                  ? 'bg-blue-100 text-blue-800'
+                  : 'bg-green-100 text-green-800'
+              "
+              class="px-2 py-0.5 rounded text-xs font-black uppercase"
+              >{{ selectedOrder.orderType }}</span
             >
-              {{ selectedOrder.customer.company }}
-            </p>
+            <span
+              :class="
+                getStatusColor(selectedOrder.status) +
+                ' px-2 py-0.5 rounded-full text-xs font-black uppercase'
+              "
+              >{{ selectedOrder.status }}</span
+            >
           </div>
+          <!-- Customer compact -->
+          <p class="text-base font-black mt-1">{{ selectedOrder.customer.name }}</p>
+          <p class="text-xs text-gray-500">{{ selectedOrder.customer.phone }}</p>
+          <p v-if="selectedOrder.customer.company" class="text-xs italic text-blue-500 font-bold">
+            {{ selectedOrder.customer.company }}
+          </p>
+          <p v-if="selectedOrder.customer.address.street" class="text-xs text-gray-400 mt-0.5">
+            [{{ selectedOrder.customer.address.postalCode }}]
+            {{ selectedOrder.customer.address.street }}
+          </p>
         </div>
-        <div class="space-y-4">
-          <div class="p-4 bg-gray-50 rounded-xl">
-            <p class="text-[10px] font-black text-gray-400 uppercase mb-2">Delivery Address</p>
-            <p class="text-sm font-bold">[{{ selectedOrder.customer.address.postalCode }}]</p>
-            <p class="text-sm">{{ selectedOrder.customer.address.street }}</p>
-          </div>
+        <!-- Delivery time + close -->
+        <div class="text-right shrink-0 flex flex-col items-end gap-1">
+          <button
+            @click="closeOrderDetail"
+            class="text-gray-300 hover:text-gray-500 transition-colors"
+          >
+            <XMarkIcon class="h-5 w-5" />
+          </button>
+          <p class="text-2xl font-black text-blue-700">
+            {{ formatTime(selectedOrder.deliveryTime) }}
+          </p>
+          <p class="text-xs font-bold text-red-500">
+            {{ timeUntilDelivery(selectedOrder.deliveryTime) }}
+          </p>
         </div>
       </div>
 
-      <div class="mb-8">
-        <p class="text-[10px] font-black text-gray-400 uppercase mb-4">Items Summary</p>
+      <!-- Items — main focus -->
+      <div class="mb-4">
+        <p class="text-[10px] font-black text-gray-400 uppercase mb-3">Items Summary</p>
         <table class="w-full text-left">
           <thead class="text-xs text-gray-400 uppercase">
             <tr class="border-b">
@@ -500,8 +488,21 @@
         </table>
       </div>
 
-      <div class="flex justify-between items-center pt-6 border-t font-black text-2xl">
-        <span class="text-gray-400 uppercase text-xs">Total Order Value</span>
+      <!-- Total + payment -->
+      <div class="flex justify-between items-center pt-4 border-t font-black text-2xl">
+        <div class="flex items-center gap-2">
+          <span
+            :class="
+              selectedOrder.paymentMethod === 'cash'
+                ? 'bg-amber-100 text-amber-800'
+                : selectedOrder.paymentMethod === 'paypay'
+                  ? 'bg-pink-100 text-pink-800'
+                  : 'bg-indigo-100 text-indigo-800'
+            "
+            class="text-xs px-2 py-1 rounded-full font-black uppercase"
+            >{{ selectedOrder.paymentMethod }}</span
+          >
+        </div>
         <span class="text-blue-600">¥{{ selectedOrder.total.toFixed(0) }}</span>
       </div>
     </div>
@@ -509,7 +510,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import type { Order, OrderItem, OrderItemOption } from '../types/types';
 import { ordersApi } from '../api/orders';
 import { PrinterIcon, XMarkIcon, MapPinIcon } from '@heroicons/vue/24/solid';
@@ -523,6 +525,8 @@ const restaurantAddress = ref('');
 const orders = ref<Order[]>([]);
 const STATUS_FLOW = ['pending', 'accepted', 'preparing', 'ready', 'delivering', 'completed'];
 const selectedOrder = ref<Order | null>(null);
+const route = useRoute();
+const router = useRouter();
 const hideDeliveredAndDelivering = ref(true);
 const showDeliveryCompleted = ref(false);
 
@@ -536,9 +540,47 @@ const handleGlobalNewOrder = async () => {
   await fetchOrders();
 };
 
+const openOrderByTrackingId = async (
+  trackingId: string,
+  dateRaw?: string,
+  autoAccept?: boolean
+) => {
+  activeTab.value = 'singleOrders';
+  // Use date from query param directly if available, otherwise derive from order
+  if (dateRaw) {
+    selectedDateFilter.value = 'specific';
+    specificDate.value = dateRaw;
+  } else {
+    const order = orders.value.find((o) => o.trackingId === trackingId);
+    if (order?.deliveryTime) {
+      selectedDateFilter.value = 'specific';
+      specificDate.value = getLocalDateString(new Date(order.deliveryTime));
+    }
+  }
+  searchQuery.value = trackingId;
+  await nextTick();
+  const order = orders.value.find((o) => o.trackingId === trackingId);
+  if (order) {
+    selectedOrder.value = order;
+    if (autoAccept && order.status === 'pending') {
+      const success = await ordersApi.updateOrderStatus(order.id, 'accepted');
+      if (success) order.status = 'accepted';
+    }
+  }
+};
+
 onMounted(async () => {
   await fetchOrders();
   window.addEventListener('new-order-notification', handleGlobalNewOrder);
+  // Handle direct navigation from notification toast
+  const openTrackingId = route.query.open as string | undefined;
+  if (openTrackingId) {
+    const dateRaw = route.query.date as string | undefined;
+    const autoAccept = route.query.accept === '1';
+    await openOrderByTrackingId(openTrackingId, dateRaw, autoAccept);
+    // Clean URL immediately so reload doesn't re-trigger
+    router.replace({ path: '/orders' });
+  }
   try {
     const info = await settingsApi.getRestaurantInfo();
     const addr = info.restaurant_address;
@@ -633,7 +675,7 @@ const selectedDateDisplay = computed(() => {
     tomorrow.setDate(today.getDate() + 1);
     return getLocalDateString(tomorrow);
   }
-  if (selectedDateFilter.value === 'specific' && specificDate.value) return specificDate.value; // Already YYYY-MM-DD from input[type=date]
+  if (selectedDateFilter.value === 'specific' && specificDate.value) return specificDate.value;
   return '--';
 });
 
@@ -1004,6 +1046,10 @@ const selectOrderByNumber = (orderNumber: string | number) => {
 
 const closeOrderDetail = () => {
   selectedOrder.value = null;
+  // Clean URL so reload doesn't re-open the order
+  if (route.query.open) {
+    router.replace({ path: '/orders' });
+  }
 };
 </script>
 

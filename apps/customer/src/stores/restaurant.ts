@@ -197,5 +197,10 @@ export const useRestaurantStore = () => {
     orderingEnabled: computed(() => orderingEnabled.value),
     isError: computed(() => isGlobalError.value),
     fetchInfo,
+    resetStore() {
+      isFetched.value = false;
+      isGlobalError.value = false;
+      info.value = RESTAURANT_INFO;
+    },
   };
 };

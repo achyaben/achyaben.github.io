@@ -63,13 +63,21 @@
         <h2 class="text-xl font-bold">
           {{ UI_TEXTS.orders.kitchenPrep.title }} - {{ selectedDateDisplay }}
         </h2>
-        <button
-          @click="printBatchPrep"
-          class="px-4 py-2 bg-gray-600 text-white text-sm rounded-md hover:bg-gray-700 flex items-center justify-center"
-        >
-          <PrinterIcon class="h-5 w-5 mr-2" />
-          {{ UI_TEXTS.orders.kanban.buttons.print }}
-        </button>
+        <div class="flex gap-2">
+          <button
+            @click="batchUpdateStatus('ready')"
+            class="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 flex items-center justify-center"
+          >
+            <span class="font-bold mr-2">✔️</span> Mark All Ready
+          </button>
+          <button
+            @click="printBatchPrep"
+            class="px-4 py-2 bg-gray-600 text-white text-sm rounded-md hover:bg-gray-700 flex items-center justify-center"
+          >
+            <PrinterIcon class="h-5 w-5 mr-2" />
+            {{ UI_TEXTS.orders.kanban.buttons.print }}
+          </button>
+        </div>
       </div>
       <table class="table-auto w-full text-left border-collapse border border-gray-200">
         <thead class="bg-gray-100">
@@ -739,7 +747,7 @@ const groupedPrepItems = computed(() => {
   > = {};
 
   filteredDailyOrders.value
-    .filter((order: Order) => order.status === 'preparing')
+    .filter((order: Order) => ['pending', 'accepted', 'preparing'].includes(order.status))
     .forEach((order: Order) => {
       order.items.forEach((item: OrderItem) => {
         const itemName = item.name;

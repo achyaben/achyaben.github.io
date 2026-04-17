@@ -74,6 +74,7 @@ export const ordersApi = {
       status: 'pending',
       payment_method: payload.paymentMethod || 'cash',
       payment_status: payload.paymentMethod === 'paypay' ? 'pending' : 'pending',
+      order_type: payload.order_type || 'delivery',
       notes: payload.notes,
     };
 
@@ -180,11 +181,19 @@ export const ordersApi = {
     }
 
     // 2. Fetch Fresh Data from Supabase (Source of Truth)
+    // getSession() reads from local cache — no network call
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session?.user?.id) return orders;
+    const userId = session.user.id;
+
     const { data: apiData, error } = await supabase
       .from('orders')
       .select(
         '*, items:order_items(*, menu_item:menu_items(*), customizations:order_item_customizations(customization_option_id))'
       )
+      .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -225,6 +234,7 @@ export const ordersApi = {
           paymentMethod: o.payment_method,
           paymentStatus: o.payment_status,
           deliveryTime: o.delivery_datetime,
+          order_type: o.order_type,
           createdAt: o.created_at,
           updatedAt: o.updated_at,
           customer: {
@@ -250,8 +260,6 @@ export const ordersApi = {
 
   // Get order by tracking ID
   async getOrderByTrackingId(trackingId: string): Promise<Order | null> {
-    // Backend technically supports filtering by trackingId in getOrders
-    // But let's reuse getOrders for now or implement specific endpoint if optimized
     const orders = await this.getOrders();
     return orders.find((o) => o.trackingId === trackingId) || null;
   },
@@ -266,10 +274,6 @@ export const ordersApi = {
   // Get most recent pending order
   async getMostRecentPendingOrder(): Promise<Order | null> {
     const orders = await this.getOrders();
-    // Filter for current user if backend doesn't?
-    // Currently backend returns all, which is a leak, but we can't fix backend logic easily right now.
-    // We assume backend might later filter.
-
     return (
       orders
         .filter((order) => !['completed', 'cancelled'].includes(order.status))

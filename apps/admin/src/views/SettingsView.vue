@@ -124,6 +124,11 @@
             {{ restaurantSettingsRef.hours.close }}
           </p>
           <p>
+            <strong>{{ UI_TEXTS.settings.restaurantSettings.deliveryHoursLabel }}:</strong>
+            {{ restaurantSettingsRef.delivery_hours?.start || '--:--' }} -
+            {{ restaurantSettingsRef.delivery_hours?.end || '--:--' }}
+          </p>
+          <p>
             <strong>{{ UI_TEXTS.settings.restaurantSettings.minAdvanceTimeLabel }}:</strong>
             {{ restaurantSettingsRef.hours.minAdvanceTime }} hours
           </p>
@@ -190,6 +195,28 @@
                 id="hoursClose"
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
                 required
+              />
+            </div>
+            <div>
+              <label for="deliveryStart" class="block text-sm font-medium text-gray-700">{{
+                UI_TEXTS.settings.restaurantSettings.deliveryStartLabel
+              }}</label>
+              <input
+                v-model="restaurantSettingsRef.delivery_hours.start"
+                type="time"
+                id="deliveryStart"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+              />
+            </div>
+            <div>
+              <label for="deliveryEnd" class="block text-sm font-medium text-gray-700">{{
+                UI_TEXTS.settings.restaurantSettings.deliveryEndLabel
+              }}</label>
+              <input
+                v-model="restaurantSettingsRef.delivery_hours.end"
+                type="time"
+                id="deliveryEnd"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
               />
             </div>
             <div>
@@ -334,7 +361,7 @@
       <!-- Banner Settings -->
       <div class="border border-blue-500 p-4 rounded mb-4">
         <h2 class="text-xl font-semibold mb-4 text-blue-800">アナウンスバナー管理</h2>
-        
+
         <!-- Create New Banner -->
         <div class="bg-blue-50 p-4 rounded-lg mb-6 border border-blue-100">
           <h3 class="text-md font-bold mb-3 text-blue-700">新規バナー作成</h3>
@@ -358,7 +385,10 @@
               />
             </div>
           </div>
-          <button @click="addNewBanner" class="w-full md:w-auto px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium shadow-sm">
+          <button
+            @click="addNewBanner"
+            class="w-full md:w-auto px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium shadow-sm"
+          >
             新規バナーを公開
           </button>
         </div>
@@ -366,40 +396,51 @@
         <!-- Banner History / List -->
         <div>
           <h3 class="text-md font-bold mb-3 text-gray-700">バナー履歴</h3>
-          <div v-if="!bannersListRef.length" class="text-center py-8 text-gray-500 italic bg-gray-50 rounded-lg">
+          <div
+            v-if="!bannersListRef.length"
+            class="text-center py-8 text-gray-500 italic bg-gray-50 rounded-lg"
+          >
             履歴はありません
           </div>
           <div v-else class="space-y-3">
-            <div 
-              v-for="(banner, index) in bannersListRef" 
+            <div
+              v-for="(banner, index) in bannersListRef"
               :key="banner.id"
               class="flex items-center justify-between p-4 rounded-lg border bg-white shadow-sm hover:border-blue-200 transition-colors"
               :class="{ 'border-l-4 border-l-green-500': banner.active }"
             >
               <div class="flex-1 min-w-0 mr-4">
                 <div class="flex items-center mb-1">
-                  <span 
-                    :class="[banner.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600']"
+                  <span
+                    :class="[
+                      banner.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600',
+                    ]"
                     class="text-xs px-2 py-0.5 rounded-full font-bold mr-2 uppercase tracking-wider"
                   >
                     {{ banner.active ? '表示中' : '非表示' }}
                   </span>
                   <p class="font-bold text-gray-800 truncate">{{ banner.title }}</p>
                 </div>
-                <p v-if="banner.link" class="text-xs text-blue-500 truncate italic">{{ banner.link }}</p>
+                <p v-if="banner.link" class="text-xs text-blue-500 truncate italic">
+                  {{ banner.link }}
+                </p>
               </div>
-              
+
               <div class="flex items-center space-x-2 shrink-0">
-                <button 
-                  @click="toggleBannerStatus(index)" 
-                  :class="[banner.active ? 'bg-orange-100 text-orange-600 hover:bg-orange-200' : 'bg-green-100 text-green-600 hover:bg-green-200']"
+                <button
+                  @click="toggleBannerStatus(index)"
+                  :class="[
+                    banner.active
+                      ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
+                      : 'bg-green-100 text-green-600 hover:bg-green-200',
+                  ]"
                   class="p-2 rounded-md transition-colors"
                   :title="banner.active ? '非表示にする' : '表示する'"
                 >
                   <i class="fas" :class="banner.active ? 'fa-eye-slash' : 'fa-eye'"></i>
                 </button>
-                <button 
-                  @click="deleteBanner(index)" 
+                <button
+                  @click="deleteBanner(index)"
                   class="p-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors"
                   title="削除"
                 >
@@ -408,6 +449,67 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Notification Sound Test -->
+      <div class="border border-yellow-400 p-4 rounded mb-4">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="bg-yellow-100 p-2 rounded-full">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 text-yellow-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+              />
+            </svg>
+          </div>
+          <h2 class="text-lg font-semibold text-yellow-800">通知音テスト</h2>
+        </div>
+        <p class="text-sm text-gray-500 mb-3">
+          ボタンを押して注文通知音を確認できます。ブラウザが音声を許可している場合のみ再生されます。
+        </p>
+        <div class="flex items-center gap-3">
+          <button
+            @click="testNotificationSound"
+            :disabled="isSoundTesting"
+            :class="
+              isSoundTesting
+                ? 'bg-yellow-300 cursor-not-allowed'
+                : 'bg-yellow-500 hover:bg-yellow-600'
+            "
+            class="flex items-center gap-2 px-4 py-2 text-white rounded-md font-medium transition-colors shadow-sm"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              :class="['h-4 w-4', isSoundTesting ? 'animate-bounce' : '']"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15.536 8.464a5 5 0 010 7.072M12 6v12m0 0l-3-3m3 3l3-3"
+              />
+            </svg>
+            {{ isSoundTesting ? '✅ テスト通知を送信しました' : '🔔 新規注文をシミュレート' }}
+          </button>
+          <span
+            v-if="soundTestResult"
+            :class="soundTestResult === 'ok' ? 'text-green-600' : 'text-red-500'"
+            class="text-sm font-medium"
+          >
+            {{ soundTestResult === 'ok' ? '👆 右上の通知を確認してください' : '' }}
+          </span>
         </div>
       </div>
 
@@ -475,6 +577,20 @@ export default {
   },
   setup() {
     const activeTab = ref('restaurantInfo');
+
+    // Sound test
+    const isSoundTesting = ref(false);
+    const soundTestResult = ref(null);
+    const testNotificationSound = async () => {
+      isSoundTesting.value = true;
+      soundTestResult.value = null;
+      window.dispatchEvent(new CustomEvent('test-order-notification'));
+      soundTestResult.value = 'ok';
+      setTimeout(() => {
+        isSoundTesting.value = false;
+        soundTestResult.value = null;
+      }, 4000);
+    };
     const restaurantSettingsRef = ref({
       name: '',
       address: { line1: '' },
@@ -488,6 +604,10 @@ export default {
         businessDays: [],
         holidays: [],
         specialDays: [],
+      },
+      delivery_hours: {
+        start: '',
+        end: '',
       },
       support: {},
     });
@@ -518,14 +638,15 @@ export default {
             specialDays: [],
             ...(info.business_hours || {}),
           },
+          delivery_hours: info.delivery_hours || { start: '', end: '' },
           support: info.support_info || {},
         };
       }
       if (info?.banners) {
         const rawBanners = Array.isArray(info.banners) ? info.banners : [info.banners];
-        bannersListRef.value = rawBanners.map(b => ({
+        bannersListRef.value = rawBanners.map((b) => ({
           ...b,
-          active: b.active !== undefined ? b.active : true
+          active: b.active !== undefined ? b.active : true,
         }));
       }
     });
@@ -591,6 +712,7 @@ export default {
         const info = restaurantSettingsRef.value;
         const success = await settingsApi.updateSettings('business_hours', info.hours);
         if (success) {
+          await settingsApi.updateSettings('delivery_hours', info.delivery_hours);
           editMode.value.settings = false;
         }
       } catch (error) {
@@ -605,18 +727,18 @@ export default {
         alert('バナーテキストを入力してください');
         return;
       }
-      
+
       const newBanner = {
         id: `banner-${Date.now()}`,
         title: newBannerRef.value.title,
         link: newBannerRef.value.link,
         active: true,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       };
-      
+
       // Add to list (at the end so it's most recent)
       const newList = [...bannersListRef.value, newBanner];
-      
+
       try {
         const success = await settingsApi.updateSettings('banners', newList);
         if (success) {
@@ -635,7 +757,7 @@ export default {
     const toggleBannerStatus = async (index) => {
       const newList = JSON.parse(JSON.stringify(bannersListRef.value));
       newList[index].active = !newList[index].active;
-      
+
       try {
         const success = await settingsApi.updateSettings('banners', newList);
         if (success) {
@@ -649,9 +771,9 @@ export default {
 
     const deleteBanner = async (index) => {
       if (!confirm('このバナーを削除しますか？')) return;
-      
+
       const newList = bannersListRef.value.filter((_, i) => i !== index);
-      
+
       try {
         const success = await settingsApi.updateSettings('banners', newList);
         if (success) {
@@ -701,6 +823,9 @@ export default {
 
     return {
       activeTab,
+      isSoundTesting,
+      soundTestResult,
+      testNotificationSound,
       restaurantSettingsRef,
       sensitiveSettingsRef,
       showConfirmDialog,

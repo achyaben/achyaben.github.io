@@ -64,6 +64,7 @@ export async function fetchMenu(forceRefresh = false) {
            )
           )`
       )
+      .is('deleted_at', null)
       .order('sort_order', { ascending: true });
 
     if (sbError) throw sbError;
@@ -196,6 +197,7 @@ export async function fetchMenuItem(id: string) {
            )
           )`
       )
+      .is('deleted_at', null)
       .eq('id', id)
       .single();
 

@@ -3,8 +3,10 @@ import type { MenuItem } from '../types/types';
 
 export const menuApi = {
   async getMenu(): Promise<MenuItem[]> {
-    const { data, error } = await supabase.from('menu_items').select(
-      `*, 
+    const { data, error } = await supabase
+      .from('menu_items')
+      .select(
+        `*, 
          category:menu_categories(name), 
          menu_item_customization_groups(
            sort_order,
@@ -13,7 +15,8 @@ export const menuApi = {
              options:customization_options(*)
            )
          )`
-    );
+      )
+      .is('deleted_at', null);
 
     if (error) throw error;
 
@@ -124,15 +127,14 @@ export const menuApi = {
   },
 
   async deleteMenuItem(id: string): Promise<boolean> {
-    // Checking if we should do soft delete or hard delete.
-    // For now, hard delete but it might fail if there are constraints from orders.
-    // If it fails, we should probably set is_available = false.
-    const { error } = await supabase.from('menu_items').delete().eq('id', id);
+    // Soft delete: set deleted_at so rows referenced by orders are preserved
+    const { error } = await supabase
+      .from('menu_items')
+      .update({ deleted_at: new Date().toISOString(), is_available: false })
+      .eq('id', id);
 
     if (error) {
-      console.error('[MenuApi] Error deleting item:', error);
-      // Fallback to disabling it
-      await supabase.from('menu_items').update({ is_available: false }).eq('id', id);
+      console.error('[MenuApi] Error soft-deleting item:', error);
       return false;
     }
     return true;
@@ -165,7 +167,8 @@ export const menuApi = {
   async getCustomizations(): Promise<any[]> {
     const { data, error } = await supabase
       .from('customization_groups')
-      .select('*, options:customization_options(*)');
+      .select('*, options:customization_options(*)')
+      .is('deleted_at', null);
 
     if (error) return [];
     return data || [];
@@ -174,7 +177,12 @@ export const menuApi = {
   async addCustomizationGroup(
     name: string,
     options: { name: string; price_add: number; is_default?: boolean; sort_order?: number }[],
-    constraints: { min_selection?: number; max_selection?: number; is_required?: boolean; sort_order?: number } = {}
+    constraints: {
+      min_selection?: number;
+      max_selection?: number;
+      is_required?: boolean;
+      sort_order?: number;
+    } = {}
   ): Promise<string | null> {
     // 1. Insert Group
     const { data: group, error: groupError } = await supabase
@@ -218,8 +226,19 @@ export const menuApi = {
   async updateCustomizationGroup(
     groupId: string,
     name: string,
-    options: { id?: string; name: string; price_add: number; sort_order?: number; delete?: boolean }[],
-    constraints: { min_selection?: number; max_selection?: number; is_required?: boolean; sort_order?: number } = {}
+    options: {
+      id?: string;
+      name: string;
+      price_add: number;
+      sort_order?: number;
+      delete?: boolean;
+    }[],
+    constraints: {
+      min_selection?: number;
+      max_selection?: number;
+      is_required?: boolean;
+      sort_order?: number;
+    } = {}
   ): Promise<boolean> {
     // 1. Update Group Name & Constraints
     const updates: any = { name };
@@ -237,7 +256,10 @@ export const menuApi = {
     // 2. Handle Options
     for (const opt of options) {
       if (opt.delete && opt.id) {
-        await supabase.from('customization_options').delete().eq('id', opt.id);
+        await supabase
+          .from('customization_options')
+          .update({ deleted_at: new Date().toISOString(), is_default: false } as any)
+          .eq('id', opt.id);
       } else if (opt.id) {
         await supabase
           .from('customization_options')
@@ -263,10 +285,17 @@ export const menuApi = {
   },
 
   async deleteCustomizationGroup(groupId: string): Promise<boolean> {
-    // Delete options first (though FK might handle it with CASCADE if set, but let's be explicit)
-    await supabase.from('customization_options').delete().eq('group_id', groupId);
+    // Soft delete options first (RESTRICT FK prevents hard delete if referenced by orders)
+    await supabase
+      .from('customization_options')
+      .update({ deleted_at: new Date().toISOString() } as any)
+      .eq('group_id', groupId)
+      .is('deleted_at', null);
 
-    const { error } = await supabase.from('customization_groups').delete().eq('id', groupId);
+    const { error } = await supabase
+      .from('customization_groups')
+      .update({ deleted_at: new Date().toISOString() } as any)
+      .eq('id', groupId);
 
     return !error;
   },

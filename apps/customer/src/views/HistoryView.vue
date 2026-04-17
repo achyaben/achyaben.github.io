@@ -68,7 +68,20 @@
           <div class="p-4 border-b">
             <div class="flex justify-between items-start">
               <div>
-                <div class="font-medium text-gray-900">注文番号: {{ order.trackingId }}</div>
+                <div class="flex items-center gap-2">
+                  <div class="font-medium text-gray-900">注文番号: {{ order.trackingId }}</div>
+                  <span
+                    v-if="order.order_type"
+                    :class="
+                      order.order_type === 'pickup'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-green-100 text-green-800'
+                    "
+                    class="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase"
+                  >
+                    {{ order.order_type === 'pickup' ? '店頭受取' : 'お届け' }}
+                  </span>
+                </div>
                 <div class="text-sm text-gray-500">
                   {{ order.deliveryTime ? formatDate(order.deliveryTime) : '日時未定' }}
                 </div>
@@ -101,6 +114,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { ordersApi } from '../data/api/orders';
+import { formatDate } from '../utils/date';
 import type { Order } from '../types';
 
 const orders = ref<Order[]>([]);
@@ -130,14 +144,4 @@ const sortedOrders = computed(() => {
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 });
-
-function formatDate(date: string | Date) {
-  const d = new Date(date);
-  return new Intl.DateTimeFormat('ja-JP', {
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(d);
-}
 </script>

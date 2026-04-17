@@ -57,6 +57,7 @@
 <script setup lang="ts">
 import { ref, watchEffect } from 'vue';
 import { ordersApi } from '../data/api/orders';
+import { formatDate } from '../utils/date';
 import type { Order } from '../types';
 
 const activeOrder = ref<Order | null>(null);
@@ -70,18 +71,6 @@ const statusText = {
   completed: '完了',
   cancelled: 'キャンセル',
 } as const;
-
-// Format date for display
-function formatDate(date: string | Date | undefined) {
-  if (!date) return '-';
-  const d = new Date(date);
-  return new Intl.DateTimeFormat('ja-JP', {
-    month: 'numeric',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(d);
-}
 
 // Watch for changes in orders and update active order
 watchEffect(async () => {

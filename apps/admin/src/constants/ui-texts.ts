@@ -26,6 +26,9 @@ export const UI_TEXTS = {
       holidaysLabel: 'Special Holidays (Closed Dates)',
       addHolidayButton: 'Add Holiday',
       removeHolidayButton: 'Remove',
+      deliveryHoursLabel: '配達可能時間 (Delivery Hours)',
+      deliveryStartLabel: '配達可能時間 (開始)',
+      deliveryEndLabel: '配達可能時間 (終了)',
       saveButton: 'Save Restaurant Settings',
     },
     orderingEnabled: {
@@ -286,5 +289,5 @@ export const UI_TEXTS = {
   },
   currency: {
     yen: '円',
-  }
+  },
 };

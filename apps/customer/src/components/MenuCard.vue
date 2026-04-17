@@ -1,8 +1,12 @@
 <template>
   <div
-    @click="router.push({ name: 'itemDetail', params: { id: item.id } })"
-    class="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden relative cursor-pointer"
-    :class="{ 'border-2 border-primary': quantity > 0 }"
+    @click="item.available && router.push({ name: 'itemDetail', params: { id: item.id } })"
+    class="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden relative"
+    :class="{
+      'border-2 border-primary': quantity > 0,
+      'cursor-pointer': item.available,
+      'cursor-not-allowed opacity-80': !item.available,
+    }"
   >
     <div class="relative aspect-square sm:aspect-[4/3] transition-all duration-300 bg-gray-100">
       <img
@@ -96,19 +100,35 @@
       </div>
     </div>
     <!-- Show a note if other variants are in the cart -->
-    <div 
-      v-if="otherQuantity > 0" 
+    <div
+      v-if="otherQuantity > 0"
       @click.stop="router.push('/cart')"
       class="text-xs text-primary font-medium bg-primary/5 py-1.5 px-3 rounded mx-3 mb-2 flex items-center justify-between border border-primary/20 hover:bg-primary/10 transition-colors cursor-pointer"
     >
       <div class="flex items-center gap-1.5">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-3.5 w-3.5"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"
+          />
         </svg>
         他のカスタマイズが {{ otherQuantity }} 点あります
       </div>
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 opacity-60 ml-2 shrink-0" viewBox="0 0 20 20" fill="currentColor">
-        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-3.5 w-3.5 opacity-60 ml-2 shrink-0"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+          clip-rule="evenodd"
+        />
       </svg>
     </div>
 

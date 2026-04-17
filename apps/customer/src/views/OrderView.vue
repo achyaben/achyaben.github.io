@@ -126,9 +126,22 @@
         <!-- Order Status -->
         <div class="bg-white rounded-lg shadow-sm overflow-hidden">
           <div class="p-4 flex justify-between items-center border-b">
-            <div>
-              <span class="text-sm text-gray-500">{{ UI_TEXT.order.detail.orderNumber }}</span>
-              <div class="font-medium">{{ order.trackingId }}</div>
+            <div class="flex items-center gap-3">
+              <div>
+                <span class="text-sm text-gray-500">{{ UI_TEXT.order.detail.orderNumber }}</span>
+                <div class="font-medium">{{ order.trackingId }}</div>
+              </div>
+              <span
+                v-if="order.order_type"
+                :class="
+                  order.order_type === 'pickup'
+                    ? 'bg-blue-100 text-blue-800'
+                    : 'bg-green-100 text-green-800'
+                "
+                class="text-xs px-2 py-1 rounded-full font-bold uppercase mt-4"
+              >
+                {{ order.order_type === 'pickup' ? '店頭受取' : 'お届け' }}
+              </span>
             </div>
             <div class="text-right">
               <span
@@ -390,19 +403,7 @@ const isReordering = ref(false);
 const isLoading = ref(true);
 
 import { getImageUrl } from '../utils/image';
-
-// Format date for display
-function formatDate(date: string | Date) {
-  const d = new Date(date);
-  return new Intl.DateTimeFormat('ja-JP', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    weekday: 'short',
-  }).format(d);
-}
+import { formatDate, formatDateLong } from '../utils/date';
 
 // Helper to look up full menu item (including image)
 function getMenuItem(id: string) {
@@ -592,17 +593,7 @@ function printReceipt() {
 }
 
 // Add date format for printing
-function formatDateForPrint(date: string | Date) {
-  const d = new Date(date);
-  return new Intl.DateTimeFormat('ja-JP', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    weekday: 'short',
-  }).format(d);
-}
+const formatDateForPrint = formatDateLong;
 
 // Add print styles
 const style = document.createElement('style');

@@ -70,6 +70,7 @@ export interface Order {
         };
   };
   deliveryTime?: string;
+  order_type?: 'pickup' | 'delivery';
   notes?: string;
   needReceipt?: boolean;
   status: OrderStatus;

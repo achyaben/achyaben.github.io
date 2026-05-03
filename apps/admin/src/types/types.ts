@@ -34,7 +34,8 @@ export interface Order {
   orderType?: 'pickup' | 'delivery';
   createdAt: string;
   updatedAt: string;
-  comments?: string;
+  comments?: string; // mapped from notes in DB
+  // notes?: string; // not used directly, use comments
   driver?: User;
   deliveredAt?: string;
 }

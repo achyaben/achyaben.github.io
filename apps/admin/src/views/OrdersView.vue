@@ -33,6 +33,14 @@
           v-model="specificDate"
           class="form-input border rounded px-2 py-1 bg-white"
         />
+        <button
+          v-if="selectedDateFilter !== 'today' || specificDate || searchQuery || postalCodeFilter"
+          @click="resetFilters"
+          title="Reset filters"
+          class="ml-2 px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300"
+        >
+          ✕
+        </button>
       </div>
 
       <div class="flex items-center space-x-2">
@@ -231,6 +239,9 @@
                   </div>
                   <div class="text-xs text-gray-500">{{ order.customer.name }}</div>
                   <div class="text-xs text-blue-500">{{ order.customer.phone }}</div>
+                  <div v-if="order.comments" class="text-xs italic text-gray-400 mt-1">
+                    📝 {{ order.comments }}
+                  </div>
                 </td>
                 <td class="px-4 py-3 italic">{{ order.customer.company || '-' }}</td>
                 <td class="px-4 py-3 leading-tight max-w-xs">
@@ -359,6 +370,9 @@
               </div>
               <p class="text-xs italic text-gray-400 mb-0.5">{{ order.customer.company || '' }}</p>
               <p class="text-sm font-medium text-gray-400 mb-1">{{ order.customer.name }}</p>
+              <p v-if="order.comments" class="text-xs italic text-gray-400 mb-1">
+                📝 {{ order.comments }}
+              </p>
               <p class="text-xs font-bold text-red-500">
                 {{ timeUntilDelivery(order.deliveryTime) }}
               </p>
@@ -452,6 +466,9 @@
             [{{ selectedOrder.customer.address.postalCode }}]
             {{ selectedOrder.customer.address.street }}
           </p>
+          <p v-if="selectedOrder.comments" class="text-xs italic text-gray-400 mt-2">
+            📝 {{ selectedOrder.comments }}
+          </p>
         </div>
         <!-- Delivery time + close -->
         <div class="text-right shrink-0 flex flex-col items-end gap-1">
@@ -539,10 +556,49 @@ const hideDeliveredAndDelivering = ref(true);
 const showDeliveryCompleted = ref(false);
 
 // Filters
+const FILTERS_KEY = 'adminOrderFilters';
 const selectedDateFilter = ref('today');
 const specificDate = ref('');
 const searchQuery = ref('');
 const postalCodeFilter = ref('');
+
+// Load filters from localStorage
+onMounted(() => {
+  const saved = localStorage.getItem(FILTERS_KEY);
+  if (saved) {
+    try {
+      const obj = JSON.parse(saved);
+      if (obj.selectedDateFilter) selectedDateFilter.value = obj.selectedDateFilter;
+      if (obj.specificDate) specificDate.value = obj.specificDate;
+      if (obj.searchQuery) searchQuery.value = obj.searchQuery;
+      if (obj.postalCodeFilter) postalCodeFilter.value = obj.postalCodeFilter;
+    } catch {}
+  }
+});
+
+// Watch and persist filters
+import { watch } from 'vue';
+watch(
+  [selectedDateFilter, specificDate, searchQuery, postalCodeFilter],
+  ([date, dateVal, search, postal]) => {
+    localStorage.setItem(
+      FILTERS_KEY,
+      JSON.stringify({
+        selectedDateFilter: date,
+        specificDate: dateVal,
+        searchQuery: search,
+        postalCodeFilter: postal,
+      })
+    );
+  }
+);
+
+function resetFilters() {
+  selectedDateFilter.value = 'today';
+  specificDate.value = '';
+  searchQuery.value = '';
+  postalCodeFilter.value = '';
+}
 
 const handleGlobalNewOrder = async () => {
   await fetchOrders();
@@ -766,7 +822,7 @@ const groupedPrepItems = computed(() => {
           itemMap[itemKey].quantity += item.quantity;
           // Always push order info even if no comments exist
           itemMap[itemKey].comments.push({
-            text: order.comments || '', // Use comments if present
+            text: order.comments || '', // Use comments (mapped from notes)
             orderNumber: order.trackingId,
             orderType: order.orderType,
           });
@@ -905,6 +961,10 @@ const _calculateTimeRemaining = (createdAt: string) => {
 };
 
 const printBatchPrep = () => {
+  // Determine if any comments exist
+  const hasAnyComments = groupedPrepItems.value.some((item) =>
+    item.comments.some((c) => c.text && c.text.trim() !== '')
+  );
   const printContent = `
     <html>
       <head>
@@ -915,12 +975,13 @@ const printBatchPrep = () => {
           th, td { border: 1px solid #000; padding: 10px; text-align: left; }
           th { background: #eee; }
           .qty { font-size: 24px; font-weight: bold; text-align: center; }
+          .comment-inline { font-size: 11px; color: #333; display: inline; }
         </style>
       </head>
       <body>
         <h1>Kitchen Batch Prep - ${selectedDateDisplay.value}</h1>
         <table>
-          <thead><tr><th>Item</th><th>Customizations</th><th>Qty</th><th>Notes (Order#)</th></tr></thead>
+          <thead><tr><th>Item</th><th>Customizations</th><th>Qty</th>${hasAnyComments ? '<th>Notes (Order#)</th>' : ''}</tr></thead>
           <tbody>
             ${groupedPrepItems.value
               .map(
@@ -929,19 +990,22 @@ const printBatchPrep = () => {
                  <td><strong>${item.name}</strong></td>
                  <td>${item.customizations.join(', ')}</td>
                  <td class="qty">${item.quantity}</td>
-                 <td>${item.comments
-                   .map(
-                     (c) => `
-                    <div style="margin-bottom: 2px;">
-                      <strong>#${c.orderNumber}</strong> 
-                      <small style="border: 1px solid #ccc; padding: 0 2px; border-radius: 2px; text-transform: uppercase;">
-                        ${c.orderType || ''}
-                      </small>
-                      ${c.text ? `: ${c.text}` : ''}
-                    </div>
-                 `
-                   )
-                   .join('')}</td>
+                 ${
+                   hasAnyComments
+                     ? `<td>${item.comments
+                         .filter((c) => c.text && c.text.trim() !== '')
+                         .map(
+                           (c) => `
+                      <span class="comment-inline">
+                        <strong>#${c.orderNumber}</strong>
+                        <small style="border: 1px solid #ccc; padding: 0 2px; border-radius: 2px; text-transform: uppercase;">${c.orderType || ''}</small>
+                        : ${c.text.replace(/\n/g, ' ')}
+                      </span>
+                   `
+                         )
+                         .join(' ')}</td>`
+                     : ''
+                 }
                </tr>
             `
               )
@@ -959,6 +1023,13 @@ const printBatchPrep = () => {
 };
 
 const printDeliveryList = () => {
+  // Determine if any company or comments exist in all orders
+  const hasAnyCompany = Object.values(ordersByPostalCode.value).some((group) =>
+    group.some((order) => order.customer.company && order.customer.company.trim() !== '')
+  );
+  const hasAnyComments = Object.values(ordersByPostalCode.value).some((group) =>
+    group.some((order) => order.comments && order.comments.trim() !== '')
+  );
   const printContent = `
     <html>
       <head>
@@ -968,9 +1039,24 @@ const printDeliveryList = () => {
           h1 { font-size: 13px; margin: 0 0 4px 0; }
           .group { margin-bottom: 16px; border: 1px solid #000; padding: 4px 6px; }
           .area-head { background: #fff; color: #000; border-bottom: 1px solid #000; padding: 3px 6px; font-size: 11px; font-weight: bold; }
-          table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 4px; table-layout: fixed; }
           th, td { border: 1px solid #000; padding: 3px 5px; font-size: 10px; }
           th { background: #eee; }
+          th.col-time, td.col-time { width: 2.5%; }
+          th.col-type, td.col-type { width: 7%; }
+          th.col-id, td.col-id { width: 6%; }
+          th.col-phone, td.col-phone { width: 8%; }
+          th.col-customer, td.col-customer { width: 7%; }
+          th.col-address, td.col-address { width: 28%; }
+          th.col-items, td.col-items { width: 28%; white-space: normal; }
+          th.col-comments, td.col-comments { width: 28%; white-space: normal; }
+          .comment-inline {
+            font-size: 10px;
+            color: #333;
+            display: block;
+            word-break: break-word;
+            width: 100%;
+          }
         </style>
       </head>
       <body>
@@ -987,7 +1073,15 @@ const printDeliveryList = () => {
             <table>
               <thead>
                  <tr>
-                   <th>Time</th><th>Type / Payment</th><th>ID</th><th>Company</th><th>Customer</th><th>Phone</th><th>Address</th><th>Items</th>
+                   <th class="col-time">Time</th>
+                   <th class="col-type">Type / Payment</th>
+                   <th class="col-id">ID</th>
+                   ${hasAnyCompany ? '<th>Company</th>' : ''}
+                   <th class="col-customer">Customer</th>
+                   <th class="col-phone">Phone</th>
+                   <th class="col-address">Address</th>
+                   <th class="col-items">Items</th>
+                   ${hasAnyComments ? '<th>Comments</th>' : ''}
                  </tr>
               </thead>
               <tbody>
@@ -995,20 +1089,21 @@ const printDeliveryList = () => {
                   .map(
                     (order) => `
                    <tr>
-                     <td>${formatTime(order.deliveryTime)}</td>
-                     <td style="text-transform: uppercase; font-weight: bold; font-size: 10px;">${order.orderType || ''}<br><span style="color:#666;font-weight:normal;">${order.paymentMethod || ''}</span></td>
-                     <td>#${order.trackingId}</td>
-                     <td>${order.customer.company || '-'}</td>
-                     <td>${order.customer.name}</td>
-                     <td>${order.customer.phone}</td>
-                      <td>${order.customer.address.street}</td>
-                      <td>${order.items
+                     <td class="col-time">${formatTime(order.deliveryTime)}</td>
+                     <td class="col-type" style="text-transform: uppercase; font-weight: bold; font-size: 10px;">${order.orderType || ''}<br><span style="color:#666;font-weight:normal;">${order.paymentMethod || ''}</span></td>
+                     <td class="col-id">#${order.trackingId}</td>
+                     ${hasAnyCompany ? `<td>${order.customer.company || '-'}</td>` : ''}
+                     <td class="col-customer">${order.customer.name}</td>
+                     <td class="col-phone">${order.customer.phone}</td>
+                      <td class="col-address">${order.customer.address.street}</td>
+                      <td class="col-items">${order.items
                         .map((i) => {
                           const optsStr = formatOptionsStr(i.options);
                           const opts = optsStr ? ` (${optsStr})` : '';
                           return `${i.quantity}x ${i.name}${opts}`;
                         })
                         .join(', ')}</td>
+                      ${hasAnyComments ? `<td><span class="comment-inline">${order.comments ? order.comments.replace(/\n/g, ' ') : ''}</span></td>` : ''}
                    </tr>
                 `
                   )

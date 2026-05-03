@@ -5,10 +5,16 @@
     <!-- Tabs -->
     <div class="mb-4">
       <div class="flex border-b border-gray-300">
-        <button v-for="tab in tabs" :key="tab" @click="activeTab = tab" :class="[
-          'px-4 py-2',
-          activeTab === tab ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500',
-        ]" class="focus:outline-none">
+        <button
+          v-for="tab in tabs"
+          :key="tab"
+          @click="activeTab = tab"
+          :class="[
+            'px-4 py-2',
+            activeTab === tab ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500',
+          ]"
+          class="focus:outline-none"
+        >
           {{ tab }}
         </button>
       </div>
@@ -21,7 +27,11 @@
         <div class="mb-4">
           <span class="mr-2">{{ UI_TEXTS.orderSummary.quickFilterLabel }}</span>
           <select v-model="selectedQuickFilter" @change="applyQuickFilter" class="form-select">
-            <option v-for="(label, key) in UI_TEXTS.orderSummary.quickFilters" :key="key" :value="key">
+            <option
+              v-for="(label, key) in UI_TEXTS.orderSummary.quickFilters"
+              :key="key"
+              :value="key"
+            >
               {{ label }}
             </option>
           </select>
@@ -37,7 +47,11 @@
           <label class="flex items-center space-x-2">
             <span>{{ UI_TEXTS.orderSummary.groupByLabel }}</span>
             <select v-model="selectedDateRange" class="form-select">
-              <option v-for="(label, key) in UI_TEXTS.orderSummary.groupByOptions" :key="key" :value="key">
+              <option
+                v-for="(label, key) in UI_TEXTS.orderSummary.groupByOptions"
+                :key="key"
+                :value="key"
+              >
                 {{ label }}
               </option>
             </select>
@@ -94,6 +108,13 @@
 </template>
 
 <script setup lang="ts">
+// Utility to format a Date as YYYY-MM-DD in local time
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 import { ref, computed, onMounted } from 'vue';
 import { ordersApi } from '../api/orders';
 import { UI_TEXTS } from '../constants/ui-texts';
@@ -118,39 +139,53 @@ onMounted(async () => {
 
 const applyQuickFilter = () => {
   const now = new Date();
-  const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+  // Calculate startOfWeek without mutating 'now'
+  const startOfWeek = new Date();
+  startOfWeek.setDate(now.getDate() - now.getDay());
+  startOfWeek.setHours(0, 0, 0, 0);
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  startOfMonth.setHours(0, 0, 0, 0);
   const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  startOfLastMonth.setHours(0, 0, 0, 0);
   const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+  endOfLastMonth.setHours(23, 59, 59, 999);
 
-  switch (selectedQuickFilter.value.toLowerCase()) {
-    case 'today':
-      {
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
-        startDate.value = `${year}-${month}-${day}`;
-        endDate.value = startDate.value;
-      }
+  switch (selectedQuickFilter.value) {
+    case 'today': {
+      const today = new Date();
+      startDate.value = formatLocalDate(today);
+      endDate.value = formatLocalDate(today);
       break;
+    }
     case 'yesterday':
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
-      startDate.value = yesterday.toISOString().split('T')[0];
-      endDate.value = startDate.value;
+      startDate.value = formatLocalDate(yesterday);
+      endDate.value = formatLocalDate(yesterday);
       break;
-    case 'this week':
-      startDate.value = startOfWeek.toISOString().split('T')[0];
-      endDate.value = new Date().toISOString().split('T')[0];
+    case 'thisWeek':
+      startDate.value = formatLocalDate(startOfWeek);
+      endDate.value = formatLocalDate(now);
       break;
-    case 'this month':
-      startDate.value = startOfMonth.toISOString().split('T')[0];
-      endDate.value = new Date().toISOString().split('T')[0];
+    case 'thisMonth':
+      // Start date is the 1st of the current month
+      const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      firstOfMonth.setHours(0, 0, 0, 0);
+      startDate.value = formatLocalDate(firstOfMonth);
+      // End date is the last day of this month at 23:59:59
+      const endOfThisMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      endOfThisMonth.setHours(23, 59, 59, 999);
+      endDate.value = formatLocalDate(endOfThisMonth);
       break;
-    case 'last month':
-      startDate.value = startOfLastMonth.toISOString().split('T')[0];
-      endDate.value = endOfLastMonth.toISOString().split('T')[0];
+    case 'lastMonth':
+      // Start date is the 1st of last month
+      const firstOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      firstOfLastMonth.setHours(0, 0, 0, 0);
+      startDate.value = formatLocalDate(firstOfLastMonth);
+      // End date is the last day of last month at 23:59:59
+      const lastOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+      lastOfLastMonth.setHours(23, 59, 59, 999);
+      endDate.value = formatLocalDate(lastOfLastMonth);
       break;
     case 'all':
       startDate.value = '';
@@ -164,18 +199,15 @@ const filteredSummaries = computed(() => {
     return summaries.value; // Show all summaries if 'All' is selected or no date range is set
   }
 
-  const start = new Date(startDate.value);
-  const end = new Date(endDate.value);
-
+  // Compare summary.date as string (YYYY-MM-DD) to startDate/endDate strings
   return summaries.value.filter((summary: OrderSummary) => {
-    const summaryDate = new Date(summary.date);
-    return summaryDate >= start && summaryDate <= end;
+    return summary.date >= startDate.value && summary.date <= endDate.value;
   });
 });
 
 const clearFilters = () => {
-  startDate.value = '';
-  endDate.value = '';
+  selectedQuickFilter.value = 'today';
+  applyQuickFilter();
 };
 
 const totalOrders = computed(() => {

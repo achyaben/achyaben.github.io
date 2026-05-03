@@ -171,7 +171,7 @@ export const UI_TEXTS = {
       singleOrders: 'Single Orders',
     },
     deliveryList: {
-      title: 'Delivery List for the Day',
+      title: 'Delivery List of',
       headers: {
         time: 'Time',
         customer: 'Customer',

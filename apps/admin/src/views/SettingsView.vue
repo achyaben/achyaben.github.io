@@ -672,7 +672,14 @@ export default {
         const newValue = !sensitiveSettingsRef.value.orderingEnabled;
         const success = await settingsApi.updateSettings('ordering_enabled', newValue);
         if (success) {
-          sensitiveSettingsRef.value.orderingEnabled = newValue;
+          // Re-fetch the latest value from backend to ensure sync
+          const info = await settingsApi.getRestaurantInfo();
+          if (info && typeof info.ordering_enabled !== 'undefined') {
+            sensitiveSettingsRef.value.orderingEnabled =
+              info.ordering_enabled !== false && info.ordering_enabled !== 'false';
+          } else {
+            sensitiveSettingsRef.value.orderingEnabled = newValue;
+          }
         }
       } catch (error) {
         console.error('Failed to change ordering status:', error);

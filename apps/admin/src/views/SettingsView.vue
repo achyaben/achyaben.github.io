@@ -641,6 +641,8 @@ export default {
           delivery_hours: info.delivery_hours || { start: '', end: '' },
           support: info.support_info || {},
         };
+        sensitiveSettingsRef.value.orderingEnabled =
+          info.ordering_enabled !== false && info.ordering_enabled !== 'false';
       }
       if (info?.banners) {
         const rawBanners = Array.isArray(info.banners) ? info.banners : [info.banners];

@@ -374,7 +374,7 @@
                 📝 {{ order.comments }}
               </p>
               <p class="text-xs font-bold text-red-500">
-                {{ timeUntilDelivery(order.deliveryTime) }}
+                {{ timeUntilDelivery(order.deliveryTime, order.status, order.updatedAt) }}
               </p>
               <div class="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
                 <span class="font-black text-blue-600">¥{{ order.total.toFixed(0) }}</span>
@@ -482,7 +482,13 @@
             {{ formatTime(selectedOrder.deliveryTime) }}
           </p>
           <p class="text-xs font-bold text-red-500">
-            {{ timeUntilDelivery(selectedOrder.deliveryTime) }}
+            {{
+              timeUntilDelivery(
+                selectedOrder.deliveryTime,
+                selectedOrder.status,
+                selectedOrder.updatedAt
+              )
+            }}
           </p>
         </div>
       </div>
@@ -542,7 +548,7 @@ import { ordersApi } from '../api/orders';
 import { PrinterIcon, XMarkIcon, MapPinIcon } from '@heroicons/vue/24/solid';
 import { UI_TEXTS } from '../constants/ui-texts';
 import { settingsApi } from '../api/settings';
-import { formatTime, formatOrderedAt } from '../utils/date';
+import { formatTime, formatOrderedAt, formatDateJST } from '../utils/date';
 import { onUnmounted } from 'vue';
 
 const activeTab = ref<keyof typeof UI_TEXTS.orders.tabs>('singleOrders');
@@ -1124,9 +1130,14 @@ const printDeliveryList = () => {
   win?.print();
 };
 
-const timeUntilDelivery = (isoString?: string): string => {
-  if (!isoString) return '';
-  const diff = new Date(isoString).getTime() - Date.now();
+// Shows time until delivery, or for completed orders, shows completion time (proxy: updatedAt)
+const timeUntilDelivery = (deliveryTime?: string, status?: string, updatedAt?: string): string => {
+  if (!deliveryTime) return '';
+  // If completed, show completion time (proxy: updatedAt)
+  if (status === 'completed' && updatedAt) {
+    return `完了: ${formatDateJST(updatedAt)}`;
+  }
+  const diff = new Date(deliveryTime).getTime() - Date.now();
   if (diff <= 0) {
     const past = Math.floor(-diff / 60000);
     return `${past}分超過`;
@@ -1134,8 +1145,8 @@ const timeUntilDelivery = (isoString?: string): string => {
   const mins = Math.floor(diff / 60000);
   if (mins < 60) return `あと ${mins}分`;
   const h = Math.floor(mins / 60);
-  const m = mins % 60;
-  return `あと ${h}時間${m > 0 ? m + '分' : ''}`;
+  const min = mins % 60;
+  return `あと ${h}時間${min > 0 ? min + '分' : ''}`;
 };
 
 const selectOrder = (order: Order) => {

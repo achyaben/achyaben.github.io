@@ -816,6 +816,14 @@ onMounted(async () => {
     localStorage.removeItem(STORAGE_KEYS.REORDER_PICKUP_TIME);
   }
 
+  // Restore order type from reorder
+  const savedOrderType = localStorage.getItem(STORAGE_KEYS.REORDER_ORDER_TYPE);
+  if (savedOrderType === 'pickup' || savedOrderType === 'delivery') {
+    orderForm.value.order_type = savedOrderType;
+    onOrderTypeChange();
+    localStorage.removeItem(STORAGE_KEYS.REORDER_ORDER_TYPE);
+  }
+
   validateForm();
 });
 

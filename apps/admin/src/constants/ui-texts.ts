@@ -165,6 +165,7 @@ export const UI_TEXTS = {
   },
   orders: {
     title: 'Orders',
+    itemCountSuffix: '品',
     tabs: {
       kitchenPrep: 'Kitchen Prep (Batch)',
       deliveryList: 'Delivery List (Daily)',

@@ -165,6 +165,7 @@ import BottomNav from '../components/BottomNav.vue';
 import { useAuthStore } from '../stores/auth';
 import { supabase } from '@app/supabase';
 import { settingsApi } from '../api/settings';
+import chimeUrl from '../assets/chime.mp3';
 
 // Fallback: show error after N failed reconnects
 const MAX_RECONNECT_ATTEMPTS = 6;
@@ -189,12 +190,30 @@ const newOrderAlert = ref<{
 } | null>(null);
 const businessHour = ref<{ open: string; close: string } | null>(null);
 
-// Audio
-const chime = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+const chime = new Audio(chimeUrl);
+chime.preload = 'auto';
+chime.load();
 const MAX_CHIMES = 15;
 const chimeCount = ref(0);
 const chimeIsRinging = ref(false);
 let chimeInterval: ReturnType<typeof setInterval> | null = null;
+
+// Unlock audio on first user interaction (browser autoplay policy)
+// Without this, audio is silently blocked if the tab hasn't been clicked yet.
+let audioUnlocked = false;
+const unlockAudio = () => {
+  if (audioUnlocked) return;
+  chime
+    .play()
+    .then(() => {
+      chime.pause();
+      chime.currentTime = 0;
+      audioUnlocked = true;
+    })
+    .catch(() => {});
+};
+document.addEventListener('click', unlockAudio);
+document.addEventListener('keydown', unlockAudio);
 
 const startChimeLoop = async () => {
   chimeCount.value = 0;
@@ -356,10 +375,9 @@ const setupRealtimeNotification = () => {
         reconnectAttempts.value = 0;
       }
       if (status === 'TIMED_OUT' || status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+        // Let Supabase handle the actual reconnect automatically.
+        // We only track attempts to show the fatal error UI if it fails repeatedly.
         reconnectAttempts.value++;
-        if (reconnectAttempts.value < MAX_RECONNECT_ATTEMPTS) {
-          reconnectTimer = setTimeout(() => setupRealtimeNotification(), 5000);
-        }
       }
     });
 };
@@ -374,6 +392,8 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize);
   window.removeEventListener('test-order-notification', triggerTestNotification);
+  document.removeEventListener('click', unlockAudio);
+  document.removeEventListener('keydown', unlockAudio);
   stopChimeLoop();
   teardownRealtimeNotification();
 });

@@ -260,6 +260,10 @@
                 </td>
                 <td class="px-4 py-3 text-right font-bold text-gray-900">
                   <div>¥{{ order.total.toFixed(0) }}</div>
+                  <div class="text-[10px] text-gray-400 font-normal">
+                    {{ order.items.reduce((s, i) => s + i.quantity, 0)
+                    }}{{ UI_TEXTS.orders.itemCountSuffix }}
+                  </div>
                   <div class="mt-1">
                     <span
                       :class="
@@ -377,7 +381,13 @@
                 {{ timeUntilDelivery(order.deliveryTime, order.status, order.updatedAt) }}
               </p>
               <div class="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
-                <span class="font-black text-blue-600">¥{{ order.total.toFixed(0) }}</span>
+                <div class="flex flex-col">
+                  <span class="font-black text-blue-600">¥{{ order.total.toFixed(0) }}</span>
+                  <span class="text-[10px] text-gray-400"
+                    >{{ order.items.reduce((s, i) => s + i.quantity, 0)
+                    }}{{ UI_TEXTS.orders.itemCountSuffix }}</span
+                  >
+                </div>
                 <div class="flex gap-1">
                   <button
                     v-if="order.status !== 'pending'"
@@ -533,6 +543,10 @@
             class="text-xs px-2 py-1 rounded-full font-black uppercase"
             >{{ selectedOrder.paymentMethod }}</span
           >
+          <span class="text-xs font-normal text-gray-400"
+            >{{ selectedOrder.items.reduce((s, i) => s + i.quantity, 0)
+            }}{{ UI_TEXTS.orders.itemCountSuffix }}</span
+          >
         </div>
         <span class="text-blue-600">¥{{ selectedOrder.total.toFixed(0) }}</span>
       </div>
@@ -627,7 +641,6 @@ const openOrderByTrackingId = async (
       specificDate.value = getLocalDateString(new Date(order.deliveryTime));
     }
   }
-  searchQuery.value = trackingId;
   await nextTick();
   const order = orders.value.find((o) => o.trackingId === trackingId);
   if (order) {
@@ -1108,7 +1121,9 @@ const printDeliveryList = () => {
                           const opts = optsStr ? ` (${optsStr})` : '';
                           return `${i.quantity}x ${i.name}${opts}`;
                         })
-                        .join(', ')}</td>
+                        .join(
+                          ', '
+                        )} <span style="color:#888;font-size:9px;">(合計${order.items.reduce((s, i) => s + i.quantity, 0)}${UI_TEXTS.orders.itemCountSuffix})</span></td>
                       ${hasAnyComments ? `<td><span class="comment-inline">${order.comments ? order.comments.replace(/\n/g, ' ') : ''}</span></td>` : ''}
                    </tr>
                 `

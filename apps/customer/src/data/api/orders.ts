@@ -64,79 +64,38 @@ export const ordersApi = {
       }
     }
 
-    // 2. Insert Order
-    // Construct payload strictly for DB
-    const orderInsertPayload: any = {
-      user_id: user.id,
+    // 2. Insert Order transactionally via RPC
+    const orderInsertPayload = {
       tracking_id: payload.trackingId,
       total: payload.total,
       delivery_datetime: payload.deliveryTime,
-      status: 'pending',
       payment_method: payload.paymentMethod || 'cash',
-      payment_status: payload.paymentMethod === 'paypay' ? 'pending' : 'pending',
       order_type: payload.order_type || 'delivery',
       notes: payload.notes,
+      items: (payload.items || []).map((item: any) => ({
+        menu_item_id: item.item.id,
+        quantity: item.quantity,
+        customizations:
+          item.customizations?.map((optId: any) =>
+            typeof optId === 'string' ? optId : optId.id
+          ) || [],
+      })),
     };
 
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .insert(orderInsertPayload)
-      .select()
-      .single();
+    const { data: orderId, error: orderError } = await supabase.rpc('create_complete_order', {
+      payload: orderInsertPayload,
+    });
 
     if (orderError) {
       console.error('Order insertion failed:', orderError);
       throw orderError;
     }
 
-    // 3. Insert Order Items (Sequential)
-    const items = payload.items || [];
-    for (const item of items) {
-      const { data: orderItem, error: itemError } = await supabase
-        .from('order_items')
-        .insert({
-          order_id: order.id,
-          menu_item_id: item.item.id,
-          quantity: item.quantity,
-          price_at_order: (() => {
-            let total = item.item.price;
-            if (item.customizations && item.customizations.length > 0 && item.item.customizations) {
-              item.customizations.forEach((customId: any) => {
-                const found = item.item.customizations.find(
-                  (c: any) => c.id === (customId?.id || customId)
-                );
-                if (found?.price) total += found.price;
-              });
-            }
-            return total;
-          })(),
-          line_total: item.subtotal,
-        })
-        .select()
-        .single();
-
-      if (itemError) {
-        console.error('Order item insertion failed:', itemError);
-        throw itemError;
-      }
-
-      // 4. Insert Customizations
-      if (item.customizations && item.customizations.length > 0) {
-        const customizationInserts = item.customizations.map((optId: any) => ({
-          order_item_id: orderItem.id,
-          customization_option_id: typeof optId === 'string' ? optId : optId.id,
-        }));
-
-        const { error: custError } = await supabase
-          .from('order_item_customizations')
-          .insert(customizationInserts);
-
-        if (custError) {
-          console.error('Customization insertion failed:', custError);
-          throw custError;
-        }
-      }
-    }
+    // Since RPC only returns the ID, construct minimal order object for local cache mapping
+    const order = {
+      id: orderId,
+      tracking_id: payload.trackingId,
+    };
 
     // Save to local storage
     try {

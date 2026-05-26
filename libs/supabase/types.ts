@@ -4,13 +4,14 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: '14.1';
+    PostgrestVersion: '14.4';
   };
   public: {
     Tables: {
       customization_groups: {
         Row: {
           allow_multiple: boolean | null;
+          deleted_at: string | null;
           id: string;
           is_required: boolean | null;
           max_selections: number | null;
@@ -19,6 +20,7 @@ export type Database = {
         };
         Insert: {
           allow_multiple?: boolean | null;
+          deleted_at?: string | null;
           id?: string;
           is_required?: boolean | null;
           max_selections?: number | null;
@@ -27,6 +29,7 @@ export type Database = {
         };
         Update: {
           allow_multiple?: boolean | null;
+          deleted_at?: string | null;
           id?: string;
           is_required?: boolean | null;
           max_selections?: number | null;
@@ -37,6 +40,7 @@ export type Database = {
       };
       customization_options: {
         Row: {
+          deleted_at: string | null;
           group_id: string;
           id: string;
           is_default: boolean | null;
@@ -45,6 +49,7 @@ export type Database = {
           sort_order: number | null;
         };
         Insert: {
+          deleted_at?: string | null;
           group_id: string;
           id?: string;
           is_default?: boolean | null;
@@ -53,6 +58,7 @@ export type Database = {
           sort_order?: number | null;
         };
         Update: {
+          deleted_at?: string | null;
           group_id?: string;
           id?: string;
           is_default?: boolean | null;
@@ -134,6 +140,7 @@ export type Database = {
         Row: {
           category_id: string | null;
           created_at: string | null;
+          deleted_at: string | null;
           description: string | null;
           id: string;
           image_url: string | null;
@@ -146,6 +153,7 @@ export type Database = {
         Insert: {
           category_id?: string | null;
           created_at?: string | null;
+          deleted_at?: string | null;
           description?: string | null;
           id?: string;
           image_url?: string | null;
@@ -158,6 +166,7 @@ export type Database = {
         Update: {
           category_id?: string | null;
           created_at?: string | null;
+          deleted_at?: string | null;
           description?: string | null;
           id?: string;
           image_url?: string | null;
@@ -269,8 +278,10 @@ export type Database = {
         Row: {
           created_at: string | null;
           delivery_datetime: string;
+          driver_id: string | null;
           id: string;
           notes: string | null;
+          order_type: string | null;
           payment_id: string | null;
           payment_method: string;
           payment_status: string | null;
@@ -283,8 +294,10 @@ export type Database = {
         Insert: {
           created_at?: string | null;
           delivery_datetime: string;
+          driver_id?: string | null;
           id?: string;
           notes?: string | null;
+          order_type?: string | null;
           payment_id?: string | null;
           payment_method?: string;
           payment_status?: string | null;
@@ -297,8 +310,10 @@ export type Database = {
         Update: {
           created_at?: string | null;
           delivery_datetime?: string;
+          driver_id?: string | null;
           id?: string;
           notes?: string | null;
+          order_type?: string | null;
           payment_id?: string | null;
           payment_method?: string;
           payment_status?: string | null;
@@ -309,6 +324,20 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: 'orders_driver_id_fkey';
+            columns: ['driver_id'];
+            isOneToOne: false;
+            referencedRelation: 'admin_users_view';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'orders_driver_id_fkey';
+            columns: ['driver_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
           {
             foreignKeyName: 'orders_user_id_fkey';
             columns: ['user_id'];
@@ -328,45 +357,57 @@ export type Database = {
       profiles: {
         Row: {
           address: string;
+          avatar_url: string | null;
           corporate_name: string | null;
           created_at: string | null;
           deleted_at: string | null;
+          email: string | null;
           f_name: string | null;
           id: string;
           l_name: string | null;
           lat: number | null;
+          line_user_id: string | null;
           lng: number | null;
           postcode: string | null;
+          provider: string | null;
           role: string;
           tel: string | null;
           updated_at: string | null;
         };
         Insert: {
           address: string;
+          avatar_url?: string | null;
           corporate_name?: string | null;
           created_at?: string | null;
           deleted_at?: string | null;
+          email?: string | null;
           f_name?: string | null;
           id: string;
           l_name?: string | null;
           lat?: number | null;
+          line_user_id?: string | null;
           lng?: number | null;
           postcode?: string | null;
+          provider?: string | null;
           role?: string;
           tel?: string | null;
           updated_at?: string | null;
         };
         Update: {
           address?: string;
+          avatar_url?: string | null;
           corporate_name?: string | null;
           created_at?: string | null;
           deleted_at?: string | null;
+          email?: string | null;
           f_name?: string | null;
           id?: string;
           l_name?: string | null;
           lat?: number | null;
+          line_user_id?: string | null;
           lng?: number | null;
           postcode?: string | null;
+          provider?: string | null;
           role?: string;
           tel?: string | null;
           updated_at?: string | null;
@@ -396,15 +437,45 @@ export type Database = {
       admin_users_view: {
         Row: {
           address: string | null;
+          avatar_url: string | null;
           created_at: string | null;
           deleted_at: string | null;
           email: string | null;
           f_name: string | null;
-          full_name_meta: string | null;
           id: string | null;
           l_name: string | null;
+          line_user_id: string | null;
+          provider: string | null;
           role: string | null;
           tel: string | null;
+        };
+        Insert: {
+          address?: string | null;
+          avatar_url?: string | null;
+          created_at?: string | null;
+          deleted_at?: string | null;
+          email?: string | null;
+          f_name?: string | null;
+          id?: string | null;
+          l_name?: string | null;
+          line_user_id?: string | null;
+          provider?: string | null;
+          role?: string | null;
+          tel?: string | null;
+        };
+        Update: {
+          address?: string | null;
+          avatar_url?: string | null;
+          created_at?: string | null;
+          deleted_at?: string | null;
+          email?: string | null;
+          f_name?: string | null;
+          id?: string | null;
+          l_name?: string | null;
+          line_user_id?: string | null;
+          provider?: string | null;
+          role?: string | null;
+          tel?: string | null;
         };
         Relationships: [];
       };
@@ -418,8 +489,11 @@ export type Database = {
           customer_postcode: string | null;
           customer_tel: string | null;
           delivery_datetime: string | null;
+          driver_id: string | null;
           id: string | null;
           notes: string | null;
+          order_type: string | null;
+          payment_id: string | null;
           payment_method: string | null;
           payment_status: string | null;
           status: string | null;
@@ -429,6 +503,20 @@ export type Database = {
           user_id: string | null;
         };
         Relationships: [
+          {
+            foreignKeyName: 'orders_driver_id_fkey';
+            columns: ['driver_id'];
+            isOneToOne: false;
+            referencedRelation: 'admin_users_view';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'orders_driver_id_fkey';
+            columns: ['driver_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
           {
             foreignKeyName: 'orders_user_id_fkey';
             columns: ['user_id'];
@@ -447,6 +535,8 @@ export type Database = {
       };
     };
     Functions: {
+      create_complete_order: { Args: { payload: Json }; Returns: string };
+      get_user_id_by_email: { Args: { email_input: string }; Returns: string };
       is_admin_or_manager: { Args: never; Returns: boolean };
     };
     Enums: {

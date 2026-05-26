@@ -574,6 +574,11 @@ async function reorder() {
       localStorage.setItem(STORAGE_KEYS.CUSTOMER_INFO, JSON.stringify(customerInfo));
     }
 
+    // Preserve order type (pickup vs delivery) for the cart
+    if (order.value.order_type) {
+      localStorage.setItem(STORAGE_KEYS.REORDER_ORDER_TYPE, order.value.order_type);
+    }
+
     // Redirect to cart so user can select NEW date/time
     await router.push('/cart');
   } catch (error) {

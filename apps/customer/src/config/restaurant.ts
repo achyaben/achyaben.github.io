@@ -31,6 +31,8 @@ export const RESTAURANT_INFO = {
     minAdvanceTime: 30,
     maxAdvanceDays: 14,
     businessDays: [0, 2, 3, 4, 5, 6],
+    holidays: [],
+    specialDays: [],
   },
   delivery_hours: {
     start: '',

@@ -105,12 +105,13 @@ export const ordersApi = {
     const summaries: Record<string, any> = {};
     orders.forEach((order) => {
       // Use deliveryTime for grouping summaries as requested by the user
-      const dateToUse = order.deliveryTime ? new Date(order.deliveryTime) : null;
-      if (!dateToUse) return;
-
-      const year = dateToUse.getFullYear();
-      const month = String(dateToUse.getMonth() + 1).padStart(2, '0');
-      const day = String(dateToUse.getDate()).padStart(2, '0');
+      if (!order.deliveryTime) return;
+      const utcDate = new Date(order.deliveryTime);
+      // Convert to JST (UTC+9)
+      const jstDate = new Date(utcDate.getTime() + 9 * 60 * 60 * 1000);
+      const year = jstDate.getFullYear();
+      const month = String(jstDate.getMonth() + 1).padStart(2, '0');
+      const day = String(jstDate.getDate()).padStart(2, '0');
       const date = `${year}-${month}-${day}`;
 
       if (!summaries[date]) {

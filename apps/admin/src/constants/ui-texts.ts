@@ -165,13 +165,14 @@ export const UI_TEXTS = {
   },
   orders: {
     title: 'Orders',
+    itemCountSuffix: '品',
     tabs: {
       kitchenPrep: 'Kitchen Prep (Batch)',
       deliveryList: 'Delivery List (Daily)',
       singleOrders: 'Single Orders',
     },
     deliveryList: {
-      title: 'Delivery List for the Day',
+      title: 'Delivery List of',
       headers: {
         time: 'Time',
         customer: 'Customer',

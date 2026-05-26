@@ -34,6 +34,7 @@
     "lint": "eslint . --ext .ts,.js,.vue",
     "format": "prettier --write .",
     "prepare": "husky",
+    "gen:types": "npx supabase gen types typescript --project-id cvkulllzrgadpyqapvzb > libs/supabase/types.ts",
     "build:customer": "yarn workspace customer build",
     "build:admin": "yarn workspace admin build",
     "build": "yarn build:customer && yarn build:admin"

@@ -21,6 +21,41 @@
     <!-- Bottom Navigation for Mobile -->
     <BottomNav v-if="isMobile" :userRole="userRole" @logout="handleLogout" />
 
+    <!-- Realtime Connection Lost Modal -->
+    <transition name="fade">
+      <div
+        v-if="showRealtimeError && !realtimeErrorDismissed"
+        class="fixed inset-0 z-[500] flex items-center justify-center bg-black/40"
+        style="backdrop-filter: blur(2px)"
+      >
+        <div
+          class="bg-red-600 text-white rounded-2xl shadow-2xl px-8 py-8 flex flex-col items-center animate-pulse max-w-[90vw] w-full max-w-md"
+        >
+          <span class="font-bold text-2xl mb-4">⚠️ 注文通知の接続が失われました</span>
+          <p class="mb-6 text-lg text-center">
+            ページをリロードしてください。<br />新しい注文の通知が届きません。
+          </p>
+          <div class="flex gap-4 mt-2">
+            <button
+              @click="reloadPage"
+              class="bg-white text-red-600 font-bold px-6 py-3 rounded shadow hover:bg-red-100 transition-colors text-lg"
+            >
+              ページを再読み込み
+            </button>
+            <button
+              @click="realtimeErrorDismissed = true"
+              class="bg-red-700/80 text-white font-bold px-6 py-3 rounded shadow hover:bg-red-800 transition-colors text-lg"
+            >
+              警告を閉じる
+            </button>
+          </div>
+          <p class="mt-4 text-sm text-white/80 text-center">
+            ※ 警告を閉じても新しい注文の通知は届きません。
+          </p>
+        </div>
+      </div>
+    </transition>
+
     <!-- Global Realtime Notification Toast -->
     <transition name="fade">
       <div
@@ -130,7 +165,18 @@ import BottomNav from '../components/BottomNav.vue';
 import { useAuthStore } from '../stores/auth';
 import { supabase } from '@app/supabase';
 import { settingsApi } from '../api/settings';
+import chimeUrl from '../assets/chime.mp3';
 
+// Fallback: show error after N failed reconnects
+const MAX_RECONNECT_ATTEMPTS = 6;
+const reconnectAttempts = ref(0);
+
+const realtimeErrorDismissed = ref(false);
+const showRealtimeError = computed(() => reconnectAttempts.value >= MAX_RECONNECT_ATTEMPTS);
+
+function reloadPage() {
+  window.location.reload();
+}
 const router = useRouter();
 const authStore = useAuthStore();
 
@@ -144,12 +190,30 @@ const newOrderAlert = ref<{
 } | null>(null);
 const businessHour = ref<{ open: string; close: string } | null>(null);
 
-// Audio
-const chime = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+const chime = new Audio(chimeUrl);
+chime.preload = 'auto';
+chime.load();
 const MAX_CHIMES = 15;
 const chimeCount = ref(0);
 const chimeIsRinging = ref(false);
 let chimeInterval: ReturnType<typeof setInterval> | null = null;
+
+// Unlock audio on first user interaction (browser autoplay policy)
+// Without this, audio is silently blocked if the tab hasn't been clicked yet.
+let audioUnlocked = false;
+const unlockAudio = () => {
+  if (audioUnlocked) return;
+  chime
+    .play()
+    .then(() => {
+      chime.pause();
+      chime.currentTime = 0;
+      audioUnlocked = true;
+    })
+    .catch(() => {});
+};
+document.addEventListener('click', unlockAudio);
+document.addEventListener('keydown', unlockAudio);
 
 const startChimeLoop = async () => {
   chimeCount.value = 0;
@@ -291,11 +355,6 @@ const setupRealtimeNotification = () => {
       { event: 'INSERT', schema: 'public', table: 'orders' },
       async (payload) => {
         const withinHours = isWithinBusinessHours();
-        console.log(
-          `%c[Realtime] 🛎 New order #${payload.new.tracking_id} — chime ${withinHours ? '🔔 ON' : '🔇 suppressed (outside hours)'}`,
-          'color:#16a34a;font-weight:bold;'
-        );
-
         newOrderAlert.value = {
           trackingId: payload.new.tracking_id,
           deliveryDate: formatAlertDate(payload.new.delivery_datetime),
@@ -312,14 +371,13 @@ const setupRealtimeNotification = () => {
       }
     )
     .subscribe((status) => {
-      const icon = status === 'SUBSCRIBED' ? '✅' : status === 'CHANNEL_ERROR' ? '❌' : '⚠️';
-      const color =
-        status === 'SUBSCRIBED' ? '#16a34a' : status === 'CHANNEL_ERROR' ? '#dc2626' : '#f59e0b';
-      console.log(`%c[Realtime] ${icon} ${status}`, `color:${color};font-weight:bold;`);
-
+      if (status === 'SUBSCRIBED') {
+        reconnectAttempts.value = 0;
+      }
       if (status === 'TIMED_OUT' || status === 'CLOSED' || status === 'CHANNEL_ERROR') {
-        console.log('%c[Realtime] 🔄 Reconnecting in 5s...', 'color:#f59e0b;font-weight:bold;');
-        reconnectTimer = setTimeout(() => setupRealtimeNotification(), 5000);
+        // Let Supabase handle the actual reconnect automatically.
+        // We only track attempts to show the fatal error UI if it fails repeatedly.
+        reconnectAttempts.value++;
       }
     });
 };
@@ -334,6 +392,8 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize);
   window.removeEventListener('test-order-notification', triggerTestNotification);
+  document.removeEventListener('click', unlockAudio);
+  document.removeEventListener('keydown', unlockAudio);
   stopChimeLoop();
   teardownRealtimeNotification();
 });

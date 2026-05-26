@@ -771,6 +771,7 @@ watch(
 );
 
 // Load saved customer info and reorder pickup time from localStorage OR Supabase
+
 onMounted(async () => {
   await checkAuth();
   if (isAuthenticated.value) {
@@ -815,6 +816,14 @@ onMounted(async () => {
     localStorage.removeItem(STORAGE_KEYS.REORDER_PICKUP_TIME);
   }
 
+  // Restore order type from reorder
+  const savedOrderType = localStorage.getItem(STORAGE_KEYS.REORDER_ORDER_TYPE);
+  if (savedOrderType === 'pickup' || savedOrderType === 'delivery') {
+    orderForm.value.order_type = savedOrderType;
+    onOrderTypeChange();
+    localStorage.removeItem(STORAGE_KEYS.REORDER_ORDER_TYPE);
+  }
+
   validateForm();
 });
 
@@ -854,7 +863,9 @@ const isDateValid = (d: Date) => {
   if (!hours) return false;
 
   // 1. Holiday check (Highest priority - Closed)
-  if (hours.holidays && hours.holidays.includes(dateStr)) return false;
+  if (hours.holidays && hours.holidays.includes(dateStr)) {
+    return false;
+  }
 
   // 2. Special Open Day check (Override business days)
   if (hours.specialDays && hours.specialDays.includes(dateStr)) return true;

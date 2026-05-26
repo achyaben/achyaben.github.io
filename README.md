@@ -3,6 +3,7 @@
 Welcome to the official web ordering platform and landing page for **炭火焼鳥＆インドカレーあちゃー** (Charcoal Grilled Yakitori & Indian Curry Achya).
 
 This repository contains the source code for our online presence:
+
 - **Landing Page**: A static HTML/Tailwind landing page built directly into the repository root (`index.html`), featuring dynamic EN/JA translations, theme toggling, and integrated Google Calendar/Maps.
 - **Ordering System**: A sophisticated Vue 3 POS/Customer ordering PWA, actively powering the `./customer` and `./admin` directories.
 
@@ -21,6 +22,7 @@ Modern Japanese lunch box pre-order system built with Vue 3 and TypeScript.
 ## Features
 
 ### Customer App
+
 - 🍱 Beautiful, mobile-first menu browsing
 - 🛒 Smart cart with customizations and quantity management
 - 📝 Order tracking with user-friendly IDs
@@ -31,6 +33,7 @@ Modern Japanese lunch box pre-order system built with Vue 3 and TypeScript.
 - 📱 PWA-ready for mobile installation
 
 ### Admin App (Coming Soon)
+
 - 📊 Order management dashboard
 - 🗂️ Menu and inventory control
 - 👥 Role-based access control
@@ -46,6 +49,9 @@ Modern Japanese lunch box pre-order system built with Vue 3 and TypeScript.
 - Install dependencies: `yarn install`
 - Run customer app: `yarn workspace customer dev`
 - Run admin app: `yarn workspace admin dev`
+- Regenerate Supabase types: `yarn gen:types`
+
+> **`libs/supabase/types.ts` is auto-generated** — never edit it manually. After adding a migration (new RPC, table, or view), run `yarn gen:types` to sync TypeScript types with the live schema. This runs automatically in the pre-commit hook so committed types are always in sync with the latest schema.
 
 ## Routing for GitHub Pages
 
@@ -63,17 +69,20 @@ Modern Japanese lunch box pre-order system built with Vue 3 and TypeScript.
 ## Architecture
 
 ### PWA Support
+
 - 📱 Installable on mobile devices
 - 🔄 Offline support and asset caching
 - 🚀 Optimized for performance
 
 ### Configuration
+
 - 🏢 Centralized restaurant info configuration
 - 🌐 Hierarchical UI text system for i18n
 - ⚙️ Business hours and validation rules
 - 🎨 Shared design tokens and Tailwind theme
 
 ### Development Tools
+
 - 🛠️ ESLint, Prettier for code quality
 - 🎯 TypeScript for type safety
 - 🎨 Tailwind CSS for styling
@@ -81,6 +90,7 @@ Modern Japanese lunch box pre-order system built with Vue 3 and TypeScript.
 - 🧪 Mock API layer for development
 
 ### Environment Variables
+
 - Place `.env` files in each app for secrets (see `.env.example` in each app).
 
 ## Project Structure
@@ -104,7 +114,6 @@ yakiben/
 ---
 
 For more details, see the code and workflow files in this repo.
-
 
 ## License
 

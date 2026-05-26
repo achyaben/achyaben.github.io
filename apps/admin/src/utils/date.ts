@@ -1,27 +1,49 @@
 const TZ = 'Asia/Tokyo';
+const LOCALE = 'ja-JP';
 
-/** "11:30" */
-export function formatTime(date: string | Date | undefined | null): string {
-  if (!date) return '--:--';
-  return new Intl.DateTimeFormat('ja-JP', {
-    timeZone: TZ,
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(date));
+/**
+ * Generic JST date formatter
+ * @param date - date string or Date
+ * @param options - Intl.DateTimeFormat options
+ * @param fallback - fallback string if date is invalid
+ */
+function formatJST(
+  date: string | Date | undefined | null,
+  options: Intl.DateTimeFormatOptions,
+  fallback = '--'
+): string {
+  if (!date) return fallback;
+  return new Intl.DateTimeFormat(LOCALE, { timeZone: TZ, ...options }).format(new Date(date));
 }
 
-/** "11:30" for today, "4/17 11:30" for any other day */
+/** HH:mm (JST) */
+export function formatTime(date: string | Date | undefined | null): string {
+  return formatJST(date, { hour: '2-digit', minute: '2-digit' }, '--:--');
+}
+
+/**
+ * "HH:mm" if today, else "M/D HH:mm" (JST, no year)
+ */
 export function formatOrderedAt(date: string | Date | undefined | null): string {
   if (!date) return '--';
   const d = new Date(date);
-  const todayStr = new Date().toLocaleDateString('sv-SE', { timeZone: TZ });
-  const dateStr = d.toLocaleDateString('sv-SE', { timeZone: TZ });
-  const timePart = new Intl.DateTimeFormat('ja-JP', {
-    timeZone: TZ,
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(d);
+  const todayStr = formatJST(new Date(), { year: 'numeric', month: '2-digit', day: '2-digit' });
+  const dateStr = formatJST(d, { year: 'numeric', month: '2-digit', day: '2-digit' });
+  const timePart = formatTime(d);
   if (dateStr === todayStr) return timePart;
-  const [, m, day] = dateStr.split('-');
+  const [, m, day] = dateStr.split('/');
   return `${parseInt(m)}/${parseInt(day)} ${timePart}`;
+}
+
+/**
+ * Always returns YYYY/MM/DD HH:mm (JST)
+ */
+export function formatDateJST(date: string | Date | undefined | null): string {
+  if (!date) return '--';
+  const d = new Date(date);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const hhmm = formatTime(d);
+  return `${y}/${m}/${day} ${hhmm}`;
 }

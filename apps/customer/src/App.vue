@@ -59,11 +59,16 @@ onMounted(async () => {
       <!-- Navbar -->
       <div class="bg-white border-b border-gray-200 sticky top-0 z-[100] shadow-sm">
         <div class="container mx-auto px-2 h-16 flex justify-between items-center">
-          <router-link to="/"
-            class="flex items-center space-x-2 text-base md:text-xl font-bold tracking-tight text-gray-900 hover:opacity-80 transition">
-            <img :src="getImageUrl('/assets/achyaben-logo.svg')" alt="App Logo" class="h-8 w-8 rounded-lg" />
-            <!--  smaller appname in sm -->
-            <span class="w-14 text-xs sm:text-base">{{ info.app_name }}</span>
+          <router-link
+            to="/"
+            class="flex items-center space-x-2 font-bold tracking-tight text-gray-900 hover:opacity-80 transition"
+          >
+            <img
+              :src="getImageUrl('/assets/achyaben-logo.svg')"
+              alt="App Logo"
+              class="h-8 w-8 flex-shrink-0 rounded-lg"
+            />
+            <span class="whitespace-nowrap text-sm sm:text-base">{{ info.app_name }}</span>
           </router-link>
           <UserMenu />
         </div>
@@ -73,10 +78,16 @@ onMounted(async () => {
 
       <main>
         <router-view v-slot="{ Component }">
-          <transition name="page" mode="out-in" enter-active-class="transition ease-out duration-200"
-            enter-from-class="opacity-0 translate-y-2" enter-to-class="opacity-100 translate-y-0"
-            leave-active-class="transition ease-in duration-150" leave-from-class="opacity-100 translate-y-0"
-            leave-to-class="opacity-0 translate-y-2">
+          <transition
+            name="page"
+            mode="out-in"
+            enter-active-class="transition ease-out duration-200"
+            enter-from-class="opacity-0 translate-y-2"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition ease-in duration-150"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 translate-y-2"
+          >
             <component :is="Component" />
           </transition>
         </router-view>
@@ -87,7 +98,7 @@ onMounted(async () => {
         <span class="mb-2">&copy; {{ info.name }}</span>
       </footer>
     </template>
-    
+
     <!-- PWA Install Guide -->
     <InstallGuide />
   </div>

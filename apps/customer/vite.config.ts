@@ -6,6 +6,10 @@ import path from 'path';
 export default defineConfig({
   plugins: [vue()],
   base: './',
+  build: {
+    // Transpile to ES2015 so older Android WebViews and LINE browser can run the app
+    target: 'es2015',
+  },
   publicDir: path.resolve(__dirname, '../../public'),
   resolve: {
     alias: {

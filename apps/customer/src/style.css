@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  Override min-h-screen to use dynamic viewport height (dvh) on browsers that support it.
+  dvh accounts for the mobile address bar shrinking/growing, preventing layout shifts.
+  Falls back to 100vh on old browsers (LINE browser, old Android WebView).
+*/
+.min-h-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
 @layer base {
   :root {
     --color-primary: #4f46e5;

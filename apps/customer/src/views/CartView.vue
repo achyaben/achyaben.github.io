@@ -385,14 +385,12 @@
                   <label class="block text-sm font-medium text-gray-700 mb-1"
                     >受け取り日<span class="text-red-500">*</span></label
                   >
-                  <input
+                  <DateSelectPicker
                     v-model="orderForm.deliveryDate"
-                    type="date"
-                    required
-                    :min="minDate"
-                    :max="maxDate"
-                    class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
-                    @change="onDateChange"
+                    :minDate="minDate"
+                    :maxDate="maxDate"
+                    :hours="restaurantInfo?.hours"
+                    @update:modelValue="onDateChange"
                   />
                   <p v-if="validationErrors.deliveryDate" class="mt-1 text-sm text-red-500">
                     {{ validationErrors.deliveryDate }}
@@ -640,12 +638,13 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import CartItem from '../components/CartItem.vue';
+import DateSelectPicker from '../components/DateSelectPicker.vue';
 import { generateTrackingId } from '../data/menu';
 import { STORAGE_KEYS } from '../constants';
 import { ordersApi } from '../data/api/orders';
 import { useCart } from '../stores/cart';
 import { useRestaurantStore } from '../stores/restaurant';
-import { toJSTDateString, toJSTTimeString } from '../utils/date';
+import { toJSTDateString, toJSTTimeString, isDateValid } from '../utils/date';
 import { supabase } from '@app/supabase';
 import type { Order, OrderStatus, PaymentStatus, PaymentMethod } from '../types';
 
@@ -856,26 +855,6 @@ function toLocalISOString(date: Date) {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
-const isDateValid = (d: Date) => {
-  const dayOfWeek = d.getDay();
-  const dateStr = d.toLocaleDateString('sv-SE'); // Consistent YYYY-MM-DD
-  const hours = restaurantInfo.value?.hours;
-  if (!hours) return false;
-
-  // 1. Holiday check (Highest priority - Closed)
-  if (hours.holidays && hours.holidays.includes(dateStr)) {
-    return false;
-  }
-
-  // 2. Special Open Day check (Override business days)
-  if (hours.specialDays && hours.specialDays.includes(dateStr)) return true;
-
-  // 3. Normal Business Day check
-  if (!hours.businessDays.includes(dayOfWeek)) return false;
-
-  return true;
-};
-
 const minDeliveryTime = computed(() => {
   const now = new Date();
   now.setMinutes(now.getMinutes() + (restaurantInfo.value?.hours.minAdvanceTime ?? 30));
@@ -886,7 +865,7 @@ const minDeliveryTime = computed(() => {
   if (now.getHours() >= closingHour) {
     do {
       now.setDate(now.getDate() + 1);
-    } while (!isDateValid(now));
+    } while (!isDateValid(now, restaurantInfo.value?.hours));
     now.setHours(restaurantInfo.value?.hours.open ?? 10, 0, 0, 0);
   } else if (now.getHours() < (restaurantInfo.value?.hours.open ?? 10)) {
     // If before opening time, set to today's open time
@@ -895,7 +874,7 @@ const minDeliveryTime = computed(() => {
 
   // If current day is not a business day, find next business day
   let safetyCounter = 0;
-  while (!isDateValid(now) && safetyCounter < 365) {
+  while (!isDateValid(now, restaurantInfo.value?.hours) && safetyCounter < 365) {
     now.setDate(now.getDate() + 1);
     now.setHours(restaurantInfo.value?.hours.open ?? 10, 0, 0, 0);
     safetyCounter++;
@@ -910,7 +889,7 @@ const maxDeliveryTime = computed(() => {
   let validDaysFound = 0;
 
   while (validDaysFound < (restaurantInfo.value?.hours.maxAdvanceDays ?? 30) && daysChecked < 90) {
-    if (isDateValid(max)) {
+    if (isDateValid(max, restaurantInfo.value?.hours)) {
       validDaysFound++;
     }
     if (validDaysFound < (restaurantInfo.value?.hours.maxAdvanceDays ?? 30)) {

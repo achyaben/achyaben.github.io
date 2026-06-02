@@ -506,9 +506,10 @@
 
             <button
               v-else-if="isAuthenticated"
-              type="submit"
+              type="button"
               :disabled="!isFormValid || isSubmitting || !isMinPriceMet"
               class="w-full bg-primary text-white py-4 rounded-xl font-bold shadow-lg hover:bg-primary-dark transition-all duration-300 transform hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center justify-center font-black text-lg"
+              @click="openConfirm"
             >
               <span v-if="isSubmitting" class="inline-block animate-spin mr-2">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
@@ -564,6 +565,49 @@
         </form>
       </div>
     </main>
+
+    <!-- Order Confirm Modal -->
+    <div
+      v-if="showConfirm"
+      class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+      @click.self="showConfirm = false"
+    >
+      <div class="bg-white rounded-xl p-6 max-w-sm w-full">
+        <h3 class="text-lg font-bold mb-4">注文内容の確認</h3>
+        <div class="space-y-3 mb-6">
+          <div class="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-500">受け取り日</span>
+              <span class="font-medium">{{ orderForm.deliveryDate }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">受け取り時間</span>
+              <span class="font-medium">{{ orderForm.deliveryTimeSlot }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">合計金額</span>
+              <span class="font-bold text-primary">¥{{ cartTotal }}</span>
+            </div>
+          </div>
+          <p class="text-xs text-gray-500 text-center">注文後のキャンセルはお店にご連絡ください</p>
+        </div>
+        <div class="flex gap-3">
+          <button
+            class="flex-1 py-3 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition"
+            @click="showConfirm = false"
+          >
+            戻る
+          </button>
+          <button
+            class="flex-1 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary-dark transition"
+            :disabled="isSubmitting"
+            @click="submitOrder"
+          >
+            {{ isSubmitting ? '処理中...' : '注文を確定する' }}
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- Help Modal -->
     <div
@@ -652,6 +696,13 @@ const router = useRouter();
 const { cartItems, cartTotal, clearCart } = useCart();
 const { info: restaurantInfo, fetchInfo, isLoading } = useRestaurantStore();
 const showHelp = ref(false);
+const showConfirm = ref(false);
+
+function openConfirm() {
+  validateForm();
+  if (!isFormValid.value || isSubmitting.value) return;
+  showConfirm.value = true;
+}
 const isSubmitting = ref(false); // Add loading state
 const isEditingProfile = ref(false);
 
@@ -1114,6 +1165,7 @@ function validateForm() {
 }
 
 async function submitOrder() {
+  showConfirm.value = false;
   validateForm();
   if (!isFormValid.value || isSubmitting.value) return;
 

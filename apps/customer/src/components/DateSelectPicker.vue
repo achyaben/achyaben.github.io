@@ -15,28 +15,40 @@ const emit = defineEmits<{
 
 const DOW_JA = ['日', '月', '火', '水', '木', '金', '土'];
 
-/** All valid selectable dates between minDate and maxDate, as { value: 'YYYY-MM-DD', label: '6月1日(月)' } */
-const availableDates = computed(() => {
+/** All dates between minDate and maxDate with availability info */
+const allDates = computed(() => {
   if (!props.minDate || !props.maxDate) return [];
   const [minY, minM, minD] = props.minDate.split('-').map(Number);
   const [maxY, maxM, maxD] = props.maxDate.split('-').map(Number);
   const start = new Date(minY, minM - 1, minD);
   const end = new Date(maxY, maxM - 1, maxD);
-  const result: { value: string; label: string }[] = [];
+  const result: { value: string; label: string; disabled: boolean; disabledColor: string }[] = [];
   const cursor = new Date(start);
   while (cursor <= end) {
-    if (isDateValid(cursor, props.hours)) {
-      const y = cursor.getFullYear();
-      const m = cursor.getMonth() + 1;
-      const d = cursor.getDate();
-      const dow = DOW_JA[cursor.getDay()];
-      const value = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-      result.push({ value, label: `${m}月${d}日(${dow})` });
+    const y = cursor.getFullYear();
+    const m = cursor.getMonth() + 1;
+    const d = cursor.getDate();
+    const dow = DOW_JA[cursor.getDay()];
+    const value = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const valid = isDateValid(cursor, props.hours);
+
+    // Determine suffix for disabled dates
+    let label = `${m}月${d}日(${dow})`;
+    let disabledColor = '';
+    if (!valid && props.hours) {
+      const isHoliday = props.hours.holidays && props.hours.holidays.includes(value);
+      label += isHoliday ? ' ー 臨時休業' : ' ー 定休日';
+      disabledColor = isHoliday ? '#ef4444' : '#9ca3af'; // red-500 for holidays, gray-400 for regular
     }
+
+    result.push({ value, label, disabled: !valid, disabledColor });
     cursor.setDate(cursor.getDate() + 1);
   }
   return result;
 });
+
+/** Only the selectable dates — used for auto-select logic */
+const availableDates = computed(() => allDates.value.filter((d) => !d.disabled));
 
 // Auto-select the first available date if nothing is selected
 watch(
@@ -70,6 +82,14 @@ function onSelect(e: Event) {
     class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
     @change="onSelect"
   >
-    <option v-for="d in availableDates" :key="d.value" :value="d.value">{{ d.label }}</option>
+    <option
+      v-for="d in allDates"
+      :key="d.value"
+      :value="d.value"
+      :disabled="d.disabled"
+      :style="d.disabledColor ? { color: d.disabledColor } : {}"
+    >
+      {{ d.label }}
+    </option>
   </select>
 </template>

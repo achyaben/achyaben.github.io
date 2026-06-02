@@ -66,6 +66,8 @@ export const ordersApi = {
       paymentStatus: order.payment_status as any,
       orderType: order.order_type as any,
       comments: order.notes,
+      cancel_reason: order.cancel_reason ?? null,
+      cancelled_at: order.cancelled_at ?? null,
     }));
   },
 
@@ -80,6 +82,27 @@ export const ordersApi = {
       return false;
     }
 
+    return true;
+  },
+
+  async cancelOrder(orderId: string, reason?: string): Promise<boolean> {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const { error } = await supabase
+      .from('orders')
+      .update({
+        status: 'cancelled',
+        cancelled_at: new Date().toISOString(),
+        cancelled_by_id: user?.id ?? null,
+        cancel_reason: reason ?? null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', orderId);
+    if (error) {
+      console.error('Failed to cancel order:', error);
+      return false;
+    }
     return true;
   },
 
@@ -104,6 +127,7 @@ export const ordersApi = {
     const orders = await this.getOrders();
     const summaries: Record<string, any> = {};
     orders.forEach((order) => {
+      if (order.status === 'cancelled') return;
       // Use deliveryTime for grouping summaries as requested by the user
       if (!order.deliveryTime) return;
       const utcDate = new Date(order.deliveryTime);

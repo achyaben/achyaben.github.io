@@ -25,6 +25,25 @@ export async function updateOrderStatus(orderId: string, status: string): Promis
   return data ?? [];
 }
 
+// Cancel an order (customer self-cancel or admin cancel)
+export async function cancelOrder(
+  orderId: string,
+  cancelledById: string,
+  reason?: string
+): Promise<void> {
+  const { error } = await supabase
+    .from('orders')
+    .update({
+      status: 'cancelled',
+      cancelled_at: new Date().toISOString(),
+      cancelled_by_id: cancelledById,
+      cancel_reason: reason ?? null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', orderId);
+  if (error) throw error;
+}
+
 // Get most recent pending order
 export async function getMostRecentPendingOrder(): Promise<OrderRow | null> {
   const { data, error } = await supabase

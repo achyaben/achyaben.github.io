@@ -111,6 +111,7 @@ export const UI_TEXT = {
     status: {
       title: '注文状況',
       pending: '確認中',
+      accepted: '受付済み',
       preparing: '調理中',
       delivering: '配達中',
       completed: '完了',

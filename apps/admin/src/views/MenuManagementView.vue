@@ -32,7 +32,9 @@
             <th class="border border-gray-300 px-4 py-2">
               {{ UI_TEXTS.menuManagement.tableHeaders.price }}
             </th>
-            <th class="border border-gray-300 px-4 py-2">Sort</th>
+            <th class="border border-gray-300 px-4 py-2">
+              {{ UI_TEXTS.menuManagement.tableHeaders.sort }}
+            </th>
             <th class="border border-gray-300 px-4 py-2">
               {{ UI_TEXTS.menuManagement.tableHeaders.description }}
             </th>
@@ -129,12 +131,15 @@
           </div>
           <h3 class="font-bold text-lg mb-2">{{ group.name }}</h3>
           <div class="text-xs text-gray-500 mb-2">
-            <span v-if="group.is_required" class="bg-red-100 text-red-800 px-1 rounded mr-1"
-              >Required</span
-            >
-            <span v-else class="bg-gray-200 text-gray-800 px-1 rounded mr-1">Optional</span>
+            <span v-if="group.is_required" class="bg-red-100 text-red-800 px-1 rounded mr-1">{{
+              UI_TEXTS.menuManagement.modals.form.optionBadges.required
+            }}</span>
+            <span v-else class="bg-gray-200 text-gray-800 px-1 rounded mr-1">{{
+              UI_TEXTS.menuManagement.modals.form.optionBadges.optional
+            }}</span>
             <span class="bg-blue-100 text-blue-800 px-1 rounded"
-              >Max: {{ group.max_selections }}</span
+              >{{ UI_TEXTS.menuManagement.modals.form.optionBadges.maxPrefix }}
+              {{ group.max_selections }}</span
             >
           </div>
           <ul class="text-sm space-y-1">
@@ -144,7 +149,7 @@
                 <span
                   v-if="opt.is_default"
                   class="text-xs bg-green-100 text-green-800 px-1 rounded ml-1"
-                  >Default</span
+                  >{{ UI_TEXTS.menuManagement.modals.form.optionBadges.default }}</span
                 ></span
               >
               <span class="text-gray-600">+¥{{ opt.price_add }}</span>
@@ -266,9 +271,9 @@
             </div>
           </div>
           <div class="mb-4">
-            <label for="sort_order" class="block text-sm font-medium text-gray-700"
-              >Sort Order</label
-            >
+            <label for="sort_order" class="block text-sm font-medium text-gray-700">{{
+              UI_TEXTS.menuManagement.modals.form.sortOrderLabel
+            }}</label>
             <input
               v-model.number="currentItem.sort_order"
               type="number"
@@ -341,7 +346,9 @@
         <!-- Constraints -->
         <div class="mb-4 grid grid-cols-3 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700">Max Selections</label>
+            <label class="block text-sm font-medium text-gray-700">{{
+              UI_TEXTS.menuManagement.modals.form.maxSelectionsLabel
+            }}</label>
             <input
               v-model.number="newGroup.max_selections"
               type="number"
@@ -350,7 +357,9 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700">Sort Order</label>
+            <label class="block text-sm font-medium text-gray-700">{{
+              UI_TEXTS.menuManagement.modals.form.sortOrderLabel
+            }}</label>
             <input
               v-model.number="newGroup.sort_order"
               type="number"
@@ -365,18 +374,30 @@
                 type="checkbox"
                 class="rounded text-primary focus:ring-primary"
               />
-              <span class="text-sm font-medium text-gray-700">Required (Min 1)</span>
+              <span class="text-sm font-medium text-gray-700">{{
+                UI_TEXTS.menuManagement.modals.form.requiredLabel
+              }}</span>
             </label>
           </div>
         </div>
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Options</label>
+          <label class="block text-sm font-medium text-gray-700 mb-2">{{
+            UI_TEXTS.menuManagement.modals.form.optionsLabel
+          }}</label>
           <!-- Column headers -->
           <div class="flex gap-2 mb-2 text-xs font-medium text-gray-600">
-            <div class="flex-1">Name</div>
-            <div class="w-20 text-center">Price</div>
-            <div class="w-16 text-center">Order</div>
-            <div class="w-20 text-center">Default</div>
+            <div class="flex-1">
+              {{ UI_TEXTS.menuManagement.modals.form.optionsColumnHeaders.name }}
+            </div>
+            <div class="w-20 text-center">
+              {{ UI_TEXTS.menuManagement.modals.form.optionsColumnHeaders.price }}
+            </div>
+            <div class="w-16 text-center">
+              {{ UI_TEXTS.menuManagement.modals.form.optionsColumnHeaders.order }}
+            </div>
+            <div class="w-20 text-center">
+              {{ UI_TEXTS.menuManagement.modals.form.optionsColumnHeaders.default }}
+            </div>
             <div class="w-5"></div>
           </div>
           <div
@@ -411,7 +432,9 @@
                 type="checkbox"
                 class="rounded text-primary focus:ring-primary"
               />
-              <span class="text-xs text-gray-500">Default</span>
+              <span class="text-xs text-gray-500">{{
+                UI_TEXTS.menuManagement.modals.form.optionBadges.default
+              }}</span>
             </label>
             <button
               @click="opt.id ? (opt.delete = true) : newGroup.options.splice(idx, 1)"

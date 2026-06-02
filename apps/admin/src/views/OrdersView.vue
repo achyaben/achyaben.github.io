@@ -36,7 +36,7 @@
         <button
           v-if="selectedDateFilter !== 'today' || specificDate || searchQuery || postalCodeFilter"
           @click="resetFilters"
-          title="Reset filters"
+          :title="UI_TEXTS.orders.resetFilters"
           class="ml-2 px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300"
         >
           ✕
@@ -50,7 +50,7 @@
         <input
           v-model="postalCodeFilter"
           type="text"
-          placeholder="e.g. 100"
+          :placeholder="UI_TEXTS.orders.postalCodePlaceholder"
           class="border rounded px-2 py-1 w-24 bg-white"
         />
       </div>
@@ -76,7 +76,7 @@
             @click="batchUpdateStatus('ready')"
             class="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 flex items-center justify-center"
           >
-            <span class="font-bold mr-2">✔️</span> Mark All Ready
+            <span class="font-bold mr-2">✔️</span> {{ UI_TEXTS.orders.kitchenPrep.markAllReady }}
           </button>
           <button
             @click="printBatchPrep"
@@ -155,7 +155,7 @@
               v-model="showDeliveryCompleted"
               class="form-checkbox text-blue-500"
             />
-            <span class="text-xs">完了を表示</span>
+            <span class="text-xs">{{ UI_TEXTS.orders.deliveryList.showCompleted }}</span>
           </label>
           <button
             @click="batchUpdateStatus('delivering')"
@@ -205,7 +205,10 @@
                 <td colspan="7" class="px-4 py-2 font-bold text-blue-800 border-y border-blue-100">
                   <div class="flex items-center">
                     <MapPinIcon class="h-4 w-4 mr-1" />
-                    Area: {{ postalCode || 'N/A' }} ({{ group.length }} orders)
+                    {{ UI_TEXTS.orders.deliveryList.areaPrefix }} {{ postalCode || 'N/A' }} ({{
+                      group.length
+                    }}
+                    {{ UI_TEXTS.orders.deliveryList.ordersSuffix }})
                   </div>
                 </td>
               </tr>
@@ -219,7 +222,8 @@
                 <td class="px-4 py-3">
                   <div class="font-medium text-gray-700">{{ formatTime(order.deliveryTime) }}</div>
                   <div class="text-[10px] text-gray-400 mt-0.5">
-                    注文日時: {{ formatOrderedAt(order.createdAt) }}
+                    {{ UI_TEXTS.orders.deliveryList.orderedAtLabel }}
+                    {{ formatOrderedAt(order.createdAt) }}
                   </div>
                 </td>
                 <td class="px-4 py-3">
@@ -293,7 +297,7 @@
             </template>
             <tr v-if="filteredDailyOrders.length === 0">
               <td colspan="7" class="text-center py-12 text-gray-400 italic">
-                No orders found for this area/selection.
+                {{ UI_TEXTS.orders.deliveryList.emptyState }}
               </td>
             </tr>
           </tbody>
@@ -417,7 +421,7 @@
                       "
                       class="px-2 py-1 rounded text-xs font-black border"
                     >
-                      ← 戻す
+                      {{ UI_TEXTS.orders.kanban.buttons.prev }}
                     </button>
                     <button
                       v-if="canUpdateStatus(order)"
@@ -435,13 +439,13 @@
                       "
                       class="px-2 py-1 rounded text-xs font-black text-white"
                     >
-                      次へ →
+                      {{ UI_TEXTS.orders.kanban.buttons.next }}
                     </button>
                   </template>
                   <span
                     v-else
                     class="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-[10px] font-black self-center"
-                    >キャンセル済み</span
+                    >{{ UI_TEXTS.orders.kanban.cancelledBadge }}</span
                   >
                 </div>
               </div>
@@ -488,7 +492,7 @@
               @click="openCancelModal(selectedOrder)"
               class="px-2 py-0.5 rounded text-xs font-black border border-red-300 text-red-500 hover:bg-red-50 transition-colors"
             >
-              ✕ キャンセル
+              {{ UI_TEXTS.orders.cancelInline }}
             </button>
           </div>
           <!-- Customer compact -->
@@ -530,13 +534,15 @@
 
       <!-- Items — main focus -->
       <div class="mb-4">
-        <p class="text-[10px] font-black text-gray-400 uppercase mb-3">Items Summary</p>
+        <p class="text-[10px] font-black text-gray-400 uppercase mb-3">
+          {{ UI_TEXTS.orders.modal.itemsSummary }}
+        </p>
         <table class="w-full text-left">
           <thead class="text-xs text-gray-400 uppercase">
             <tr class="border-b">
-              <th class="pb-2">Item</th>
-              <th class="pb-2 text-center">Qty</th>
-              <th class="pb-2 text-right">Price</th>
+              <th class="pb-2">{{ UI_TEXTS.orders.modal.items.headers.item }}</th>
+              <th class="pb-2 text-center">{{ UI_TEXTS.orders.modal.items.headers.qty }}</th>
+              <th class="pb-2 text-right">{{ UI_TEXTS.orders.modal.items.headers.price }}</th>
             </tr>
           </thead>
           <tbody class="text-sm">
@@ -596,18 +602,18 @@
     @click.self="showCancelModal = false"
   >
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
-      <h3 class="text-lg font-black text-gray-900">注文をキャンセルしますか？</h3>
+      <h3 class="text-lg font-black text-gray-900">{{ UI_TEXTS.orders.cancelModal.title }}</h3>
       <p class="text-sm text-gray-600">
         #{{ cancelTarget?.trackingId }} — {{ cancelTarget?.customer.name }}
       </p>
       <div>
         <label class="block text-sm font-bold text-gray-700 mb-1">
-          キャンセル理由 <span class="text-red-500">*</span>
+          {{ UI_TEXTS.orders.cancelModal.reasonLabel }} <span class="text-red-500">*</span>
         </label>
         <textarea
           v-model="cancelReason"
           rows="3"
-          placeholder="例: 在庫切れ、顧客希望..."
+          :placeholder="UI_TEXTS.orders.cancelModal.reasonPlaceholder"
           class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300 resize-none"
         />
       </div>
@@ -616,14 +622,14 @@
           @click="showCancelModal = false"
           class="flex-1 py-2 rounded-xl border border-gray-300 font-bold text-gray-700 hover:bg-gray-50 text-sm transition-colors"
         >
-          戻る
+          {{ UI_TEXTS.orders.cancelModal.backButton }}
         </button>
         <button
           @click="confirmAdminCancel"
           :disabled="!cancelReason.trim()"
           class="flex-1 py-2 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          キャンセルする
+          {{ UI_TEXTS.orders.cancelModal.confirmButton }}
         </button>
       </div>
     </div>
@@ -645,15 +651,7 @@ const activeTab = ref<keyof typeof UI_TEXTS.orders.tabs>('singleOrders');
 const restaurantAddress = ref('');
 const orders = ref<Order[]>([]);
 const STATUS_FLOW = ['pending', 'accepted', 'preparing', 'ready', 'delivering', 'completed'];
-const STATUS_LABELS: Record<string, string> = {
-  pending: 'Pending',
-  accepted: 'Accepted',
-  preparing: 'Preparing',
-  ready: 'Ready',
-  delivering: 'Delivering',
-  completed: 'Completed',
-  cancelled: 'Cancelled',
-};
+const STATUS_LABELS = UI_TEXTS.orders.statusLabels;
 const selectedOrder = ref<Order | null>(null);
 const route = useRoute();
 const router = useRouter();
@@ -884,6 +882,14 @@ const filteredDailyOrders = computed(() => {
 });
 
 const ordersByPostalCode = computed(() => {
+  // Normalize: strip non-digits, then format as xxx-xxxx if 7 digits, else keep as-is.
+  const normalizePC = (raw: string): string => {
+    const digits = raw.replace(/\D/g, '');
+    if (digits.length === 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    if (digits.length === 3) return digits; // partial filter prefix — leave as-is
+    return raw.trim() || 'Other';
+  };
+
   const groups: Record<string, Order[]> = {};
   filteredDailyOrders.value
     .filter((order) => {
@@ -892,7 +898,7 @@ const ordersByPostalCode = computed(() => {
       return true;
     })
     .forEach((order) => {
-      const pc = order.customer.address.postalCode || 'Other';
+      const pc = normalizePC(order.customer.address.postalCode || '') || 'Other';
       if (!groups[pc]) groups[pc] = [];
       groups[pc].push(order);
     });

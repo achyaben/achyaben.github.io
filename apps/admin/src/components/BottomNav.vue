@@ -25,6 +25,7 @@ import {
   ChartBarIcon,
 } from '@heroicons/vue/24/outline';
 import { USER_ROLES } from '../constants/auth';
+import { UI_TEXTS } from '../constants/ui-texts';
 
 export default {
   props: {
@@ -35,6 +36,7 @@ export default {
   },
   data() {
     return {
+      UI_TEXTS,
       isMobile: window.innerWidth <= 640, // Tailwind's sm breakpoint
     };
   },
@@ -42,33 +44,37 @@ export default {
     filteredMenu() {
       const menu = [
         {
-          name: 'Orders',
+          name: UI_TEXTS.nav.items.orders,
           path: '/orders',
           icon: HomeIcon,
           roles: [USER_ROLES.MANAGER, USER_ROLES.STAFF, USER_ROLES.DRIVER],
         },
         {
-          name: 'Menu Management',
+          name: UI_TEXTS.nav.items.menuManagement,
           path: '/menu-management',
           icon: ClipboardDocumentListIcon,
           roles: [USER_ROLES.MANAGER],
         },
-        // { name: 'User Management', path: '/user-management', icon: UserGroupIcon, roles: [USER_ROLES.MANAGER] },
-        { name: 'Settings', path: '/settings', icon: Cog6ToothIcon, roles: [USER_ROLES.MANAGER] },
         {
-          name: 'Delivery',
+          name: UI_TEXTS.nav.items.settings,
+          path: '/settings',
+          icon: Cog6ToothIcon,
+          roles: [USER_ROLES.MANAGER],
+        },
+        {
+          name: UI_TEXTS.nav.items.delivery,
           path: '/delivery',
           icon: TruckIcon,
           roles: [USER_ROLES.MANAGER, USER_ROLES.DRIVER],
         },
         {
-          name: 'Account',
+          name: UI_TEXTS.nav.items.account,
           path: '/account',
           icon: UserIcon,
           roles: [USER_ROLES.MANAGER, USER_ROLES.STAFF, USER_ROLES.DRIVER],
         },
         {
-          name: 'Order Summary',
+          name: UI_TEXTS.nav.items.orderSummary,
           path: '/order-summary',
           icon: ChartBarIcon,
           roles: [USER_ROLES.MANAGER],

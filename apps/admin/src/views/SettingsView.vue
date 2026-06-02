@@ -248,19 +248,7 @@
                 UI_TEXTS.settings.restaurantSettings.businessDaysLabel
               }}</label>
               <div class="grid grid-cols-2 gap-2">
-                <label
-                  v-for="day in [
-                    'Monday',
-                    'Tuesday',
-                    'Wednesday',
-                    'Thursday',
-                    'Friday',
-                    'Saturday',
-                    'Sunday',
-                  ]"
-                  :key="day"
-                  class="flex items-center"
-                >
+                <label v-for="day in UI_TEXTS.settings.days" :key="day" class="flex items-center">
                   <input
                     type="checkbox"
                     v-model="restaurantSettingsRef.hours.businessDays"
@@ -306,7 +294,7 @@
                   v-if="!restaurantSettingsRef.hours.specialDays?.length"
                   class="text-gray-500 text-sm italic"
                 >
-                  No special open days set.
+                  {{ UI_TEXTS.settings.specialDays.emptyState }}
                 </li>
               </ul>
             </div>
@@ -345,7 +333,7 @@
                   v-if="!restaurantSettingsRef.hours.holidays?.length"
                   class="text-gray-500 text-sm italic"
                 >
-                  No special holidays set.
+                  {{ UI_TEXTS.settings.holidays.emptyState }}
                 </li>
               </ul>
             </div>
@@ -360,27 +348,35 @@
     <div v-if="activeTab === 'settings'">
       <!-- Banner Settings -->
       <div class="border border-blue-500 p-4 rounded mb-4">
-        <h2 class="text-xl font-semibold mb-4 text-blue-800">アナウンスバナー管理</h2>
+        <h2 class="text-xl font-semibold mb-4 text-blue-800">
+          {{ UI_TEXTS.settings.banners.sectionTitle }}
+        </h2>
 
         <!-- Create New Banner -->
         <div class="bg-blue-50 p-4 rounded-lg mb-6 border border-blue-100">
-          <h3 class="text-md font-bold mb-3 text-blue-700">新規バナー作成</h3>
+          <h3 class="text-md font-bold mb-3 text-blue-700">
+            {{ UI_TEXTS.settings.banners.createTitle }}
+          </h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">バナーテキスト</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{
+                UI_TEXTS.settings.banners.bannerTextLabel
+              }}</label>
               <input
                 v-model="newBannerRef.title"
                 type="text"
-                placeholder="例: 7月限定！からあげ弁当100円引き"
+                :placeholder="UI_TEXTS.settings.banners.bannerTextPlaceholder"
                 class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">リンクURL (任意)</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{
+                UI_TEXTS.settings.banners.linkUrlLabel
+              }}</label>
               <input
                 v-model="newBannerRef.link"
                 type="url"
-                placeholder="https://..."
+                :placeholder="UI_TEXTS.settings.banners.linkUrlPlaceholder"
                 class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
               />
             </div>
@@ -389,18 +385,20 @@
             @click="addNewBanner"
             class="w-full md:w-auto px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium shadow-sm"
           >
-            新規バナーを公開
+            {{ UI_TEXTS.settings.banners.publishButton }}
           </button>
         </div>
 
         <!-- Banner History / List -->
         <div>
-          <h3 class="text-md font-bold mb-3 text-gray-700">バナー履歴</h3>
+          <h3 class="text-md font-bold mb-3 text-gray-700">
+            {{ UI_TEXTS.settings.banners.historyTitle }}
+          </h3>
           <div
             v-if="!bannersListRef.length"
             class="text-center py-8 text-gray-500 italic bg-gray-50 rounded-lg"
           >
-            履歴はありません
+            {{ UI_TEXTS.settings.banners.emptyHistory }}
           </div>
           <div v-else class="space-y-3">
             <div
@@ -417,7 +415,11 @@
                     ]"
                     class="text-xs px-2 py-0.5 rounded-full font-bold mr-2 uppercase tracking-wider"
                   >
-                    {{ banner.active ? '表示中' : '非表示' }}
+                    {{
+                      banner.active
+                        ? UI_TEXTS.settings.banners.activeLabel
+                        : UI_TEXTS.settings.banners.inactiveLabel
+                    }}
                   </span>
                   <p class="font-bold text-gray-800 truncate">{{ banner.title }}</p>
                 </div>
@@ -435,14 +437,18 @@
                       : 'bg-green-100 text-green-600 hover:bg-green-200',
                   ]"
                   class="p-2 rounded-md transition-colors"
-                  :title="banner.active ? '非表示にする' : '表示する'"
+                  :title="
+                    banner.active
+                      ? UI_TEXTS.settings.banners.hideTitle
+                      : UI_TEXTS.settings.banners.showTitle
+                  "
                 >
                   <i class="fas" :class="banner.active ? 'fa-eye-slash' : 'fa-eye'"></i>
                 </button>
                 <button
                   @click="deleteBanner(index)"
                   class="p-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors"
-                  title="削除"
+                  :title="UI_TEXTS.settings.banners.deleteTitle"
                 >
                   <i class="fas fa-trash-alt"></i>
                 </button>
@@ -471,10 +477,12 @@
               />
             </svg>
           </div>
-          <h2 class="text-lg font-semibold text-yellow-800">通知音テスト</h2>
+          <h2 class="text-lg font-semibold text-yellow-800">
+            {{ UI_TEXTS.settings.notificationSound.title }}
+          </h2>
         </div>
         <p class="text-sm text-gray-500 mb-3">
-          ボタンを押して注文通知音を確認できます。ブラウザが音声を許可している場合のみ再生されます。
+          {{ UI_TEXTS.settings.notificationSound.helpText }}
         </p>
         <div class="flex items-center gap-3">
           <button

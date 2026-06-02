@@ -38,7 +38,7 @@
           <input type="date" v-model="startDate" class="form-input" />
           <input type="date" v-model="endDate" class="form-input" />
           <button @click="clearFilters" class="bg-red-500 text-white px-4 py-2 rounded">
-            Clear
+            {{ UI_TEXTS.orderSummary.clearButton }}
           </button>
         </div>
 
@@ -72,9 +72,15 @@
               <th class="border-b border-gray-300 py-2">
                 {{ UI_TEXTS.orderSummary.headers.totalRevenue }}
               </th>
-              <th class="border-b border-gray-300 py-2">Cash</th>
-              <th class="border-b border-gray-300 py-2">Card</th>
-              <th class="border-b border-gray-300 py-2">PayPay</th>
+              <th class="border-b border-gray-300 py-2">
+                {{ UI_TEXTS.orderSummary.paymentHeaders.cash }}
+              </th>
+              <th class="border-b border-gray-300 py-2">
+                {{ UI_TEXTS.orderSummary.paymentHeaders.card }}
+              </th>
+              <th class="border-b border-gray-300 py-2">
+                {{ UI_TEXTS.orderSummary.paymentHeaders.paypay }}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -87,7 +93,7 @@
               <td class="py-2">{{ summary.paypay.toFixed(2) }}{{ UI_TEXTS.currency.yen }}</td>
             </tr>
             <tr class="font-bold">
-              <td class="py-2">Total</td>
+              <td class="py-2">{{ UI_TEXTS.orderSummary.totalRowLabel }}</td>
               <td class="py-2">{{ totalOrders }}</td>
               <td class="py-2">{{ totalRevenue.toFixed(2) }}{{ UI_TEXTS.currency.yen }}</td>
               <td class="py-2">{{ totalCash.toFixed(2) }}{{ UI_TEXTS.currency.yen }}</td>
@@ -101,7 +107,7 @@
 
     <!-- Performance and Analysis Tab -->
     <div v-if="activeTab === 'Performance and Analysis'">
-      <h2 class="text-xl font-bold mb-4">Top-Selling Menu Items</h2>
+      <h2 class="text-xl font-bold mb-4">{{ UI_TEXTS.orderSummary.topSellingChartTitle }}</h2>
       <MenuPerformanceChart />
     </div>
   </div>

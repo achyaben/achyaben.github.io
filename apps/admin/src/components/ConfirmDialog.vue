@@ -8,10 +8,10 @@
       <p>{{ message }}</p>
       <div class="flex justify-end gap-2 mt-4">
         <button type="button" class="px-4 py-2 bg-gray-300 rounded" @click="onCancel">
-          Cancel
+          {{ cancelLabel ?? UI_TEXTS.common.cancel }}
         </button>
         <button type="button" class="px-4 py-2 bg-red-500 text-white rounded" @click="onConfirm">
-          Confirm
+          {{ confirmLabel ?? UI_TEXTS.common.confirm }}
         </button>
       </div>
     </div>
@@ -19,10 +19,14 @@
 </template>
 
 <script setup lang="ts">
+import { UI_TEXTS } from '../constants/ui-texts';
+
 const _props = defineProps<{
   isOpen: boolean;
   title: string;
   message: string;
+  cancelLabel?: string;
+  confirmLabel?: string;
 }>();
 
 const emit = defineEmits(['cancel', 'confirm']);

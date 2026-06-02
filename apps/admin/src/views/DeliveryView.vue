@@ -17,29 +17,29 @@
     </div>
 
     <!-- Current Delivery Tab -->
-    <div v-if="activeTab === 'Current Delivery'">
+    <div v-if="activeTab === UI_TEXTS.delivery.tabs.current">
       <div v-if="currentDelivery" class="p-4 bg-white shadow-lg rounded-md">
         <!-- Customer Info Section -->
-        <h3 class="text-base font-semibold mb-2">Customer Info</h3>
+        <h3 class="text-base font-semibold mb-2">{{ UI_TEXTS.delivery.sections.customerInfo }}</h3>
         <div class="space-y-1 mb-4">
           <p class="text-sm">
-            <span class="font-medium">Name:</span>
+            <span class="font-medium">{{ UI_TEXTS.delivery.labels.name }}</span>
             {{ currentDelivery.customer.name }}
           </p>
           <p class="text-sm">
-            <span class="font-medium">Address:</span>
+            <span class="font-medium">{{ UI_TEXTS.delivery.labels.address }}</span>
             {{ currentDelivery.customer.address?.street }},
             {{ currentDelivery.customer.address?.city }}
           </p>
           <p class="text-sm">
-            <span class="font-medium">Comment:</span>
-            {{ currentDelivery.customer.address?.instructions || 'No comments' }}
+            <span class="font-medium">{{ UI_TEXTS.delivery.labels.comment }}</span>
+            {{ currentDelivery.customer.address?.instructions || UI_TEXTS.delivery.noComments }}
           </p>
         </div>
         <hr class="border-gray-300 my-4" />
 
         <!-- Order Details Section -->
-        <h3 class="text-base font-semibold mb-2">Order</h3>
+        <h3 class="text-base font-semibold mb-2">{{ UI_TEXTS.delivery.sections.order }}</h3>
         <div class="p-4 bg-white shadow-lg rounded-md overflow-y-auto max-h-60">
           <ul class="list-disc pl-5 space-y-1 mb-4">
             <li v-for="item in currentDelivery.items" :key="item.id" class="text-sm">
@@ -51,7 +51,7 @@
         <hr class="border-gray-300 my-4" />
 
         <!-- Details Section -->
-        <h3 class="text-base font-semibold mb-2">Order Details</h3>
+        <h3 class="text-base font-semibold mb-2">{{ UI_TEXTS.delivery.sections.orderDetails }}</h3>
         <div class="space-y-1">
           <p class="text-sm">
             <span class="font-medium">Total:</span>
@@ -63,25 +63,27 @@
               v-if="currentDelivery.paymentMethod === 'card'"
               @click="handleCalculateChange"
             >
-              Calculate Change
+              {{ UI_TEXTS.delivery.calculateChange.title }}
             </a>
           </p>
           <p class="text-sm">
-            <span class="font-medium">Payment Method:</span>
+            <span class="font-medium">{{ UI_TEXTS.delivery.labels.paymentMethod }}</span>
             <span class="text-blue-500">{{ currentDelivery.paymentMethod }}</span>
           </p>
           <p class="text-sm">
-            <span class="font-medium">Payment Status:</span>
+            <span class="font-medium">{{ UI_TEXTS.delivery.labels.paymentStatus }}</span>
             <span class="text-red-500">{{ currentDelivery.paymentStatus }}</span>
           </p>
         </div>
         <hr class="border-gray-300 my-4" />
 
         <!-- Delivery Details Section -->
-        <h3 class="text-base font-semibold mb-2">Delivery Details</h3>
+        <h3 class="text-base font-semibold mb-2">
+          {{ UI_TEXTS.delivery.sections.deliveryDetails }}
+        </h3>
         <div class="space-y-1">
           <p class="text-sm">
-            <span class="font-medium">Status:</span>
+            <span class="font-medium">{{ UI_TEXTS.delivery.labels.status }}</span>
             {{ currentDelivery.status }}
           </p>
           <p class="text-sm">
@@ -96,7 +98,7 @@
             target="_blank"
             class="text-blue-500 hover:underline text-sm"
           >
-            View on Map
+            {{ UI_TEXTS.delivery.viewOnMap }}
           </a>
         </div>
         <hr class="border-gray-300 my-4" />
@@ -107,24 +109,24 @@
             @click="markAsDelivered(currentDelivery)"
             class="px-4 py-2 bg-green-500 text-white rounded text-sm"
           >
-            Mark as Delivered
+            {{ UI_TEXTS.delivery.markAsDelivered }}
           </button>
           <button
             @click="contactCustomer(currentDelivery)"
             class="px-4 py-2 bg-blue-500 text-white rounded text-sm"
           >
-            Contact Customer
+            {{ UI_TEXTS.delivery.contactCustomer }}
           </button>
         </div>
       </div>
       <div v-else class="text-center text-gray-500">
-        <p class="text-sm">No current delivery assigned.</p>
+        <p class="text-sm">{{ UI_TEXTS.delivery.noCurrentDelivery }}</p>
       </div>
     </div>
 
     <!-- My Deliveries Tab -->
-    <div v-if="activeTab === 'My Deliveries'">
-      <h2 class="text-lg font-bold mb-4 text-center">My Deliveries</h2>
+    <div v-if="activeTab === UI_TEXTS.delivery.tabs.myDeliveries">
+      <h2 class="text-lg font-bold mb-4 text-center">{{ UI_TEXTS.delivery.tabs.myDeliveries }}</h2>
       <div class="flex justify-between items-center mb-4">
         <label class="flex items-center space-x-2">
           <input
@@ -132,7 +134,7 @@
             v-model="hideDelivered"
             class="form-checkbox h-4 w-4 text-blue-500"
           />
-          <span class="text-sm">Hide Delivered</span>
+          <span class="text-sm">{{ UI_TEXTS.delivery.hideDelivered }}</span>
         </label>
       </div>
       <div
@@ -147,17 +149,17 @@
         <hr class="border-gray-300 my-2" />
         <div class="space-y-1">
           <p class="text-sm">
-            <span class="font-medium">Customer:</span>
+            <span class="font-medium">{{ UI_TEXTS.delivery.labels.customer }}</span>
             {{ order.customer.name }}
           </p>
           <p class="text-sm">
-            <span class="font-medium">Address:</span>
+            <span class="font-medium">{{ UI_TEXTS.delivery.labels.address }}</span>
             {{ order.customer.address?.street }},
             {{ order.customer.address?.city }}
           </p>
           <p class="text-sm">
-            <span class="font-medium">Comment:</span>
-            {{ order.customer.address?.instructions || 'No comments' }}
+            <span class="font-medium">{{ UI_TEXTS.delivery.labels.comment }}</span>
+            {{ order.customer.address?.instructions || UI_TEXTS.delivery.noComments }}
           </p>
           <p class="text-sm">
             <span class="font-medium">Delivery Time:</span>
@@ -166,13 +168,15 @@
               {{ calculateCountdown(order.deliveryTime) }}
             </span>
             <span v-else class="text-sm text-green-500">
-              Delivered at: {{ formatTime(order.deliveredAt) }} </span
+              {{ UI_TEXTS.delivery.labels.deliveredAt }} {{ formatTime(order.deliveredAt) }} </span
             >)
           </p>
         </div>
         <hr class="border-gray-300 my-2" />
         <details class="bg-gray-100 p-2 rounded-md">
-          <summary class="cursor-pointer text-sm font-medium text-blue-500">Order Summary</summary>
+          <summary class="cursor-pointer text-sm font-medium text-blue-500">
+            {{ UI_TEXTS.delivery.orderSummary }}
+          </summary>
           <ul class="list-disc pl-5 space-y-1 mt-2">
             <li v-for="item in order.items" :key="item.id" class="text-sm">
               <span class="font-medium">{{ item.name }}</span>
@@ -190,7 +194,7 @@
             @click="startDelivery(order)"
             class="px-4 py-2 bg-blue-500 text-white rounded text-sm"
           >
-            Start Delivery
+            {{ UI_TEXTS.delivery.startDelivery }}
           </button>
         </div>
       </div>
@@ -210,29 +214,32 @@
     <template v-if="showChangeModal">
       <div class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
         <div class="bg-white p-6 rounded shadow-lg w-80">
-          <h3 class="text-lg font-semibold mb-4">Calculate Change</h3>
-          <label class="block text-sm font-medium mb-2">Given Amount:</label>
+          <h3 class="text-lg font-semibold mb-4">{{ UI_TEXTS.delivery.calculateChange.title }}</h3>
+          <label class="block text-sm font-medium mb-2">{{
+            UI_TEXTS.delivery.calculateChange.givenAmountLabel
+          }}</label>
           <input
             v-model="givenAmount"
             type="number"
             class="w-full border border-gray-300 rounded px-3 py-2 mb-4"
-            placeholder="Enter amount"
+            :placeholder="UI_TEXTS.delivery.calculateChange.givenAmountPlaceholder"
           />
           <p v-if="changeAmount !== null" class="text-sm text-green-500 mb-4">
-            Change to return: {{ changeAmount.toFixed(2) }}{{ UI_TEXTS.currency.yen }}
+            {{ UI_TEXTS.delivery.calculateChange.changeToReturn }} {{ changeAmount.toFixed(2)
+            }}{{ UI_TEXTS.currency.yen }}
           </p>
           <div class="flex justify-end space-x-2">
             <button
               @click="closeChangeModal"
               class="px-4 py-2 bg-gray-500 text-white rounded text-sm"
             >
-              Cancel
+              {{ UI_TEXTS.delivery.calculateChange.cancelButton }}
             </button>
             <button
               @click="calculateChangeAmount"
               class="px-4 py-2 bg-blue-500 text-white rounded text-sm"
             >
-              Calculate
+              {{ UI_TEXTS.delivery.calculateChange.calculateButton }}
             </button>
           </div>
         </div>
@@ -248,8 +255,8 @@ import ConfirmDialog from '../components/ConfirmDialog.vue';
 import { formatTime } from '../utils/date';
 import type { Order } from '../types/types';
 
-const tabs = ['Current Delivery', 'My Deliveries'];
-const activeTab = ref('Current Delivery');
+const tabs = [UI_TEXTS.delivery.tabs.current, UI_TEXTS.delivery.tabs.myDeliveries];
+const activeTab = ref(UI_TEXTS.delivery.tabs.current);
 
 import { useAuthStore } from '../stores/auth';
 import { UI_TEXTS } from '../constants/ui-texts';
@@ -291,12 +298,12 @@ const confirmDialogProps = ref({ title: '', message: '' });
 const markAsDelivered = (order: Order) => {
   if (order.paymentStatus !== 'completed') {
     confirmDialogProps.value = {
-      title: 'Payment Reminder',
+      title: UI_TEXTS.delivery.dialogs.paymentReminder,
       message: `Payment status is '${order.paymentStatus}'. Please confirm payment before marking as delivered.`,
     };
   } else {
     confirmDialogProps.value = {
-      title: 'Delivery Confirmation',
+      title: UI_TEXTS.delivery.dialogs.deliveryConfirmation,
       message: `Order ${order.id} will be marked as delivered.`,
     };
   }

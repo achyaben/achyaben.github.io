@@ -7,6 +7,8 @@ const props = defineProps<{
   minDate: string;
   maxDate: string;
   hours?: DateValidationHours;
+  /** Earliest date the customer can actually order. Dates before this are shown as disabled (past deadline or holiday). */
+  firstOrderableDate?: string;
 }>();
 
 const emit = defineEmits<{
@@ -14,6 +16,11 @@ const emit = defineEmits<{
 }>();
 
 const DOW_JA = ['日', '月', '火', '水', '木', '金', '土'];
+
+const todayStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' });
+const tomorrowDate = new Date();
+tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+const tomorrowStr = tomorrowDate.toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' });
 
 /** All dates between minDate and maxDate with availability info */
 const allDates = computed(() => {
@@ -34,11 +41,20 @@ const allDates = computed(() => {
 
     // Determine suffix for disabled dates
     let label = `${m}月${d}日(${dow})`;
+    if (value === todayStr) label = `今日 ${label}`;
+    else if (value === tomorrowStr) label = `明日 ${label}`;
     let disabledColor = '';
     if (!valid && props.hours) {
       const isHoliday = props.hours.holidays && props.hours.holidays.includes(value);
       label += isHoliday ? ' ー 臨時休業' : ' ー 定休日';
-      disabledColor = isHoliday ? '#ef4444' : '#9ca3af'; // red-500 for holidays, gray-400 for regular
+      disabledColor = isHoliday ? '#ef4444' : '#9ca3af';
+    } else if (valid && props.firstOrderableDate && value < props.firstOrderableDate) {
+      // Business day but past today's order deadline
+      label += ' ー 本日の受付終了';
+      disabledColor = '#f97316'; // orange-500
+      result.push({ value, label, disabled: true, disabledColor });
+      cursor.setDate(cursor.getDate() + 1);
+      continue;
     }
 
     result.push({ value, label, disabled: !valid, disabledColor });

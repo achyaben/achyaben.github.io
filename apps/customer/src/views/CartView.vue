@@ -385,11 +385,18 @@
                   <label class="block text-sm font-medium text-gray-700 mb-1"
                     >受け取り日<span class="text-red-500">*</span></label
                   >
+                  <p
+                    v-if="todayUnavailableReason"
+                    class="mb-1.5 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1.5"
+                  >
+                    ⚠️ {{ todayUnavailableReason }}
+                  </p>
                   <DateSelectPicker
                     v-model="orderForm.deliveryDate"
-                    :minDate="minDate"
+                    :minDate="todayDate"
                     :maxDate="maxDate"
                     :hours="restaurantInfo?.hours"
+                    :firstOrderableDate="minDate"
                     @update:modelValue="onDateChange"
                   />
                   <p v-if="validationErrors.deliveryDate" class="mt-1 text-sm text-red-500">
@@ -407,7 +414,7 @@
                     class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
                     :disabled="!orderForm.deliveryDate || !availableTimeSlots.length"
                   >
-                    <option value="" disabled>時間を選択してください</option>
+                    <option value="" disabled>{{ UI_TEXT.cart.fulfillment.timeSelect }}</option>
                     <option v-for="time in availableTimeSlots" :key="time" :value="time">
                       {{ time }}
                     </option>
@@ -419,16 +426,18 @@
                     v-if="orderForm.deliveryDate && !availableTimeSlots.length"
                     class="mt-1 text-sm text-red-500"
                   >
-                    選択された日は予約可能な時間がありません
+                    {{ UI_TEXT.cart.fulfillment.noSlotsAvailable }}
                   </p>
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">備考</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">{{
+                    UI_TEXT.cart.fulfillment.notesLabel
+                  }}</label>
                   <textarea
                     v-model="orderForm.notes"
                     rows="2"
-                    placeholder="アレルギーなどの注意事項があればご記入ください"
+                    :placeholder="UI_TEXT.cart.fulfillment.notesPlaceholder"
                     class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
                   ></textarea>
                 </div>
@@ -573,37 +582,49 @@
       @click.self="showConfirm = false"
     >
       <div class="bg-white rounded-xl p-6 max-w-sm w-full">
-        <h3 class="text-lg font-bold mb-4">注文内容の確認</h3>
+        <h3 class="text-lg font-bold mb-4">{{ UI_TEXT.cart.confirm.title }}</h3>
         <div class="space-y-3 mb-6">
           <div class="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
-            <div class="flex justify-between">
-              <span class="text-gray-500">受け取り日</span>
-              <span class="font-medium">{{ orderForm.deliveryDate }}</span>
+            <div class="flex justify-between items-center">
+              <span class="text-gray-500">{{ UI_TEXT.cart.confirm.pickupDate }}</span>
+              <span class="font-medium flex items-center gap-1.5">
+                <span
+                  v-if="orderForm.deliveryDate === todayDate"
+                  class="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-semibold"
+                  >{{ UI_TEXT.cart.confirm.todayBadge }}</span
+                >
+                <span
+                  v-else-if="orderForm.deliveryDate === tomorrowDate"
+                  class="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-semibold"
+                  >{{ UI_TEXT.cart.confirm.tomorrowBadge }}</span
+                >
+                {{ orderForm.deliveryDate }}
+              </span>
             </div>
             <div class="flex justify-between">
-              <span class="text-gray-500">受け取り時間</span>
+              <span class="text-gray-500">{{ UI_TEXT.cart.confirm.pickupTime }}</span>
               <span class="font-medium">{{ orderForm.deliveryTimeSlot }}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-gray-500">合計金額</span>
+              <span class="text-gray-500">{{ UI_TEXT.cart.confirm.totalAmount }}</span>
               <span class="font-bold text-primary">¥{{ cartTotal }}</span>
             </div>
           </div>
-          <p class="text-xs text-gray-500 text-center">注文後のキャンセルはお店にご連絡ください</p>
+          <p class="text-xs text-gray-500 text-center">{{ UI_TEXT.cart.confirm.cancelNote }}</p>
         </div>
         <div class="flex gap-3">
           <button
             class="flex-1 py-3 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition"
             @click="showConfirm = false"
           >
-            戻る
+            {{ UI_TEXT.cart.confirm.back }}
           </button>
           <button
             class="flex-1 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary-dark transition"
             :disabled="isSubmitting"
             @click="submitOrder"
           >
-            {{ isSubmitting ? '処理中...' : '注文を確定する' }}
+            {{ isSubmitting ? UI_TEXT.common.processing : UI_TEXT.cart.confirm.submit }}
           </button>
         </div>
       </div>
@@ -684,6 +705,7 @@ import { useRouter } from 'vue-router';
 import CartItem from '../components/CartItem.vue';
 import DateSelectPicker from '../components/DateSelectPicker.vue';
 import { generateTrackingId } from '../data/menu';
+import { UI_TEXT } from '../constants/ui-text';
 import { STORAGE_KEYS } from '../constants';
 import { ordersApi } from '../data/api/orders';
 import { useCart } from '../stores/cart';
@@ -959,6 +981,39 @@ const minDate = computed(() => {
   return minDeliveryTime.value.split('T')[0];
 });
 
+// Always start from today so customers can see why earlier dates are unavailable
+const todayDate = computed(() => {
+  return new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' });
+});
+
+/** Explains why today is not orderable, or null if today is fine. */
+const todayUnavailableReason = computed((): string | null => {
+  if (!restaurantInfo.value?.hours) return null;
+  if (minDate.value <= todayDate.value) return null; // today is orderable
+
+  const hours = restaurantInfo.value.hours;
+  const today = todayDate.value;
+
+  if (hours.holidays && (hours.holidays as string[]).includes(today)) {
+    return UI_TEXT.cart.dateNotice.holiday;
+  }
+  const todayDow = new Date(today + 'T00:00:00').getDay();
+  const isBusinessDay =
+    (hours.specialDays && (hours.specialDays as string[]).includes(today)) ||
+    (hours.businessDays && (hours.businessDays as number[]).includes(todayDow));
+  if (!isBusinessDay) {
+    return UI_TEXT.cart.dateNotice.closed;
+  }
+  return UI_TEXT.cart.dateNotice.deadlinePassed;
+});
+
+/** Tomorrow's date string in JST — used for 明日 badge */
+const tomorrowDate = computed(() => {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return d.toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' });
+});
+
 // Return YYYY-MM-DD for max attribute of date input
 const maxDate = computed(() => {
   if (!maxDeliveryTime.value) return '';
@@ -1031,14 +1086,14 @@ const availableTimeSlots = computed(() => {
 const earliestPickupInfo = computed(() => {
   const date = orderForm.value.deliveryDate || minDate.value;
   const slots = getTimeSlots('pickup', date);
-  if (slots.length === 0) return '本日不可';
+  if (slots.length === 0) return UI_TEXT.cart.orderType.unavailableToday;
   return `${slots[0]} 〜 ${slots[slots.length - 1]}`;
 });
 
 const earliestDeliveryInfo = computed(() => {
   const date = orderForm.value.deliveryDate || minDate.value;
   const slots = getTimeSlots('delivery', date);
-  if (slots.length === 0) return '本日不可';
+  if (slots.length === 0) return UI_TEXT.cart.orderType.unavailableToday;
   return `${slots[0]} 〜 ${slots[slots.length - 1]}`;
 });
 
@@ -1137,7 +1192,7 @@ function validateForm() {
 
   // Date/Time validation
   if (!orderForm.value.deliveryDate) {
-    validationErrors.value.deliveryDate = '受け取り日を選択してください';
+    validationErrors.value.deliveryDate = UI_TEXT.cart.validation.required;
   } else {
     const dateStr = orderForm.value.deliveryDate;
     const hours = restaurantInfo.value?.hours;
@@ -1160,7 +1215,7 @@ function validateForm() {
   }
 
   if (orderForm.value.deliveryDate && !orderForm.value.deliveryTimeSlot) {
-    validationErrors.value.deliveryTimeSlot = '受け取り時間を選択してください';
+    validationErrors.value.deliveryTimeSlot = UI_TEXT.cart.validation.deliveryTime.required;
   }
 }
 
@@ -1173,7 +1228,6 @@ async function submitOrder() {
 
   try {
     const trackingId = generateTrackingId();
-    // const fullAddress = ... (removed unused variable)
 
     // Construct the payload to match what the Edge Function expects
     const deliveryDateTime = `${orderForm.value.deliveryDate}T${orderForm.value.deliveryTimeSlot}:00`;
@@ -1224,7 +1278,6 @@ async function submitOrder() {
     // Redirect to order history page instead of detail
     await router.push({ name: 'history' });
 
-    // Optional: Show a toast/success message before redirecting?
     // For now, history view is sufficient confirmation.
   } catch (error) {
     console.error('Order submission failed:', error);

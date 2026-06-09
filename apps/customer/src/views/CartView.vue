@@ -461,7 +461,27 @@
                   value="cash"
                   class="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
                 />
-                <span class="ml-3">現金</span>
+                <span class="ml-3">{{ UI_TEXT.cart.payment.cash }}</span>
+              </label>
+
+              <!-- Card: pickup only -->
+              <label
+                v-if="orderForm.order_type === 'pickup'"
+                class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                :class="{ 'border-primary bg-primary/5': orderForm.paymentMethod === 'card' }"
+              >
+                <input
+                  type="radio"
+                  v-model="orderForm.paymentMethod"
+                  value="card"
+                  class="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
+                />
+                <div class="ml-3">
+                  <span class="font-medium">{{ UI_TEXT.cart.payment.card }}</span>
+                  <span class="text-sm text-gray-500 ml-2">{{
+                    UI_TEXT.cart.payment.cardNote
+                  }}</span>
+                </div>
               </label>
 
               <label
@@ -476,7 +496,9 @@
                 />
                 <div class="ml-3">
                   <span class="font-bold text-[#0095EE]">PayPay</span>
-                  <span class="text-sm text-gray-500 ml-2">(受け取り時に決済)</span>
+                  <span class="text-sm text-gray-500 ml-2">{{
+                    UI_TEXT.cart.payment.payLater
+                  }}</span>
                 </div>
               </label>
             </div>
@@ -1105,6 +1127,10 @@ const onDateChange = () => {
 
 const onOrderTypeChange = () => {
   orderForm.value.deliveryTimeSlot = '';
+  // Card is only available for pickup — reset to cash if switching to delivery
+  if (orderForm.value.order_type === 'delivery' && orderForm.value.paymentMethod === 'card') {
+    orderForm.value.paymentMethod = 'cash';
+  }
   validateForm();
 };
 

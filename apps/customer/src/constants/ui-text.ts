@@ -60,8 +60,10 @@ export const UI_TEXT = {
     payment: {
       title: 'お支払い方法',
       cash: '現金',
+      card: 'クレジットカード',
       paypay: 'PayPay',
       payLater: '(受け取り時に決済)',
+      cardNote: '(店頭にてカード決済)',
       completed: '支払い完了',
       pending: '未決済',
     },

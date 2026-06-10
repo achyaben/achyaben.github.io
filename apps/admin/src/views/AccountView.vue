@@ -1,9 +1,9 @@
 <template>
   <div v-if="user.role === 'manager'" class="text-left p-4 mb-4">
-    <h1 class="text-xl font-bold mb-6 text-left">Manage Other Users</h1>
-    <router-link to="/user-management" class="underline text-red-500"
-      >Go To User Management</router-link
-    >
+    <h1 class="text-xl font-bold mb-6 text-left">{{ UI_TEXTS.account.manageOtherUsers }}</h1>
+    <router-link to="/user-management" class="underline text-red-500">{{
+      UI_TEXTS.account.goToUserManagement
+    }}</router-link>
   </div>
   <div class="account-view p-4 bg-white shadow-md rounded-lg max-w-md mx-auto relative mt-8">
     <br />
@@ -13,7 +13,7 @@
       @click="startEditing"
       class="absolute top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
     >
-      Edit
+      {{ UI_TEXTS.account.editingText }}
     </button>
     <h2 v-if="isEditing" class="text-lg font-semibold text-center text-blue-500 mt-2">
       {{ UI_TEXTS.account.editingText }}

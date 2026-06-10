@@ -31,26 +31,28 @@
         <div
           class="bg-red-600 text-white rounded-2xl shadow-2xl px-8 py-8 flex flex-col items-center animate-pulse max-w-[90vw] w-full max-w-md"
         >
-          <span class="font-bold text-2xl mb-4">⚠️ 注文通知の接続が失われました</span>
+          <span class="font-bold text-2xl mb-4">{{ UI_TEXTS.layout.connectionLost.title }}</span>
           <p class="mb-6 text-lg text-center">
-            ページをリロードしてください。<br />新しい注文の通知が届きません。
+            {{ UI_TEXTS.layout.connectionLost.body }}<br />{{
+              UI_TEXTS.layout.connectionLost.noNotifications
+            }}
           </p>
           <div class="flex gap-4 mt-2">
             <button
               @click="reloadPage"
               class="bg-white text-red-600 font-bold px-6 py-3 rounded shadow hover:bg-red-100 transition-colors text-lg"
             >
-              ページを再読み込み
+              {{ UI_TEXTS.layout.connectionLost.reloadButton }}
             </button>
             <button
               @click="realtimeErrorDismissed = true"
               class="bg-red-700/80 text-white font-bold px-6 py-3 rounded shadow hover:bg-red-800 transition-colors text-lg"
             >
-              警告を閉じる
+              {{ UI_TEXTS.layout.connectionLost.dismissButton }}
             </button>
           </div>
           <p class="mt-4 text-sm text-white/80 text-center">
-            ※ 警告を閉じても新しい注文の通知は届きません。
+            {{ UI_TEXTS.layout.connectionLost.footer }}
           </p>
         </div>
       </div>
@@ -96,7 +98,9 @@
               </svg>
             </div>
             <div class="flex-1 cursor-pointer">
-              <p class="text-4xl font-black italic tracking-wide leading-tight">NEW ORDER!</p>
+              <p class="text-4xl font-black italic tracking-wide leading-tight">
+                {{ UI_TEXTS.layout.newOrder.title }}
+              </p>
               <div class="text-base font-bold bg-white/15 px-4 py-1.5 rounded-xl w-fit mt-2">
                 #{{ newOrderAlert.trackingId }}
               </div>
@@ -107,7 +111,7 @@
             <button
               class="hover:bg-white/10 p-2 rounded-xl transition-colors self-start shrink-0"
               @click.stop="dismissWithDateSet"
-              title="閉じる"
+              :title="UI_TEXTS.layout.newOrder.closeTitle"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -143,12 +147,12 @@
               class="flex-1 text-center py-3 text-sm font-bold opacity-70 cursor-pointer hover:bg-white/5"
               @click.stop="dismissWithDateSet"
             >
-              ✕ 閉じるのみ
+              {{ UI_TEXTS.layout.newOrder.closeOnly }}
             </div>
             <div
               class="flex-1 text-center py-3 text-sm font-black bg-white/10 cursor-pointer hover:bg-white/20"
             >
-              ✓ 開く＆受付
+              {{ UI_TEXTS.layout.newOrder.openAndAccept }}
             </div>
           </div>
         </div>
@@ -166,6 +170,7 @@ import { useAuthStore } from '../stores/auth';
 import { supabase } from '@app/supabase';
 import { settingsApi } from '../api/settings';
 import chimeUrl from '../assets/chime.mp3';
+import { UI_TEXTS } from '../constants/ui-texts';
 
 // Fallback: show error after N failed reconnects
 const MAX_RECONNECT_ATTEMPTS = 6;

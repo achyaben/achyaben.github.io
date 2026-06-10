@@ -196,6 +196,8 @@ export const ordersApi = {
           order_type: o.order_type,
           createdAt: o.created_at,
           updatedAt: o.updated_at,
+          cancel_reason: o.cancel_reason ?? null,
+          cancelled_at: o.cancelled_at ?? null,
           customer: {
             name: 'Me', // RLS restricted
             phone: '', // Could fetch profile if needed
@@ -228,6 +230,29 @@ export const ordersApi = {
     // Customer app usually doesn't update orders directly except maybe cancelling
     console.warn('updateOrder not implemented for customer app');
     return updatedOrder;
+  },
+
+  // Cancel an order (customer self-cancel — RLS enforces time window)
+  async cancelOrder(orderId: string, reason: string): Promise<boolean> {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return false;
+    const { error } = await supabase
+      .from('orders')
+      .update({
+        status: 'cancelled',
+        cancelled_at: new Date().toISOString(),
+        cancelled_by_id: user.id,
+        cancel_reason: reason,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', orderId);
+    if (error) {
+      console.error('Failed to cancel order:', error);
+      return false;
+    }
+    return true;
   },
 
   // Get most recent pending order

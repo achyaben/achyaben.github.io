@@ -10,7 +10,7 @@
             class="w-2 h-2 rounded-full animate-pulse"
             :class="{
               'bg-yellow-500':
-                activeOrder.status === 'pending' || activeOrder.status === 'confirmed',
+                activeOrder.status === 'pending' || activeOrder.status === 'accepted',
               'bg-orange-500': activeOrder.status === 'preparing',
               'bg-blue-500': activeOrder.status === 'delivering' || activeOrder.status === 'ready',
               'bg-green-500': activeOrder.status === 'completed',
@@ -21,7 +21,7 @@
             class="font-medium"
             :class="{
               'text-yellow-800':
-                activeOrder.status === 'pending' || activeOrder.status === 'confirmed',
+                activeOrder.status === 'pending' || activeOrder.status === 'accepted',
               'text-orange-800': activeOrder.status === 'preparing',
               'text-blue-800':
                 activeOrder.status === 'delivering' || activeOrder.status === 'ready',
@@ -64,7 +64,7 @@ const activeOrder = ref<Order | null>(null);
 
 const statusText = {
   pending: '注文確認中',
-  confirmed: '受信済み',
+  accepted: '受付済み',
   preparing: '調理中',
   ready: '準備完了',
   delivering: '配達中',

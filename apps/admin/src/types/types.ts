@@ -36,6 +36,8 @@ export interface Order {
   updatedAt: string;
   comments?: string; // mapped from notes in DB
   // notes?: string; // not used directly, use comments
+  cancel_reason?: string | null;
+  cancelled_at?: string | null;
   driver?: User;
   deliveredAt?: string;
 }

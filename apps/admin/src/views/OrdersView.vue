@@ -36,7 +36,7 @@
         <button
           v-if="selectedDateFilter !== 'today' || specificDate || searchQuery || postalCodeFilter"
           @click="resetFilters"
-          title="Reset filters"
+          :title="UI_TEXTS.orders.resetFilters"
           class="ml-2 px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300"
         >
           ✕
@@ -50,7 +50,7 @@
         <input
           v-model="postalCodeFilter"
           type="text"
-          placeholder="e.g. 100"
+          :placeholder="UI_TEXTS.orders.postalCodePlaceholder"
           class="border rounded px-2 py-1 w-24 bg-white"
         />
       </div>
@@ -76,7 +76,7 @@
             @click="batchUpdateStatus('ready')"
             class="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 flex items-center justify-center"
           >
-            <span class="font-bold mr-2">✔️</span> Mark All Ready
+            <span class="font-bold mr-2">✔️</span> {{ UI_TEXTS.orders.kitchenPrep.markAllReady }}
           </button>
           <button
             @click="printBatchPrep"
@@ -155,7 +155,7 @@
               v-model="showDeliveryCompleted"
               class="form-checkbox text-blue-500"
             />
-            <span class="text-xs">完了を表示</span>
+            <span class="text-xs">{{ UI_TEXTS.orders.deliveryList.showCompleted }}</span>
           </label>
           <button
             @click="batchUpdateStatus('delivering')"
@@ -205,7 +205,10 @@
                 <td colspan="7" class="px-4 py-2 font-bold text-blue-800 border-y border-blue-100">
                   <div class="flex items-center">
                     <MapPinIcon class="h-4 w-4 mr-1" />
-                    Area: {{ postalCode || 'N/A' }} ({{ group.length }} orders)
+                    {{ UI_TEXTS.orders.deliveryList.areaPrefix }} {{ postalCode || 'N/A' }} ({{
+                      group.length
+                    }}
+                    {{ UI_TEXTS.orders.deliveryList.ordersSuffix }})
                   </div>
                 </td>
               </tr>
@@ -219,7 +222,8 @@
                 <td class="px-4 py-3">
                   <div class="font-medium text-gray-700">{{ formatTime(order.deliveryTime) }}</div>
                   <div class="text-[10px] text-gray-400 mt-0.5">
-                    注文日時: {{ formatOrderedAt(order.createdAt) }}
+                    {{ UI_TEXTS.orders.deliveryList.orderedAtLabel }}
+                    {{ formatOrderedAt(order.createdAt) }}
                   </div>
                 </td>
                 <td class="px-4 py-3">
@@ -293,7 +297,7 @@
             </template>
             <tr v-if="filteredDailyOrders.length === 0">
               <td colspan="7" class="text-center py-12 text-gray-400 italic">
-                No orders found for this area/selection.
+                {{ UI_TEXTS.orders.deliveryList.emptyState }}
               </td>
             </tr>
           </tbody>
@@ -327,10 +331,21 @@
             <h2
               class="text-xs font-black mb-4 uppercase tracking-widest text-gray-600 flex justify-between"
             >
-              {{ status }}
-              <span class="bg-white bg-opacity-50 px-2 py-0.5 rounded-full">{{
-                filteredOrdersByStatus[status].length
-              }}</span>
+              {{ STATUS_LABELS[status] || status }}
+              <span class="flex gap-1 items-center">
+                <span class="bg-white bg-opacity-50 px-2 py-0.5 rounded-full">{{
+                  filteredOrdersByStatus[status].filter((o: Order) => o.status !== 'cancelled')
+                    .length
+                }}</span>
+                <span
+                  v-if="filteredOrdersByStatus[status].some((o: Order) => o.status === 'cancelled')"
+                  class="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-[10px]"
+                  >✕{{
+                    filteredOrdersByStatus[status].filter((o: Order) => o.status === 'cancelled')
+                      .length
+                  }}</span
+                >
+              </span>
             </h2>
 
             <div
@@ -389,42 +404,49 @@
                   >
                 </div>
                 <div class="flex gap-1">
-                  <button
-                    v-if="order.status !== 'pending'"
-                    @click.stop="updateOrderStatus(order, 'prev')"
-                    :class="
-                      STATUS_FLOW.indexOf(order.status) === 1
-                        ? 'bg-orange-100 hover:bg-orange-200 text-orange-700 border-orange-300'
-                        : STATUS_FLOW.indexOf(order.status) === 2
-                          ? 'bg-blue-100 hover:bg-blue-200 text-blue-700 border-blue-300'
-                          : STATUS_FLOW.indexOf(order.status) === 3
-                            ? 'bg-purple-100 hover:bg-purple-200 text-purple-700 border-purple-300'
-                            : STATUS_FLOW.indexOf(order.status) === 4
-                              ? 'bg-green-100 hover:bg-green-200 text-green-700 border-green-300'
-                              : 'bg-yellow-100 hover:bg-yellow-200 text-yellow-700 border-yellow-300'
-                    "
-                    class="px-2 py-1 rounded text-xs font-black border"
-                  >
-                    ← 戻す
-                  </button>
-                  <button
-                    v-if="canUpdateStatus(order)"
-                    @click.stop="updateOrderStatus(order)"
-                    :class="
-                      STATUS_FLOW.indexOf(order.status) === 0
-                        ? 'bg-blue-500 hover:bg-blue-600'
-                        : STATUS_FLOW.indexOf(order.status) === 1
-                          ? 'bg-purple-500 hover:bg-purple-600'
+                  <template v-if="order.status !== 'cancelled'">
+                    <button
+                      v-if="order.status !== 'pending'"
+                      @click.stop="updateOrderStatus(order, 'prev')"
+                      :class="
+                        STATUS_FLOW.indexOf(order.status) === 1
+                          ? 'bg-orange-100 hover:bg-orange-200 text-orange-700 border-orange-300'
                           : STATUS_FLOW.indexOf(order.status) === 2
-                            ? 'bg-green-500 hover:bg-green-600'
+                            ? 'bg-blue-100 hover:bg-blue-200 text-blue-700 border-blue-300'
                             : STATUS_FLOW.indexOf(order.status) === 3
-                              ? 'bg-yellow-500 hover:bg-yellow-600'
-                              : 'bg-gray-500 hover:bg-gray-600'
-                    "
-                    class="px-2 py-1 rounded text-xs font-black text-white"
+                              ? 'bg-purple-100 hover:bg-purple-200 text-purple-700 border-purple-300'
+                              : STATUS_FLOW.indexOf(order.status) === 4
+                                ? 'bg-green-100 hover:bg-green-200 text-green-700 border-green-300'
+                                : 'bg-yellow-100 hover:bg-yellow-200 text-yellow-700 border-yellow-300'
+                      "
+                      class="px-2 py-1 rounded text-xs font-black border"
+                    >
+                      {{ UI_TEXTS.orders.kanban.buttons.prev }}
+                    </button>
+                    <button
+                      v-if="canUpdateStatus(order)"
+                      @click.stop="updateOrderStatus(order)"
+                      :class="
+                        STATUS_FLOW.indexOf(order.status) === 0
+                          ? 'bg-blue-500 hover:bg-blue-600'
+                          : STATUS_FLOW.indexOf(order.status) === 1
+                            ? 'bg-purple-500 hover:bg-purple-600'
+                            : STATUS_FLOW.indexOf(order.status) === 2
+                              ? 'bg-green-500 hover:bg-green-600'
+                              : STATUS_FLOW.indexOf(order.status) === 3
+                                ? 'bg-yellow-500 hover:bg-yellow-600'
+                                : 'bg-gray-500 hover:bg-gray-600'
+                      "
+                      class="px-2 py-1 rounded text-xs font-black text-white"
+                    >
+                      {{ UI_TEXTS.orders.kanban.buttons.next }}
+                    </button>
+                  </template>
+                  <span
+                    v-else
+                    class="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-[10px] font-black self-center"
+                    >{{ UI_TEXTS.orders.kanban.cancelledBadge }}</span
                   >
-                    次へ →
-                  </button>
                 </div>
               </div>
             </div>
@@ -461,10 +483,17 @@
             <span
               :class="
                 getStatusColor(selectedOrder.status) +
-                ' px-2 py-0.5 rounded-full text-xs font-black uppercase'
+                ' px-2 py-0.5 rounded-full text-xs font-black'
               "
-              >{{ selectedOrder.status }}</span
+              >{{ STATUS_LABELS[selectedOrder.status] || selectedOrder.status }}</span
             >
+            <button
+              v-if="!['cancelled', 'completed'].includes(selectedOrder.status)"
+              @click="openCancelModal(selectedOrder)"
+              class="px-2 py-0.5 rounded text-xs font-black border border-red-300 text-red-500 hover:bg-red-50 transition-colors"
+            >
+              {{ UI_TEXTS.orders.cancelInline }}
+            </button>
           </div>
           <!-- Customer compact -->
           <p class="text-base font-black mt-1">{{ selectedOrder.customer.name }}</p>
@@ -505,13 +534,15 @@
 
       <!-- Items — main focus -->
       <div class="mb-4">
-        <p class="text-[10px] font-black text-gray-400 uppercase mb-3">Items Summary</p>
+        <p class="text-[10px] font-black text-gray-400 uppercase mb-3">
+          {{ UI_TEXTS.orders.modal.itemsSummary }}
+        </p>
         <table class="w-full text-left">
           <thead class="text-xs text-gray-400 uppercase">
             <tr class="border-b">
-              <th class="pb-2">Item</th>
-              <th class="pb-2 text-center">Qty</th>
-              <th class="pb-2 text-right">Price</th>
+              <th class="pb-2">{{ UI_TEXTS.orders.modal.items.headers.item }}</th>
+              <th class="pb-2 text-center">{{ UI_TEXTS.orders.modal.items.headers.qty }}</th>
+              <th class="pb-2 text-right">{{ UI_TEXTS.orders.modal.items.headers.price }}</th>
             </tr>
           </thead>
           <tbody class="text-sm">
@@ -527,6 +558,17 @@
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Cancel reason -->
+      <div
+        v-if="selectedOrder.status === 'cancelled'"
+        class="bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-4"
+      >
+        <p class="text-[10px] font-black text-red-400 uppercase tracking-widest mb-1">
+          キャンセル理由
+        </p>
+        <p class="text-sm text-red-700">{{ selectedOrder.cancel_reason || '—' }}</p>
       </div>
 
       <!-- Total + payment -->
@@ -552,6 +594,46 @@
       </div>
     </div>
   </div>
+
+  <!-- Admin Cancel Confirm Modal -->
+  <div
+    v-if="showCancelModal"
+    class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[200] p-4"
+    @click.self="showCancelModal = false"
+  >
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+      <h3 class="text-lg font-black text-gray-900">{{ UI_TEXTS.orders.cancelModal.title }}</h3>
+      <p class="text-sm text-gray-600">
+        #{{ cancelTarget?.trackingId }} — {{ cancelTarget?.customer.name }}
+      </p>
+      <div>
+        <label class="block text-sm font-bold text-gray-700 mb-1">
+          {{ UI_TEXTS.orders.cancelModal.reasonLabel }} <span class="text-red-500">*</span>
+        </label>
+        <textarea
+          v-model="cancelReason"
+          rows="3"
+          :placeholder="UI_TEXTS.orders.cancelModal.reasonPlaceholder"
+          class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300 resize-none"
+        />
+      </div>
+      <div class="flex gap-3 pt-1">
+        <button
+          @click="showCancelModal = false"
+          class="flex-1 py-2 rounded-xl border border-gray-300 font-bold text-gray-700 hover:bg-gray-50 text-sm transition-colors"
+        >
+          {{ UI_TEXTS.orders.cancelModal.backButton }}
+        </button>
+        <button
+          @click="confirmAdminCancel"
+          :disabled="!cancelReason.trim()"
+          class="flex-1 py-2 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          {{ UI_TEXTS.orders.cancelModal.confirmButton }}
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -569,6 +651,7 @@ const activeTab = ref<keyof typeof UI_TEXTS.orders.tabs>('singleOrders');
 const restaurantAddress = ref('');
 const orders = ref<Order[]>([]);
 const STATUS_FLOW = ['pending', 'accepted', 'preparing', 'ready', 'delivering', 'completed'];
+const STATUS_LABELS = UI_TEXTS.orders.statusLabels;
 const selectedOrder = ref<Order | null>(null);
 const route = useRoute();
 const router = useRouter();
@@ -799,11 +882,23 @@ const filteredDailyOrders = computed(() => {
 });
 
 const ordersByPostalCode = computed(() => {
+  // Normalize: strip non-digits, then format as xxx-xxxx if 7 digits, else keep as-is.
+  const normalizePC = (raw: string): string => {
+    const digits = raw.replace(/\D/g, '');
+    if (digits.length === 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    if (digits.length === 3) return digits; // partial filter prefix — leave as-is
+    return raw.trim() || 'Other';
+  };
+
   const groups: Record<string, Order[]> = {};
   filteredDailyOrders.value
-    .filter((order) => showDeliveryCompleted.value || order.status !== 'completed')
+    .filter((order) => {
+      if (order.status === 'cancelled') return false;
+      if (!showDeliveryCompleted.value && order.status === 'completed') return false;
+      return true;
+    })
     .forEach((order) => {
-      const pc = order.customer.address.postalCode || 'Other';
+      const pc = normalizePC(order.customer.address.postalCode || '') || 'Other';
       if (!groups[pc]) groups[pc] = [];
       groups[pc].push(order);
     });
@@ -856,19 +951,18 @@ const filteredOrdersByStatus = computed(() => {
   return STATUS_FLOW.reduce(
     (acc: Record<string, Order[]>, status: string) => {
       acc[status] = filteredDailyOrders.value.filter((order: Order) => {
-        const matchesStatus = order.status === status;
+        // Cancelled orders bucket into the 'completed' column
+        const effectiveStatus = order.status === 'cancelled' ? 'completed' : order.status;
+        const matchesStatus = effectiveStatus === status;
 
         // Smart Filtering Logic per Tab
         let isVisible = true;
         if (activeTab.value === 'kitchenPrep') {
-          // Only show 'preparing' orders in kitchen tab
           isVisible = order.status === 'preparing';
         } else if (activeTab.value === 'deliveryList') {
-          // Delivery tab hides completed
-          isVisible = order.status !== 'completed';
+          isVisible = !['completed', 'cancelled'].includes(order.status);
         } else if (hideDeliveredAndDelivering.value) {
-          // General view hides delivering and completed
-          isVisible = !['delivering', 'completed'].includes(order.status);
+          isVisible = !['delivering', 'completed', 'cancelled'].includes(order.status);
         }
 
         return matchesStatus && isVisible;
@@ -893,6 +987,32 @@ const filteredStatuses = computed(() => {
 const canUpdateStatus = (order: Order) => {
   return STATUS_FLOW.indexOf(order.status) < STATUS_FLOW.length - 1;
 };
+
+const cancelTarget = ref<Order | null>(null);
+const showCancelModal = ref(false);
+const cancelReason = ref('');
+
+function openCancelModal(order: Order) {
+  cancelTarget.value = order;
+  cancelReason.value = '';
+  showCancelModal.value = true;
+}
+
+async function confirmAdminCancel() {
+  if (!cancelTarget.value || !cancelReason.value.trim()) return;
+  const success = await ordersApi.cancelOrder(cancelTarget.value.id, cancelReason.value.trim());
+  if (success) {
+    cancelTarget.value.status = 'cancelled';
+    if (selectedOrder.value?.id === cancelTarget.value.id) {
+      selectedOrder.value.status = 'cancelled';
+    }
+  } else {
+    alert('キャンセルに失敗しました。');
+  }
+  showCancelModal.value = false;
+  cancelTarget.value = null;
+  cancelReason.value = '';
+}
 
 const manualStatusUpdate = async (order: Order) => {
   const success = await ordersApi.updateOrderStatus(order.id, order.status);
@@ -953,6 +1073,8 @@ const getStatusColor = (status: string) => {
       return 'bg-yellow-100 text-yellow-800 border-yellow-200';
     case 'completed':
       return 'bg-gray-100 text-gray-800 border-gray-200';
+    case 'cancelled':
+      return 'bg-red-100 text-red-800 border-red-200';
     default:
       return 'bg-gray-100 text-gray-800 border-gray-200';
   }

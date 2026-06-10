@@ -95,7 +95,7 @@
                       'text-green-600': order.status === 'completed',
                       'text-blue-600': order.status === 'delivering' || order.status === 'ready',
                       'text-orange-500': order.status === 'preparing',
-                      'text-yellow-600': order.status === 'pending' || order.status === 'confirmed',
+                      'text-yellow-600': order.status === 'pending' || order.status === 'accepted',
                       'text-red-600': order.status === 'cancelled',
                     }"
                   >
@@ -121,7 +121,7 @@ const orders = ref<Order[]>([]);
 
 const statusText = {
   pending: '注文確認中',
-  confirmed: '受信済み',
+  accepted: '受付済み',
   preparing: '調理中',
   ready: '準備完了',
   delivering: '配達中',

@@ -41,7 +41,7 @@ export interface CartItem {
 
 export type OrderStatus =
   | 'pending'
-  | 'confirmed'
+  | 'accepted'
   | 'preparing'
   | 'ready'
   | 'delivering'
@@ -79,4 +79,6 @@ export interface Order {
   total: number;
   createdAt: string;
   updatedAt: string;
+  cancel_reason?: string | null;
+  cancelled_at?: string | null;
 }

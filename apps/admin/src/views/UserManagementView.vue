@@ -13,7 +13,7 @@
         "
         class="pb-2 font-medium"
       >
-        Admin Staff
+        {{ UI_TEXTS.userManagement.tabs.staff }}
       </button>
       <button
         @click="activeTab = USER_MANAGEMENT_TABS.CUSTOMERS"
@@ -24,7 +24,7 @@
         "
         class="pb-2 font-medium"
       >
-        Customers
+        {{ UI_TEXTS.userManagement.tabs.customers }}
       </button>
     </div>
 
@@ -34,7 +34,7 @@
       <thead>
         <tr class="bg-gray-50 text-left text-sm font-semibold text-gray-700">
           <th class="px-6 py-3 border-b">{{ UI_TEXTS.userManagement.tableHeaders.name }}</th>
-          <th class="px-6 py-3 border-b">Login</th>
+          <th class="px-6 py-3 border-b">{{ UI_TEXTS.userManagement.loginColumnHeader }}</th>
           <th class="px-6 py-3 border-b">{{ UI_TEXTS.userManagement.tableHeaders.email }}</th>
           <th class="px-6 py-3 border-b">{{ UI_TEXTS.userManagement.tableHeaders.role }}</th>
           <th class="px-6 py-3 border-b">{{ UI_TEXTS.userManagement.tableHeaders.actions }}</th>
@@ -44,19 +44,40 @@
         <tr v-for="user in filteredUsers" :key="user.id" class="hover:bg-gray-50 transition-colors">
           <td class="px-6 py-4 text-sm font-medium text-gray-900">
             <div class="flex items-center">
-              <img v-if="user.avatar_url" :src="user.avatar_url" class="w-8 h-8 rounded-full mr-2 border border-gray-100" />
-              <div v-else class="w-8 h-8 rounded-full bg-gray-100 mr-2 flex items-center justify-center text-xs text-gray-400">?</div>
+              <img
+                v-if="user.avatar_url"
+                :src="user.avatar_url"
+                class="w-8 h-8 rounded-full mr-2 border border-gray-100"
+              />
+              <div
+                v-else
+                class="w-8 h-8 rounded-full bg-gray-100 mr-2 flex items-center justify-center text-xs text-gray-400"
+              >
+                ?
+              </div>
               {{ user.name }}
             </div>
           </td>
           <td class="px-6 py-4 text-sm font-medium text-gray-900">
             <div class="flex items-center">
-              <img v-if="user.provider === 'line'" src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" alt="LINE" class="w-5 h-5 mr-1" />
-              <img v-else-if="user.provider === 'google'" src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" class="w-5 h-5 mr-1" />
+              <img
+                v-if="user.provider === 'line'"
+                src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg"
+                alt="LINE"
+                class="w-5 h-5 mr-1"
+              />
+              <img
+                v-else-if="user.provider === 'google'"
+                src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
+                alt="Google"
+                class="w-5 h-5 mr-1"
+              />
               <span class="text-xs text-gray-500 capitalize">{{ user.provider || 'Other' }}</span>
             </div>
           </td>
-          <td class="px-6 py-4 text-sm text-gray-600">{{ user.email || '(No Email)' }}</td>
+          <td class="px-6 py-4 text-sm text-gray-600">
+            {{ user.email || UI_TEXTS.userManagement.noEmail }}
+          </td>
           <td class="px-6 py-4 text-sm">
             <span
               :class="getRoleBadgeClass(user.role)"
@@ -87,15 +108,29 @@
         <h2 class="text-xl font-bold mb-4">{{ UI_TEXTS.userManagement.modals.editUser.title }}</h2>
         <form @submit.prevent="saveUser">
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700">User</label>
+            <label class="block text-sm font-medium text-gray-700">{{
+              UI_TEXTS.userManagement.editModal.userLabel
+            }}</label>
             <div class="mt-1 p-2 bg-gray-50 rounded border text-sm text-gray-600 flex items-center">
-              <img v-if="currentUser.provider === 'line'" src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" alt="LINE" class="w-4 h-4 mr-2" />
-              <img v-else-if="currentUser.provider === 'google'" src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" class="w-4 h-4 mr-2" />
+              <img
+                v-if="currentUser.provider === 'line'"
+                src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg"
+                alt="LINE"
+                class="w-4 h-4 mr-2"
+              />
+              <img
+                v-else-if="currentUser.provider === 'google'"
+                src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
+                alt="Google"
+                class="w-4 h-4 mr-2"
+              />
               {{ currentUser.name }} ({{ currentUser.email || 'LINE' }})
             </div>
           </div>
           <div class="mb-4">
-            <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
+            <label for="role" class="block text-sm font-medium text-gray-700">{{
+              UI_TEXTS.userManagement.editModal.roleLabel
+            }}</label>
             <select
               v-model="currentUser.role"
               id="role"
@@ -147,7 +182,13 @@ import type { UserManagementTab } from '../constants/auth';
 const users = ref<User[]>([]);
 const isEditModalOpen = ref(false);
 const isDeleteDialogOpen = ref(false);
-const currentUser = ref<User>({ id: '', name: '', email: '', role: USER_ROLES.STAFF, provider: 'google' });
+const currentUser = ref<User>({
+  id: '',
+  name: '',
+  email: '',
+  role: USER_ROLES.STAFF,
+  provider: 'google',
+});
 const deleteUserId = ref<string | null>(null);
 const activeTab = ref<UserManagementTab>(USER_MANAGEMENT_TABS.STAFF);
 

@@ -143,19 +143,29 @@
                 {{ order.order_type === 'pickup' ? '店頭受取' : 'お届け' }}
               </span>
             </div>
-            <div class="text-right">
-              <span
-                :class="{
-                  'text-green-600': order.status === 'completed',
-                  'text-blue-600': order.status === 'delivering',
-                  'text-orange-500': order.status === 'preparing',
-                  'text-yellow-600': order.status === 'pending',
-                  'text-red-600': order.status === 'cancelled',
-                }"
-                class="font-medium"
-              >
-                {{ (UI_TEXT.order.status as any)[order.status] || order.status }}
-              </span>
+            <div class="text-right flex flex-col items-end gap-1">
+              <div class="flex items-center gap-2">
+                <span
+                  v-if="order.status !== 'cancelled'"
+                  :class="{
+                    'text-green-600': order.status === 'completed',
+                    'text-blue-600': order.status === 'delivering',
+                    'text-orange-500': order.status === 'preparing',
+                    'text-yellow-600': order.status === 'pending',
+                  }"
+                  class="font-medium"
+                >
+                  {{ (UI_TEXT.order.status as any)[order.status] || order.status }}
+                </span>
+                <button
+                  v-if="canCancel"
+                  @click="showCancelConfirm = true"
+                  :disabled="isCancelling"
+                  class="text-xs px-2 py-0.5 rounded border border-red-300 text-red-500 hover:bg-red-50 transition-colors font-bold disabled:opacity-40"
+                >
+                  ✕ キャンセル
+                </button>
+              </div>
               <div class="text-sm text-gray-500">
                 {{ formatDate(order.createdAt) }}
               </div>
@@ -189,6 +199,17 @@
               </span>
             </div>
           </div>
+        </div>
+
+        <!-- Cancel Reason Notice -->
+        <div
+          v-if="order.status === 'cancelled' && order.cancel_reason"
+          class="bg-red-50 border border-red-200 rounded-lg p-4"
+        >
+          <p class="text-xs font-black text-red-500 uppercase tracking-widest mb-1">
+            キャンセル理由
+          </p>
+          <p class="text-sm text-red-700">{{ order.cancel_reason }}</p>
         </div>
 
         <!-- Order Details -->
@@ -289,7 +310,55 @@
             }}</span>
           </button>
         </div>
+        <!-- Cancel: must call (<60 min window) -->
+        <div v-if="callRequired" class="text-center text-sm text-gray-600 py-1">
+          キャンセルはお電話にて承ります
+          <a
+            v-if="restaurantInfo?.phone"
+            :href="`tel:${restaurantInfo.phone}`"
+            class="ml-1 text-primary font-bold underline"
+            >{{ restaurantInfo.phone }}</a
+          >
+        </div>
       </main>
+
+      <!-- Cancel Confirm Modal -->
+      <div
+        v-if="showCancelConfirm"
+        class="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 px-4 pb-4 sm:pb-0"
+        @click.self="showCancelConfirm = false"
+      >
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 space-y-4">
+          <h3 class="text-lg font-bold text-gray-900">注文をキャンセルしますか？</h3>
+          <p class="text-sm text-gray-600">キャンセルは取り消せません。</p>
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-1">
+              キャンセル理由 <span class="text-red-500">*</span>
+            </label>
+            <textarea
+              v-model="cancelReason"
+              rows="3"
+              placeholder="例: 都合が悪くなりました..."
+              class="w-full rounded-lg border-gray-300 text-sm focus:border-red-400 focus:ring-red-400 resize-none"
+            />
+          </div>
+          <div class="flex gap-3 pt-1">
+            <button
+              @click="showCancelConfirm = false"
+              class="flex-1 py-3 rounded-xl border border-gray-300 font-bold text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              戻る
+            </button>
+            <button
+              @click="confirmCancel"
+              :disabled="!cancelReason.trim()"
+              class="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              キャンセルする
+            </button>
+          </div>
+        </div>
+      </div>
 
       <!-- Print Layout -->
       <div v-if="order" class="hidden print:block p-8">
@@ -382,7 +451,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { STORAGE_KEYS } from '../constants';
 import { useRestaurantStore } from '../stores/restaurant';
@@ -401,6 +470,28 @@ const { clearCart } = useCart();
 const order = ref<Order | null>(null);
 const isReordering = ref(false);
 const isLoading = ref(true);
+const showCancelConfirm = ref(false);
+const isCancelling = ref(false);
+const cancelReason = ref('');
+
+// Can self-cancel: pending/accepted and delivery > 60 min away
+const canCancel = computed(() => {
+  if (!order.value) return false;
+  const s = order.value.status;
+  if (s !== 'pending' && s !== 'accepted') return false;
+  if (!order.value.deliveryTime) return false;
+  return new Date(order.value.deliveryTime).getTime() > Date.now() + 60 * 60 * 1000;
+});
+
+// Within 60 min window: must call to cancel
+const callRequired = computed(() => {
+  if (!order.value) return false;
+  const s = order.value.status;
+  if (s !== 'pending' && s !== 'accepted') return false;
+  if (!order.value.deliveryTime) return false;
+  const dt = new Date(order.value.deliveryTime).getTime();
+  return dt <= Date.now() + 60 * 60 * 1000 && dt > Date.now();
+});
 
 import { getImageUrl } from '../utils/image';
 import { formatDate, formatDateLong } from '../utils/date';
@@ -585,6 +676,26 @@ async function reorder() {
     console.error('Reorder failed:', error);
   } finally {
     isReordering.value = false;
+  }
+}
+
+async function confirmCancel() {
+  if (!order.value || isCancelling.value || !cancelReason.value.trim()) return;
+  isCancelling.value = true;
+  showCancelConfirm.value = false;
+  try {
+    const success = await ordersApi.cancelOrder(order.value.id, cancelReason.value.trim());
+    if (success) {
+      order.value = { ...order.value, status: 'cancelled' };
+    } else {
+      alert('キャンセルに失敗しました。もう一度お試しください。');
+    }
+  } catch (e) {
+    console.error(e);
+    alert('キャンセルに失敗しました。もう一度お試しください。');
+  } finally {
+    isCancelling.value = false;
+    cancelReason.value = '';
   }
 }
 

@@ -1,10 +1,12 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+  <div
+    class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100"
+  >
     <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden">
       <div class="px-8 py-10">
         <div class="text-center mb-8">
-          <h1 class="text-4xl font-bold text-gray-800 mb-2">Admin Login</h1>
-          <p class="text-gray-600">Sign in with your authorized Google account</p>
+          <h1 class="text-4xl font-bold text-gray-800 mb-2">{{ UI_TEXTS.login.title }}</h1>
+          <p class="text-gray-600">{{ UI_TEXTS.login.subtitle }}</p>
         </div>
 
         <div v-if="error" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -14,10 +16,9 @@
         <div id="google-signin-button" class="flex justify-center"></div>
 
         <div class="mt-8 p-4 bg-blue-50 rounded-lg">
-          <p class="text-sm text-blue-800 font-medium mb-2">ℹ️ Admin Access Required</p>
+          <p class="text-sm text-blue-800 font-medium mb-2">{{ UI_TEXTS.login.infoBadge }}</p>
           <p class="text-xs text-blue-700">
-            Only authorized staff accounts can access this admin panel. Please sign in with your
-            registered Google account.
+            {{ UI_TEXTS.login.infoText }}
           </p>
         </div>
       </div>
@@ -29,6 +30,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import { UI_TEXTS } from '../constants/ui-texts';
 
 const router = useRouter();
 const authStore = useAuthStore();

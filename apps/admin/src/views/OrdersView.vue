@@ -395,8 +395,17 @@
                     </span>
                   </div>
                 </div>
-                <div class="text-sm font-black px-2 py-0.5 rounded bg-gray-100 text-gray-700">
-                  {{ formatTime(order.deliveryTime) }}
+                <div class="flex items-center gap-1">
+                  <button
+                    @click.stop="printSingleOrder(order)"
+                    class="inline-flex h-7 w-7 items-center justify-center rounded border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
+                    :title="UI_TEXTS.orders.kanban.buttons.print"
+                  >
+                    <PrinterIcon class="h-4 w-4" />
+                  </button>
+                  <div class="text-sm font-black px-2 py-0.5 rounded bg-gray-100 text-gray-700">
+                    {{ formatTime(order.deliveryTime) }}
+                  </div>
                 </div>
               </div>
               <p class="text-xs italic text-gray-400 mb-0.5">{{ order.customer.company || '' }}</p>

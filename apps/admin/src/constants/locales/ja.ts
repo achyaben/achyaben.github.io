@@ -41,6 +41,7 @@ export const ja = {
       closeTitle: '閉じる',
       closeOnly: '✕ 閉じるのみ',
       openAndAccept: '✓ 開く＆受付',
+      printAndAccept: '受付＆印刷',
     },
   },
   settings: {

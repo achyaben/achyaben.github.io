@@ -41,6 +41,7 @@ export const en = {
       closeTitle: 'Close',
       closeOnly: '✕ Close Only',
       openAndAccept: '✓ Open & Accept',
+      printAndAccept: 'Accept & Print',
     },
   },
   settings: {

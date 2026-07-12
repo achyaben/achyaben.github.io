@@ -151,8 +151,15 @@
             </div>
             <div
               class="flex-1 text-center py-3 text-sm font-black bg-white/10 cursor-pointer hover:bg-white/20"
+              @click.stop="openOrderFromAlert"
             >
               {{ UI_TEXTS.layout.newOrder.openAndAccept }}
+            </div>
+            <div
+              class="flex-1 text-center py-3 text-sm font-black bg-white/20 cursor-pointer hover:bg-white/30"
+              @click.stop="openOrderFromAlertWithPrint"
+            >
+              {{ UI_TEXTS.layout.newOrder.printAndAccept }}
             </div>
           </div>
         </div>
@@ -269,7 +276,22 @@ const openOrderFromAlert = () => {
   const trackingId = newOrderAlert.value.trackingId;
   const dateRaw = newOrderAlert.value.deliveryDateRaw || '';
   dismissAlert();
-  router.push({ path: '/orders', query: { open: trackingId, date: dateRaw, accept: '1' } });
+  router.push({
+    path: '/orders',
+    query: { open: trackingId, date: dateRaw, accept: '1' },
+  });
+};
+
+const openOrderFromAlertWithPrint = () => {
+  if (!newOrderAlert.value) return;
+  const trackingId = newOrderAlert.value.trackingId;
+  const dateRaw = newOrderAlert.value.deliveryDateRaw || '';
+  window.open('', 'single-order-print');
+  dismissAlert();
+  router.push({
+    path: '/orders',
+    query: { open: trackingId, date: dateRaw, accept: '1', print: '1' },
+  });
 };
 
 const dismissWithDateSet = () => {

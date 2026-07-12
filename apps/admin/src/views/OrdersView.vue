@@ -196,13 +196,16 @@
               <th class="px-4 py-3 border-b text-center">
                 {{ UI_TEXTS.orders.deliveryList.headers.status }}
               </th>
+              <th class="px-4 py-3 border-b text-center">
+                {{ UI_TEXTS.orders.kanban.buttons.print }}
+              </th>
             </tr>
           </thead>
           <tbody>
             <template v-for="(group, postalCode) in ordersByPostalCode" :key="postalCode">
               <!-- Postal Code Group Header -->
               <tr class="bg-blue-50">
-                <td colspan="7" class="px-4 py-2 font-bold text-blue-800 border-y border-blue-100">
+                <td colspan="8" class="px-4 py-2 font-bold text-blue-800 border-y border-blue-100">
                   <div class="flex items-center">
                     <MapPinIcon class="h-4 w-4 mr-1" />
                     {{ UI_TEXTS.orders.deliveryList.areaPrefix }} {{ postalCode || 'N/A' }} ({{
@@ -293,10 +296,19 @@
                     <option v-for="s in STATUS_FLOW" :key="s" :value="s">{{ s }}</option>
                   </select>
                 </td>
+                <td class="px-4 py-3 text-center" @click.stop>
+                  <button
+                    @click="printSingleOrder(order)"
+                    class="inline-flex items-center justify-center rounded-md border border-gray-300 px-2 py-1 text-gray-600 hover:bg-gray-50 transition-colors"
+                    :title="UI_TEXTS.orders.kanban.buttons.print"
+                  >
+                    <PrinterIcon class="h-4 w-4" />
+                  </button>
+                </td>
               </tr>
             </template>
             <tr v-if="filteredDailyOrders.length === 0">
-              <td colspan="7" class="text-center py-12 text-gray-400 italic">
+              <td colspan="8" class="text-center py-12 text-gray-400 italic">
                 {{ UI_TEXTS.orders.deliveryList.emptyState }}
               </td>
             </tr>
@@ -511,12 +523,21 @@
         </div>
         <!-- Delivery time + close -->
         <div class="text-right shrink-0 flex flex-col items-end gap-1">
-          <button
-            @click="closeOrderDetail"
-            class="text-gray-300 hover:text-gray-500 transition-colors"
-          >
-            <XMarkIcon class="h-5 w-5" />
-          </button>
+          <div class="flex items-center gap-2">
+            <button
+              @click="printSingleOrder(selectedOrder)"
+              class="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-2 py-1 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              <PrinterIcon class="h-4 w-4" />
+              {{ UI_TEXTS.orders.kanban.buttons.print }}
+            </button>
+            <button
+              @click="closeOrderDetail"
+              class="text-gray-300 hover:text-gray-500 transition-colors"
+            >
+              <XMarkIcon class="h-5 w-5" />
+            </button>
+          </div>
           <p class="text-2xl font-black text-blue-700">
             {{ formatTime(selectedOrder.deliveryTime) }}
           </p>
@@ -710,7 +731,8 @@ const handleGlobalNewOrder = async () => {
 const openOrderByTrackingId = async (
   trackingId: string,
   dateRaw?: string,
-  autoAccept?: boolean
+  autoAccept?: boolean,
+  autoPrint?: boolean
 ) => {
   activeTab.value = 'singleOrders';
   // Use date from query param directly if available, otherwise derive from order
@@ -732,6 +754,9 @@ const openOrderByTrackingId = async (
       const success = await ordersApi.updateOrderStatus(order.id, 'accepted');
       if (success) order.status = 'accepted';
     }
+    if (autoPrint) {
+      printSingleOrder(order, 'single-order-print');
+    }
   }
 };
 
@@ -743,7 +768,8 @@ onMounted(async () => {
   if (openTrackingId) {
     const dateRaw = route.query.date as string | undefined;
     const autoAccept = route.query.accept === '1';
-    await openOrderByTrackingId(openTrackingId, dateRaw, autoAccept);
+    const autoPrint = route.query.print === '1';
+    await openOrderByTrackingId(openTrackingId, dateRaw, autoAccept, autoPrint);
     // Clean URL immediately so reload doesn't re-trigger
     router.replace({ path: '/orders' });
   }
@@ -1093,6 +1119,47 @@ const getStatusBg = (status: string) => {
   }
 };
 
+const escapeHtml = (value: unknown) =>
+  String(value ?? '').replace(/[&<>"']/g, (char) => {
+    const entities: Record<string, string> = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    };
+    return entities[char];
+  });
+
+const printWindowStyles = `
+  * { box-sizing: border-box; }
+  body { font-family: sans-serif; color: #111; margin: 0; }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: #eee; }
+`;
+
+const openPrintWindow = (title: string, body: string, styles = '', target = '_blank') => {
+  const printContent = `
+    <html>
+      <head>
+        <title>${escapeHtml(title)}</title>
+        <style>
+          ${printWindowStyles}
+          ${styles}
+        </style>
+      </head>
+      <body>${body}</body>
+    </html>
+  `;
+  const win = window.open('', target);
+  win?.document.write(printContent);
+  win?.document.close();
+  win?.focus();
+  win?.print();
+};
+
+const formatYen = (value: number) => `¥${value.toFixed(0)}`;
+
 const _calculateTimeRemaining = (createdAt: string) => {
   const now = new Date();
   const createdTime = new Date(createdAt);
@@ -1106,20 +1173,14 @@ const printBatchPrep = () => {
   const hasAnyComments = groupedPrepItems.value.some((item) =>
     item.comments.some((c) => c.text && c.text.trim() !== '')
   );
-  const printContent = `
-    <html>
-      <head>
-        <title>Batch Prep Guide</title>
-        <style>
-          body { font-family: sans-serif; padding: 20px; }
-          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-          th, td { border: 1px solid #000; padding: 10px; text-align: left; }
-          th { background: #eee; }
-          .qty { font-size: 24px; font-weight: bold; text-align: center; }
-          .comment-inline { font-size: 11px; color: #333; display: inline; }
-        </style>
-      </head>
-      <body>
+  const styles = `
+    body { padding: 20px; }
+    table { margin-top: 20px; }
+    th, td { border: 1px solid #000; padding: 10px; text-align: left; }
+    .qty { font-size: 24px; font-weight: bold; text-align: center; }
+    .comment-inline { font-size: 11px; color: #333; display: inline; }
+  `;
+  const body = `
         <h1>Kitchen Batch Prep - ${selectedDateDisplay.value}</h1>
         <table>
           <thead><tr><th>Item</th><th>Customizations</th><th>Qty</th>${hasAnyComments ? '<th>Notes (Order#)</th>' : ''}</tr></thead>
@@ -1153,14 +1214,8 @@ const printBatchPrep = () => {
               .join('')}
           </tbody>
         </table>
-      </body>
-    </html>
   `;
-  const win = window.open('', '_blank');
-  win?.document.write(printContent);
-  win?.document.close();
-  win?.focus();
-  win?.print();
+  openPrintWindow('Batch Prep Guide', body, styles);
 };
 
 const printDeliveryList = () => {
@@ -1171,36 +1226,30 @@ const printDeliveryList = () => {
   const hasAnyComments = Object.values(ordersByPostalCode.value).some((group) =>
     group.some((order) => order.comments && order.comments.trim() !== '')
   );
-  const printContent = `
-    <html>
-      <head>
-        <title>Delivery Area List</title>
-        <style>
-          body { font-family: sans-serif; padding: 10px; }
-          h1 { font-size: 13px; margin: 0 0 4px 0; }
-          .group { margin-bottom: 16px; border: 1px solid #000; padding: 4px 6px; }
-          .area-head { background: #fff; color: #000; border-bottom: 1px solid #000; padding: 3px 6px; font-size: 11px; font-weight: bold; }
-          table { width: 100%; border-collapse: collapse; margin-top: 4px; table-layout: fixed; }
-          th, td { border: 1px solid #000; padding: 3px 5px; font-size: 10px; }
-          th { background: #eee; }
-          th.col-time, td.col-time { width: 2.5%; }
-          th.col-type, td.col-type { width: 7%; }
-          th.col-id, td.col-id { width: 6%; }
-          th.col-phone, td.col-phone { width: 8%; }
-          th.col-customer, td.col-customer { width: 7%; }
-          th.col-address, td.col-address { width: 28%; }
-          th.col-items, td.col-items { width: 28%; white-space: normal; }
-          th.col-comments, td.col-comments { width: 28%; white-space: normal; }
-          .comment-inline {
-            font-size: 10px;
-            color: #333;
-            display: block;
-            word-break: break-word;
-            width: 100%;
-          }
-        </style>
-      </head>
-      <body>
+  const styles = `
+    body { padding: 10px; }
+    h1 { font-size: 13px; margin: 0 0 4px 0; }
+    .group { margin-bottom: 16px; border: 1px solid #000; padding: 4px 6px; }
+    .area-head { background: #fff; color: #000; border-bottom: 1px solid #000; padding: 3px 6px; font-size: 11px; font-weight: bold; }
+    table { margin-top: 4px; table-layout: fixed; }
+    th, td { border: 1px solid #000; padding: 3px 5px; font-size: 10px; }
+    th.col-time, td.col-time { width: 2.5%; }
+    th.col-type, td.col-type { width: 7%; }
+    th.col-id, td.col-id { width: 6%; }
+    th.col-phone, td.col-phone { width: 8%; }
+    th.col-customer, td.col-customer { width: 7%; }
+    th.col-address, td.col-address { width: 28%; }
+    th.col-items, td.col-items { width: 28%; white-space: normal; }
+    th.col-comments, td.col-comments { width: 28%; white-space: normal; }
+    .comment-inline {
+      font-size: 10px;
+      color: #333;
+      display: block;
+      word-break: break-word;
+      width: 100%;
+    }
+  `;
+  const body = `
         <div style="display:flex;justify-content:space-between;align-items:baseline;border:1px solid #000;padding:3px 6px;margin-bottom:10px;font-size:9px;">
           <strong style="font-size:12px;">Delivery Routes - ${selectedDateDisplay.value}</strong>
           <span>${restaurantAddress.value}</span>
@@ -1257,14 +1306,137 @@ const printDeliveryList = () => {
         `
           )
           .join('')}
-      </body>
-    </html>
   `;
-  const win = window.open('', '_blank');
-  win?.document.write(printContent);
-  win?.document.close();
-  win?.focus();
-  win?.print();
+  openPrintWindow('Delivery Area List', body, styles);
+};
+
+const printSingleOrder = (order: Order, target = '_blank') => {
+  const hasCompany = Boolean(order.customer.company?.trim());
+  const hasComments = Boolean(order.comments?.trim());
+  const hasAddress =
+    Boolean(order.customer.address.postalCode?.trim()) ||
+    Boolean(order.customer.address.street?.trim());
+  const itemCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
+  const styles = `
+    @page { size: A4; margin: 12mm; }
+    body { font-size: 12px; }
+    .sheet { width: 100%; }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border: 2px solid #000;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+    }
+    h1 { font-size: 24px; margin: 0 0 4px; }
+    .meta { text-align: right; line-height: 1.6; }
+    .badge { border: 1px solid #000; padding: 2px 6px; font-weight: bold; text-transform: uppercase; display: inline-block; margin-left: 4px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .box { border: 1px solid #000; padding: 8px 10px; min-height: 74px; }
+    .label { font-size: 10px; font-weight: bold; text-transform: uppercase; color: #555; margin-bottom: 4px; }
+    .value { font-size: 14px; font-weight: bold; }
+    .muted { color: #555; font-size: 11px; }
+    table { table-layout: fixed; }
+    th, td { border: 1px solid #000; padding: 7px 8px; vertical-align: top; }
+    th { font-size: 11px; text-align: left; }
+    .qty { width: 12%; text-align: center; }
+    .price, .amount { width: 16%; text-align: right; }
+    .options { font-size: 11px; color: #444; margin-top: 3px; }
+    .total {
+      display: flex;
+      justify-content: flex-end;
+      align-items: baseline;
+      gap: 18px;
+      border: 2px solid #000;
+      border-top: 0;
+      padding: 10px 12px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .notes { border: 1px solid #000; padding: 8px 10px; margin-top: 12px; white-space: pre-wrap; }
+    .footer { margin-top: 12px; font-size: 10px; color: #555; display: flex; justify-content: space-between; }
+  `;
+  const body = `
+        <div class="sheet">
+          <div class="topbar">
+            <div>
+              <h1>Order #${escapeHtml(order.trackingId)}</h1>
+              <span class="badge">${escapeHtml(STATUS_LABELS[order.status] || order.status)}</span>
+              ${order.orderType ? `<span class="badge">${escapeHtml(order.orderType)}</span>` : ''}
+              <span class="badge">${escapeHtml(order.paymentMethod)}</span>
+            </div>
+            <div class="meta">
+              <div><strong>Scheduled:</strong> ${escapeHtml(formatDateJST(order.deliveryTime))}</div>
+              <div><strong>Ordered:</strong> ${escapeHtml(formatDateJST(order.createdAt))}</div>
+              <div><strong>Items:</strong> ${itemCount}${escapeHtml(UI_TEXTS.orders.itemCountSuffix)}</div>
+            </div>
+          </div>
+
+          <div class="grid">
+            <div class="box">
+              <div class="label">Customer</div>
+              <div class="value">${escapeHtml(order.customer.name)}</div>
+              ${hasCompany ? `<div class="muted">${escapeHtml(order.customer.company)}</div>` : ''}
+              <div class="muted">${escapeHtml(order.customer.phone)}</div>
+            </div>
+            <div class="box">
+              <div class="label">Address</div>
+              ${
+                hasAddress
+                  ? `<div class="value">[${escapeHtml(order.customer.address.postalCode)}]</div>
+                     <div>${escapeHtml(order.customer.address.street)}</div>`
+                  : '<div class="muted">-</div>'
+              }
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th class="qty">Qty</th>
+                <th class="price">Unit</th>
+                <th class="amount">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${order.items
+                .map((item) => {
+                  const options = formatOptionsStr(item.options);
+                  return `
+                    <tr>
+                      <td>
+                        <strong>${escapeHtml(item.name)}</strong>
+                        ${options ? `<div class="options">+ ${escapeHtml(options)}</div>` : ''}
+                      </td>
+                      <td class="qty">${item.quantity}</td>
+                      <td class="price">${escapeHtml(formatYen(item.price))}</td>
+                      <td class="amount">${escapeHtml(formatYen(item.price * item.quantity))}</td>
+                    </tr>
+                  `;
+                })
+                .join('')}
+            </tbody>
+          </table>
+          <div class="total">
+            <span>Total</span>
+            <span>${escapeHtml(formatYen(order.total))}</span>
+          </div>
+
+          ${hasComments ? `<div class="notes"><div class="label">Comments</div>${escapeHtml(order.comments)}</div>` : ''}
+          ${
+            order.status === 'cancelled'
+              ? `<div class="notes"><div class="label">Cancel Reason</div>${escapeHtml(order.cancel_reason || '-')}</div>`
+              : ''
+          }
+          <div class="footer">
+            <span>${escapeHtml(restaurantAddress.value)}</span>
+            <span><strong>[Confidential / 機密]</strong> 個人情報を含む。使用後シュレッダー処分。</span>
+          </div>
+        </div>
+  `;
+  openPrintWindow(`Order #${order.trackingId}`, body, styles, target);
 };
 
 // Shows time until delivery, or for completed orders, shows completion time (proxy: updatedAt)

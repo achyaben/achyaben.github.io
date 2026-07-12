@@ -41,6 +41,7 @@ export const ne = {
       closeTitle: 'बन्द गर्नुहोस्',
       closeOnly: '✕ केवल बन्द गर्नुहोस्',
       openAndAccept: '✓ खोल्नुहोस् र स्वीकार गर्नुहोस्',
+      printAndAccept: 'स्वीकार र प्रिन्ट गर्नुहोस्',
     },
   },
   settings: {

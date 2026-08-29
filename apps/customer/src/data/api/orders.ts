@@ -2,6 +2,134 @@ import { supabase } from '@app/supabase';
 import type { Order } from '../../types';
 import { STORAGE_KEYS } from '../../constants';
 
+const RECENT_ORDER_LIMIT = 5;
+
+function getCachedOrders(): Order[] {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.ORDERS);
+    if (!saved) return [];
+
+    const orders = JSON.parse(saved);
+    return Array.isArray(orders) ? orders : [];
+  } catch (e) {
+    console.warn('Failed to load local orders:', e);
+    return [];
+  }
+}
+
+function saveCachedOrders(orders: Order[]) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+  } catch (e) {
+    console.warn('Failed to save local orders:', e);
+  }
+}
+
+function getRecentCachedOrders(limit = RECENT_ORDER_LIMIT): Order[] {
+  return [...getCachedOrders()]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, limit);
+}
+
+function mergeWithCachedOrder(apiOrder: Order, cachedOrders = getCachedOrders()): Order {
+  const cached = cachedOrders.find(
+    (order) => order.id === apiOrder.id || order.trackingId === apiOrder.trackingId
+  );
+
+  if (!cached) return apiOrder;
+
+  return {
+    ...cached,
+    ...apiOrder,
+    items: apiOrder.items.length ? apiOrder.items : cached.items,
+    customer: cached.customer || apiOrder.customer,
+    notes: cached.notes ?? apiOrder.notes,
+    status: apiOrder.status,
+    cancel_reason: apiOrder.cancel_reason,
+    cancelled_at: apiOrder.cancelled_at,
+    updatedAt: apiOrder.updatedAt,
+  };
+}
+
+function saveMergedCachedOrders(updatedOrders: Order[], cachedOrders = getCachedOrders()) {
+  const mergedOrders = [...cachedOrders];
+
+  updatedOrders.forEach((order) => {
+    const existingIndex = mergedOrders.findIndex(
+      (cached) => cached.id === order.id || cached.trackingId === order.trackingId
+    );
+    if (existingIndex > -1) {
+      mergedOrders[existingIndex] = order;
+    } else {
+      mergedOrders.push(order);
+    }
+  });
+
+  saveCachedOrders(mergedOrders);
+}
+
+function mapOrderRow(o: any, itemMode: 'full' | 'summary' | 'none' = 'full'): Order {
+  const items =
+    itemMode === 'full'
+      ? (o.items || []).map((i: any) => ({
+          item: {
+            id: i.menu_item?.id || i.menu_item_id || 'unknown',
+            name: i.menu_item?.name || 'Unknown Item',
+            price: Number(i.price_at_order || 0),
+            description: i.menu_item?.description || '',
+            category: i.menu_item?.category || '',
+            image: i.menu_item?.image || '',
+            available: true,
+          },
+          quantity: Number(i.quantity || 0),
+          subtotal: Number(i.line_total || i.quantity * i.price_at_order || 0),
+          customizations: i.customizations?.map((c: any) => c.customization_option_id) || [],
+        }))
+      : itemMode === 'summary'
+        ? (o.items || []).map((i: any) => ({
+            item: {
+              id: 'summary',
+              name: '',
+              price: 0,
+              description: '',
+              category: '',
+              image: '',
+              available: true,
+            },
+            quantity: Number(i.quantity || 0),
+            subtotal: 0,
+            customizations: [],
+          }))
+        : [];
+
+  const calculatedTotal = items.reduce((sum: number, item: any) => sum + (item.subtotal || 0), 0);
+
+  return {
+    id: o.id,
+    trackingId: o.tracking_id,
+    items,
+    total: o.total ? Number(o.total) : calculatedTotal,
+    status: o.status,
+    paymentMethod: o.payment_method,
+    paymentStatus: o.payment_status,
+    deliveryTime: o.delivery_datetime,
+    order_type: o.order_type,
+    createdAt: o.created_at,
+    updatedAt: o.updated_at,
+    cancel_reason: o.cancel_reason ?? null,
+    cancelled_at: o.cancelled_at ?? null,
+    customer: {
+      name: 'Me',
+      phone: '',
+      address: {
+        street: '',
+        city: '',
+        postalCode: '',
+      },
+    },
+  } as Order;
+}
+
 export const ordersApi = {
   // Create a new order
   async createOrder(orderData: Partial<Order>): Promise<any> {
@@ -91,138 +219,142 @@ export const ordersApi = {
       throw orderError;
     }
 
-    // Since RPC only returns the ID, construct minimal order object for local cache mapping
-    const order = {
-      id: orderId,
-      tracking_id: payload.trackingId,
-    };
-
-    // Save to local storage
     try {
-      const saved = localStorage.getItem(STORAGE_KEYS.ORDERS);
-      const orders = saved ? JSON.parse(saved) : [];
-
+      const orders = getCachedOrders();
       const finalOrder = {
-        ...orderData, // Use original payload for local state
-        id: order.id || payload.id,
-        trackingId: order.tracking_id || payload.trackingId,
-      };
+        ...orderData,
+        id: orderId || payload.id,
+        trackingId: payload.trackingId,
+      } as Order;
 
-      const existingIndex = orders.findIndex((o: any) => o.id === finalOrder.id);
+      const existingIndex = orders.findIndex(
+        (o) => o.id === finalOrder.id || o.trackingId === finalOrder.trackingId
+      );
       if (existingIndex > -1) {
         orders[existingIndex] = finalOrder;
       } else {
         orders.push(finalOrder);
       }
 
-      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+      saveCachedOrders(orders);
     } catch (e) {
       console.warn('Failed to save order locally:', e);
     }
 
-    return { orderId: order.id, trackingId: order.tracking_id, success: true };
+    return { orderId, trackingId: payload.trackingId, success: true };
   },
 
-  // Get all orders
-  async getOrders(): Promise<Order[]> {
-    let orders: Order[] = [];
+  getCachedOrders,
+  getRecentCachedOrders,
 
-    // 1. Load from Cache (Fast Initial Paint)
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.ORDERS);
-      if (saved) {
-        orders = JSON.parse(saved);
-        // Basic sanity check
-        if (!Array.isArray(orders)) orders = [];
-      }
-    } catch (e) {
-      console.warn('Failed to load local orders:', e);
-    }
+  // Get lightweight order summaries for history screens.
+  async getRecentOrderSummaries(): Promise<Order[]> {
+    const cachedOrders = getCachedOrders();
+    const recentCachedOrders = getRecentCachedOrders();
 
-    // 2. Fetch Fresh Data from Supabase (Source of Truth)
-    // getSession() reads from local cache — no network call
     const {
       data: { session },
     } = await supabase.auth.getSession();
-    if (!session?.user?.id) return orders;
+    if (!session?.user?.id) return recentCachedOrders;
     const userId = session.user.id;
 
     const { data: apiData, error } = await supabase
       .from('orders')
       .select(
-        '*, items:order_items(*, menu_item:menu_items(*), customizations:order_item_customizations(customization_option_id))'
+        'id, tracking_id, total, status, payment_method, payment_status, delivery_datetime, order_type, created_at, updated_at, cancel_reason, cancelled_at, items:order_items(quantity)'
       )
       .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(RECENT_ORDER_LIMIT);
 
     if (error) {
-      console.warn('Failed to fetch API orders:', error);
-      // Fallback: Return cached orders if API fails
-      return orders;
+      console.warn('Failed to fetch API order summaries:', error);
+      return recentCachedOrders;
     }
 
-    if (apiData) {
-      // Map API data to Order interface
-      const freshOrders = apiData.map((o: any) => {
-        const items = (o.items || []).map((i: any) => ({
-          item: {
-            id: i.menu_item?.id || 'unknown',
-            name: i.menu_item?.name || 'Unknown Item',
-            price: Number(i.price_at_order),
-            description: i.menu_item?.description || '', // Added default
-            category: i.menu_item?.category || '',
-            image: i.menu_item?.image || '',
-            available: true,
-          },
-          quantity: Number(i.quantity),
-          subtotal: Number(i.line_total || i.quantity * i.price_at_order),
-          customizations: i.customizations?.map((c: any) => c.customization_option_id) || [],
-        }));
+    if (!apiData) return recentCachedOrders;
 
-        const calculatedTotal = items.reduce(
-          (sum: number, item: any) => sum + (item.subtotal || 0),
-          0
-        );
+    const freshOrders = apiData.map((o: any) =>
+      mergeWithCachedOrder(mapOrderRow(o, 'summary'), cachedOrders)
+    );
+    saveMergedCachedOrders(freshOrders, cachedOrders);
+    return freshOrders;
+  },
 
-        return {
-          id: o.id,
-          trackingId: o.tracking_id,
-          items: items,
-          total: o.total ? Number(o.total) : calculatedTotal,
-          status: o.status,
-          paymentMethod: o.payment_method,
-          paymentStatus: o.payment_status,
-          deliveryTime: o.delivery_datetime,
-          order_type: o.order_type,
-          createdAt: o.created_at,
-          updatedAt: o.updated_at,
-          cancel_reason: o.cancel_reason ?? null,
-          cancelled_at: o.cancelled_at ?? null,
-          customer: {
-            name: 'Me', // RLS restricted
-            phone: '', // Could fetch profile if needed
-            address: {
-              street: '',
-              city: '',
-              postalCode: '',
-            },
-          },
-        } as Order;
-      });
+  async getOrderStatus(trackingId: string): Promise<Order | null> {
+    const cachedOrders = getCachedOrders();
+    const cachedOrder = cachedOrders.find((o) => o.trackingId === trackingId) || null;
 
-      // 3. Update Cache & Return Fresh Data
-      // Supabase is the Truth. We overwrite local storage completely.
-      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(freshOrders));
-      return freshOrders;
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session?.user?.id) return cachedOrder;
+
+    const { data: apiData, error } = await supabase
+      .from('orders')
+      .select(
+        'id, tracking_id, total, status, payment_method, payment_status, delivery_datetime, order_type, created_at, updated_at, cancel_reason, cancelled_at'
+      )
+      .eq('user_id', session.user.id)
+      .eq('tracking_id', trackingId)
+      .maybeSingle();
+
+    if (error) {
+      console.warn('Failed to fetch API order status:', error);
+      return cachedOrder;
     }
 
-    return orders;
+    if (!apiData) return cachedOrder;
+
+    const freshOrder = mergeWithCachedOrder(mapOrderRow(apiData, 'none'), cachedOrders);
+    saveMergedCachedOrders([freshOrder], cachedOrders);
+    return freshOrder;
+  },
+
+  async getOrderDetail(trackingId: string): Promise<Order | null> {
+    const cachedOrders = getCachedOrders();
+    const cachedOrder = cachedOrders.find((o) => o.trackingId === trackingId) || null;
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session?.user?.id) return cachedOrder;
+
+    const { data, error } = await supabase
+      .from('orders')
+      .select(
+        '*, items:order_items(*, menu_item:menu_items(*), customizations:order_item_customizations(customization_option_id))'
+      )
+      .eq('user_id', session.user.id)
+      .eq('tracking_id', trackingId)
+      .maybeSingle();
+
+    if (error) {
+      console.warn('Failed to fetch API order detail:', error);
+      return cachedOrder;
+    }
+
+    if (!data) return cachedOrder;
+
+    const freshOrder = mergeWithCachedOrder(mapOrderRow(data), cachedOrders);
+    saveMergedCachedOrders([freshOrder], cachedOrders);
+    return freshOrder;
+  },
+
+  async getOrderSummaries(): Promise<Order[]> {
+    return this.getRecentOrderSummaries();
+  },
+
+  // Legacy helper retained for callers that need customer order list data.
+  async getOrders(): Promise<Order[]> {
+    return this.getRecentOrderSummaries();
   },
 
   // Get order by tracking ID
   async getOrderByTrackingId(trackingId: string): Promise<Order | null> {
-    const orders = await this.getOrders();
-    return orders.find((o) => o.trackingId === trackingId) || null;
+    const cachedOrders = getCachedOrders();
+    const cachedOrder = cachedOrders.find((o) => o.trackingId === trackingId) || null;
+    return cachedOrder ? this.getOrderStatus(trackingId) : this.getOrderDetail(trackingId);
   },
 
   // Update an order (staff/manager role usually required)
@@ -257,7 +389,7 @@ export const ordersApi = {
 
   // Get most recent pending order
   async getMostRecentPendingOrder(): Promise<Order | null> {
-    const orders = await this.getOrders();
+    const orders = await this.getRecentOrderSummaries();
     return (
       orders
         .filter((order) => !['completed', 'cancelled'].includes(order.status))

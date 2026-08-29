@@ -145,16 +145,7 @@
             </div>
             <div class="text-right flex flex-col items-end gap-1">
               <div class="flex items-center gap-2">
-                <span
-                  v-if="order.status !== 'cancelled'"
-                  :class="{
-                    'text-green-600': order.status === 'completed',
-                    'text-blue-600': order.status === 'delivering',
-                    'text-orange-500': order.status === 'preparing',
-                    'text-yellow-600': order.status === 'pending',
-                  }"
-                  class="font-medium"
-                >
+                <span :class="statusClass(order.status)" class="font-medium">
                   {{ (UI_TEXT.order.status as any)[order.status] || order.status }}
                 </span>
                 <button
@@ -459,7 +450,7 @@ import { menuItems, fetchMenu } from '../data/menu';
 
 const { info: restaurantInfo } = useRestaurantStore();
 import { UI_TEXT } from '../constants/ui-text';
-import type { Order } from '../types';
+import type { Order, OrderStatus } from '../types';
 import { useCart } from '../stores/cart';
 import { ordersApi } from '../data/api/orders';
 
@@ -533,7 +524,15 @@ async function loadOrder() {
     // Load order from API
     // Ensure trackingId is a string
     const id = Array.isArray(trackingId) ? trackingId[0] : trackingId;
-    const result = await ordersApi.getOrderByTrackingId(id);
+    const cachedOrder = ordersApi.getCachedOrders().find((o) => o.trackingId === id);
+    if (cachedOrder) {
+      order.value = cachedOrder;
+      isLoading.value = false;
+    }
+
+    const result = cachedOrder
+      ? await ordersApi.getOrderStatus(id)
+      : await ordersApi.getOrderDetail(id);
     order.value = result;
   } catch (error) {
     console.error('Failed to load order:', error);
@@ -541,6 +540,16 @@ async function loadOrder() {
   } finally {
     isLoading.value = false;
   }
+}
+
+function statusClass(status: OrderStatus) {
+  return {
+    'text-green-600': status === 'completed',
+    'text-blue-600': status === 'delivering' || status === 'ready',
+    'text-orange-500': status === 'preparing',
+    'text-yellow-600': status === 'pending' || status === 'accepted',
+    'text-red-600': status === 'cancelled',
+  };
 }
 
 // Initialize and handle route changes

@@ -69,7 +69,7 @@ const statusText = {
   ready: '準備完了',
   delivering: '配達中',
   completed: '完了',
-  cancelled: 'キャンセル',
+  cancelled: 'キャンセル済み',
 } as const;
 
 // Watch for changes in orders and update active order

@@ -90,15 +90,7 @@
               <div class="text-right">
                 <div class="font-bold text-primary">¥{{ order.total }}</div>
                 <div class="text-sm">
-                  <span
-                    :class="{
-                      'text-green-600': order.status === 'completed',
-                      'text-blue-600': order.status === 'delivering' || order.status === 'ready',
-                      'text-orange-500': order.status === 'preparing',
-                      'text-yellow-600': order.status === 'pending' || order.status === 'accepted',
-                      'text-red-600': order.status === 'cancelled',
-                    }"
-                  >
+                  <span :class="statusClass(order.status)">
                     {{ statusText[order.status] }}
                   </span>
                 </div>
@@ -115,7 +107,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { ordersApi } from '../data/api/orders';
 import { formatDate } from '../utils/date';
-import type { Order } from '../types';
+import type { Order, OrderStatus } from '../types';
 
 const orders = ref<Order[]>([]);
 
@@ -126,18 +118,34 @@ const statusText = {
   ready: '準備完了',
   delivering: '配達中',
   completed: '完了',
-  cancelled: 'キャンセル',
+  cancelled: 'キャンセル済み',
 } as const;
 
 const isLoading = ref(true);
 
 onMounted(async () => {
+  const cachedOrders = ordersApi.getRecentCachedOrders();
+  if (cachedOrders.length) {
+    orders.value = cachedOrders;
+    isLoading.value = false;
+  }
+
   try {
-    orders.value = await ordersApi.getOrders();
+    orders.value = await ordersApi.getRecentOrderSummaries();
   } finally {
     isLoading.value = false;
   }
 });
+
+function statusClass(status: OrderStatus) {
+  return {
+    'text-green-600': status === 'completed',
+    'text-blue-600': status === 'delivering' || status === 'ready',
+    'text-orange-500': status === 'preparing',
+    'text-yellow-600': status === 'pending' || status === 'accepted',
+    'text-red-600': status === 'cancelled',
+  };
+}
 
 const sortedOrders = computed(() => {
   return [...orders.value].sort(

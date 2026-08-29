@@ -60,9 +60,13 @@ export const ne = {
     restaurantSettings: {
       title: 'रेस्टुरेन्ट सेटिङ',
       editButton: 'सम्पादन',
+      businessHoursGroupTitle: 'व्यापार समय',
+      businessCalendarGroupTitle: 'व्यापार पात्रो',
+      deliveryGroupTitle: 'डेलिभरी सेटिङ',
       openingTimeLabel: 'खुल्ने समय',
       closingTimeLabel: 'बन्द हुने समय',
-      minAdvanceTimeLabel: 'न्यूनतम अग्रिम समय (घण्टा)',
+      minAdvanceTimeLabel: 'न्यूनतम अग्रिम समय (मिनेट)',
+      minAdvanceTimeUnit: 'मिनेट',
       maxAdvanceDaysLabel: 'अधिकतम अग्रिम दिनहरू',
       businessDaysLabel: 'व्यापार दिनहरू',
       specialDaysLabel: 'विशेष खुला दिनहरू',
@@ -74,6 +78,13 @@ export const ne = {
       deliveryHoursLabel: 'डेलिभरी समय',
       deliveryStartLabel: 'डेलिभरी सुरु समय',
       deliveryEndLabel: 'डेलिभरी अन्त्य समय',
+      deliveryDisabledDatesLabel: 'डेलिभरी बन्द मितिहरू (पिकअप उपलब्ध)',
+      stopTodayDeliveryButton: 'आजको डेलिभरी बन्द',
+      resumeTodayDeliveryButton: 'आजको डेलिभरी सुरु',
+      stopTomorrowDeliveryButton: 'भोलिको डेलिभरी बन्द',
+      resumeTomorrowDeliveryButton: 'भोलिको डेलिभरी सुरु',
+      addDeliveryDisabledDateButton: 'डेलिभरी बन्द मिति थप्नुहोस्',
+      removeDeliveryDisabledDateButton: 'हटाउनुहोस्',
       saveButton: 'सेटिङ सुरक्षित गर्नुहोस्',
     },
     orderingEnabled: {
@@ -121,6 +132,9 @@ export const ne = {
     },
     holidays: {
       emptyState: 'कुनै विशेष बिदा सेट गरिएको छैन।',
+    },
+    deliveryDisabledDates: {
+      emptyState: 'कुनै डेलिभरी बन्द मिति सेट गरिएको छैन।',
     },
     days: [
       'Monday',

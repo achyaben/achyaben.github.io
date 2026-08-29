@@ -734,11 +734,11 @@ import { useCart } from '../stores/cart';
 import { useRestaurantStore } from '../stores/restaurant';
 import { toJSTDateString, toJSTTimeString, isDateValid } from '../utils/date';
 import { supabase } from '@app/supabase';
-import type { Order, OrderStatus, PaymentStatus, PaymentMethod } from '../types';
+import type { Order, OrderStatus, PaymentStatus, PaymentMethod, OrderType } from '../types';
 
 const router = useRouter();
 const { cartItems, cartTotal, clearCart } = useCart();
-const { info: restaurantInfo, fetchInfo, isLoading } = useRestaurantStore();
+const { info: restaurantInfo, fetchInfo, refreshInfo, isLoading } = useRestaurantStore();
 const showHelp = ref(false);
 const showConfirm = ref(false);
 
@@ -837,7 +837,7 @@ const orderForm = ref({
   companyContact: '',
   deliveryDate: '',
   deliveryTimeSlot: '',
-  order_type: 'delivery' as 'pickup' | 'delivery',
+  order_type: 'delivery' as OrderType,
   notes: '',
   paymentMethod: 'cash' as PaymentMethod,
   needReceipt: false,
@@ -1043,8 +1043,13 @@ const maxDate = computed(() => {
 });
 
 // Generate available time slots based on selected date
-const getTimeSlots = (type: 'pickup' | 'delivery', dateStr: string) => {
+const isDeliveryDisabledDate = (dateStr: string) => {
+  return !!dateStr && restaurantInfo.value.delivery_disabled_dates?.includes(dateStr);
+};
+
+const getTimeSlots = (type: OrderType, dateStr: string) => {
   if (!dateStr || !restaurantInfo.value?.hours) return [];
+  if (type === 'delivery' && isDeliveryDisabledDate(dateStr)) return [];
 
   const slots: string[] = [];
   const [y, m, d] = dateStr.split('-').map(Number);
@@ -1226,6 +1231,9 @@ function validateForm() {
     if (hours) {
       if (hours.holidays && hours.holidays.includes(dateStr)) {
         validationErrors.value.deliveryDate = '選択された日は臨時休業日です';
+      } else if (orderForm.value.order_type === 'delivery' && isDeliveryDisabledDate(dateStr)) {
+        validationErrors.value.deliveryDate =
+          '選択された日は配達を停止しています。店頭受取を選択してください';
       } else if (hours.specialDays && hours.specialDays.includes(dateStr)) {
         // Special working day, skip business day check
       } else {
@@ -1253,6 +1261,10 @@ async function submitOrder() {
   isSubmitting.value = true;
 
   try {
+    await refreshInfo();
+    validateForm();
+    if (!isFormValid.value) return;
+
     const trackingId = generateTrackingId();
 
     // Construct the payload to match what the Edge Function expects

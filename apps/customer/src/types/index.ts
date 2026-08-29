@@ -49,6 +49,7 @@ export type OrderStatus =
   | 'cancelled';
 export type PaymentStatus = 'pending' | 'completed';
 export type PaymentMethod = 'cash' | 'card' | 'paypay';
+export type OrderType = 'pickup' | 'delivery';
 
 export interface Order {
   id: string;

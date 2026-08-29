@@ -1,6 +1,13 @@
 import { supabase } from '@app/supabase';
 import type { Order } from '../types/types';
 
+const JST_DATE_FORMATTER = new Intl.DateTimeFormat('sv-SE', {
+  timeZone: 'Asia/Tokyo',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
+
 export const ordersApi = {
   async getOrders(): Promise<Order[]> {
     const { data, error } = await supabase
@@ -130,13 +137,7 @@ export const ordersApi = {
       if (order.status === 'cancelled') return;
       // Use deliveryTime for grouping summaries as requested by the user
       if (!order.deliveryTime) return;
-      const utcDate = new Date(order.deliveryTime);
-      // Convert to JST (UTC+9)
-      const jstDate = new Date(utcDate.getTime() + 9 * 60 * 60 * 1000);
-      const year = jstDate.getFullYear();
-      const month = String(jstDate.getMonth() + 1).padStart(2, '0');
-      const day = String(jstDate.getDate()).padStart(2, '0');
-      const date = `${year}-${month}-${day}`;
+      const date = JST_DATE_FORMATTER.format(new Date(order.deliveryTime));
 
       if (!summaries[date]) {
         summaries[date] = { date, totalOrders: 0, totalRevenue: 0, cash: 0, card: 0, paypay: 0 };

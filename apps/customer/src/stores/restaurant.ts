@@ -38,6 +38,7 @@ interface RestaurantInfo {
   recovery_form: string;
   hours: BusinessHours;
   delivery_hours: { start: string; end: string };
+  delivery_disabled_dates: readonly string[];
   banners?: Array<{ id: string; title: string; link?: string; active: boolean }> | null;
 }
 
@@ -121,8 +122,8 @@ function mergeWithFallback<T extends Record<string, any>>(server: any, fallback:
 }
 
 export const useRestaurantStore = () => {
-  async function fetchInfo() {
-    if (isFetched.value || isLoading.value) return;
+  async function fetchInfo(options: { force?: boolean } = {}) {
+    if (!options.force && (isFetched.value || isLoading.value)) return;
 
     isLoading.value = true;
     isGlobalError.value = false;
@@ -158,6 +159,7 @@ export const useRestaurantStore = () => {
           sns: settings.sns,
           hours: settings.business_hours,
           delivery_hours: settings.delivery_hours,
+          delivery_disabled_dates: settings.delivery_disabled_dates,
           banners: settings.banners,
         };
 
@@ -197,6 +199,7 @@ export const useRestaurantStore = () => {
     orderingEnabled: computed(() => orderingEnabled.value),
     isError: computed(() => isGlobalError.value),
     fetchInfo,
+    refreshInfo: () => fetchInfo({ force: true }),
     resetStore() {
       isFetched.value = false;
       isGlobalError.value = false;

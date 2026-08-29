@@ -114,18 +114,42 @@
 </template>
 
 <script setup lang="ts">
-// Utility to format a Date as YYYY-MM-DD in local time
-function formatLocalDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
 import { ref, computed, onMounted } from 'vue';
 import { ordersApi } from '../api/orders';
 import { UI_TEXTS } from '../constants/ui-texts';
 import type { OrderSummary } from '../types/types';
 import MenuPerformanceChart from '../components/MenuPerformanceChart.vue';
+
+const formatJstDate = (date: Date): string => {
+  return date.toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' });
+};
+
+const getDateKeyParts = (dateKey: string) => {
+  const [year, month, day] = dateKey.split('-').map(Number);
+  return { year, month, day };
+};
+
+const formatDateKeyParts = (year: number, month: number, day: number) => {
+  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+};
+
+const addDaysToDateKey = (dateKey: string, days: number) => {
+  const { year, month, day } = getDateKeyParts(dateKey);
+  const date = new Date(Date.UTC(year, month - 1, day + days));
+  return formatDateKeyParts(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate());
+};
+
+const getWeekStartDateKey = (dateKey: string) => {
+  const { year, month, day } = getDateKeyParts(dateKey);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return addDaysToDateKey(dateKey, -date.getUTCDay());
+};
+
+const getMonthEndDateKey = (dateKey: string) => {
+  const { year, month } = getDateKeyParts(dateKey);
+  const date = new Date(Date.UTC(year, month, 0));
+  return formatDateKeyParts(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate());
+};
 
 const tabs = ['Current Summary', 'Performance and Analysis'];
 const activeTab = ref('Current Summary');
@@ -144,54 +168,29 @@ onMounted(async () => {
 });
 
 const applyQuickFilter = () => {
-  const now = new Date();
-  // Calculate startOfWeek without mutating 'now'
-  const startOfWeek = new Date();
-  startOfWeek.setDate(now.getDate() - now.getDay());
-  startOfWeek.setHours(0, 0, 0, 0);
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  startOfMonth.setHours(0, 0, 0, 0);
-  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  startOfLastMonth.setHours(0, 0, 0, 0);
-  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-  endOfLastMonth.setHours(23, 59, 59, 999);
+  const todayKey = formatJstDate(new Date());
 
   switch (selectedQuickFilter.value) {
     case 'today': {
-      const today = new Date();
-      startDate.value = formatLocalDate(today);
-      endDate.value = formatLocalDate(today);
+      startDate.value = todayKey;
+      endDate.value = todayKey;
       break;
     }
     case 'yesterday':
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      startDate.value = formatLocalDate(yesterday);
-      endDate.value = formatLocalDate(yesterday);
+      startDate.value = addDaysToDateKey(todayKey, -1);
+      endDate.value = startDate.value;
       break;
     case 'thisWeek':
-      startDate.value = formatLocalDate(startOfWeek);
-      endDate.value = formatLocalDate(now);
+      startDate.value = getWeekStartDateKey(todayKey);
+      endDate.value = todayKey;
       break;
     case 'thisMonth':
-      // Start date is the 1st of the current month
-      const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      firstOfMonth.setHours(0, 0, 0, 0);
-      startDate.value = formatLocalDate(firstOfMonth);
-      // End date is the last day of this month at 23:59:59
-      const endOfThisMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      endOfThisMonth.setHours(23, 59, 59, 999);
-      endDate.value = formatLocalDate(endOfThisMonth);
+      startDate.value = `${todayKey.slice(0, 7)}-01`;
+      endDate.value = getMonthEndDateKey(todayKey);
       break;
     case 'lastMonth':
-      // Start date is the 1st of last month
-      const firstOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      firstOfLastMonth.setHours(0, 0, 0, 0);
-      startDate.value = formatLocalDate(firstOfLastMonth);
-      // End date is the last day of last month at 23:59:59
-      const lastOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-      lastOfLastMonth.setHours(23, 59, 59, 999);
-      endDate.value = formatLocalDate(lastOfLastMonth);
+      endDate.value = addDaysToDateKey(`${todayKey.slice(0, 7)}-01`, -1);
+      startDate.value = `${endDate.value.slice(0, 7)}-01`;
       break;
     case 'all':
       startDate.value = '';
@@ -201,7 +200,7 @@ const applyQuickFilter = () => {
 };
 
 const filteredSummaries = computed(() => {
-  if (selectedQuickFilter.value === 'All' || (!startDate.value && !endDate.value)) {
+  if (selectedQuickFilter.value === 'all' || (!startDate.value && !endDate.value)) {
     return summaries.value; // Show all summaries if 'All' is selected or no date range is set
   }
 
@@ -268,9 +267,7 @@ const groupedSummaries = computed(() => {
       }
     > = {};
     dataToGroup.forEach((summary: OrderSummary) => {
-      const week = new Date(summary.date);
-      week.setDate(week.getDate() - week.getDay()); // Start of the week
-      const weekKey = week.toISOString().split('T')[0];
+      const weekKey = getWeekStartDateKey(summary.date);
       if (!grouped[weekKey]) {
         grouped[weekKey] = {
           date: weekKey,
@@ -301,8 +298,7 @@ const groupedSummaries = computed(() => {
       }
     > = {};
     dataToGroup.forEach((summary: OrderSummary) => {
-      const month = new Date(summary.date);
-      const monthKey = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, '0')}`;
+      const monthKey = summary.date.slice(0, 7);
       if (!grouped[monthKey]) {
         grouped[monthKey] = {
           date: monthKey,

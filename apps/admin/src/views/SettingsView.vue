@@ -130,7 +130,8 @@
           </p>
           <p>
             <strong>{{ UI_TEXTS.settings.restaurantSettings.minAdvanceTimeLabel }}:</strong>
-            {{ restaurantSettingsRef.hours.minAdvanceTime }} hours
+            {{ restaurantSettingsRef.hours.minAdvanceTime }}
+            {{ UI_TEXTS.settings.restaurantSettings.minAdvanceTimeUnit }}
           </p>
           <p>
             <strong>{{ UI_TEXTS.settings.restaurantSettings.maxAdvanceDaysLabel }}:</strong>
@@ -172,171 +173,275 @@
           </div>
         </div>
         <form v-show="editMode.settings" @submit.prevent="confirmSaveRestaurantSettings">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label for="hoursOpen" class="block text-sm font-medium text-gray-700">{{
-                UI_TEXTS.settings.restaurantSettings.openingTimeLabel
-              }}</label>
-              <input
-                v-model="restaurantSettingsRef.hours.open"
-                type="time"
-                id="hoursOpen"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                required
-              />
-            </div>
-            <div>
-              <label for="hoursClose" class="block text-sm font-medium text-gray-700">{{
-                UI_TEXTS.settings.restaurantSettings.closingTimeLabel
-              }}</label>
-              <input
-                v-model="restaurantSettingsRef.hours.close"
-                type="time"
-                id="hoursClose"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                required
-              />
-            </div>
-            <div>
-              <label for="deliveryStart" class="block text-sm font-medium text-gray-700">{{
-                UI_TEXTS.settings.restaurantSettings.deliveryStartLabel
-              }}</label>
-              <input
-                v-model="restaurantSettingsRef.delivery_hours.start"
-                type="time"
-                id="deliveryStart"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-              />
-            </div>
-            <div>
-              <label for="deliveryEnd" class="block text-sm font-medium text-gray-700">{{
-                UI_TEXTS.settings.restaurantSettings.deliveryEndLabel
-              }}</label>
-              <input
-                v-model="restaurantSettingsRef.delivery_hours.end"
-                type="time"
-                id="deliveryEnd"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-              />
-            </div>
-            <div>
-              <label for="minAdvanceTime" class="block text-sm font-medium text-gray-700">{{
-                UI_TEXTS.settings.restaurantSettings.minAdvanceTimeLabel
-              }}</label>
-              <input
-                v-model="restaurantSettingsRef.hours.minAdvanceTime"
-                type="number"
-                id="minAdvanceTime"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                required
-              />
-            </div>
-            <div>
-              <label for="maxAdvanceDays" class="block text-sm font-medium text-gray-700">{{
-                UI_TEXTS.settings.restaurantSettings.maxAdvanceDaysLabel
-              }}</label>
-              <input
-                v-model="restaurantSettingsRef.hours.maxAdvanceDays"
-                type="number"
-                id="maxAdvanceDays"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                required
-              />
-            </div>
-            <div>
-              <label for="businessDays" class="block text-sm font-medium text-gray-700">{{
-                UI_TEXTS.settings.restaurantSettings.businessDaysLabel
-              }}</label>
-              <div class="grid grid-cols-2 gap-2">
-                <label v-for="day in UI_TEXTS.settings.days" :key="day" class="flex items-center">
+          <div class="space-y-6">
+            <section class="border-b pb-5">
+              <h3 class="text-sm font-bold text-gray-500 uppercase mb-3">
+                {{ UI_TEXTS.settings.restaurantSettings.businessHoursGroupTitle }}
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label for="hoursOpen" class="block text-sm font-medium text-gray-700">{{
+                    UI_TEXTS.settings.restaurantSettings.openingTimeLabel
+                  }}</label>
                   <input
-                    type="checkbox"
-                    v-model="restaurantSettingsRef.hours.businessDays"
-                    :value="day"
-                    class="mr-2"
+                    v-model="restaurantSettingsRef.hours.open"
+                    type="time"
+                    id="hoursOpen"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                    required
                   />
-                  {{ day }}
-                </label>
+                </div>
+                <div>
+                  <label for="hoursClose" class="block text-sm font-medium text-gray-700">{{
+                    UI_TEXTS.settings.restaurantSettings.closingTimeLabel
+                  }}</label>
+                  <input
+                    v-model="restaurantSettingsRef.hours.close"
+                    type="time"
+                    id="hoursClose"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                    required
+                  />
+                </div>
+                <div>
+                  <label for="minAdvanceTime" class="block text-sm font-medium text-gray-700">{{
+                    UI_TEXTS.settings.restaurantSettings.minAdvanceTimeLabel
+                  }}</label>
+                  <input
+                    v-model="restaurantSettingsRef.hours.minAdvanceTime"
+                    type="number"
+                    id="minAdvanceTime"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                    required
+                  />
+                </div>
+                <div>
+                  <label for="maxAdvanceDays" class="block text-sm font-medium text-gray-700">{{
+                    UI_TEXTS.settings.restaurantSettings.maxAdvanceDaysLabel
+                  }}</label>
+                  <input
+                    v-model="restaurantSettingsRef.hours.maxAdvanceDays"
+                    type="number"
+                    id="maxAdvanceDays"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                    required
+                  />
+                </div>
               </div>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">{{
-                UI_TEXTS.settings.restaurantSettings.specialDaysLabel
-              }}</label>
-              <div class="flex gap-2 mb-2">
-                <input
-                  v-model="newSpecialDay"
-                  type="date"
-                  class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                />
-                <button
-                  @click.prevent="addSpecialDay"
-                  class="px-3 py-1 bg-blue-500 text-white rounded text-sm"
-                >
-                  {{ UI_TEXTS.settings.restaurantSettings.addSpecialDayButton }}
-                </button>
+            </section>
+
+            <section class="border-b pb-5">
+              <h3 class="text-sm font-bold text-gray-500 uppercase mb-3">
+                {{ UI_TEXTS.settings.restaurantSettings.businessCalendarGroupTitle }}
+              </h3>
+              <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div>
+                  <label for="businessDays" class="block text-sm font-medium text-gray-700 mb-2">{{
+                    UI_TEXTS.settings.restaurantSettings.businessDaysLabel
+                  }}</label>
+                  <div class="grid grid-cols-2 gap-2">
+                    <label
+                      v-for="day in UI_TEXTS.settings.days"
+                      :key="day"
+                      class="flex items-center"
+                    >
+                      <input
+                        type="checkbox"
+                        v-model="restaurantSettingsRef.hours.businessDays"
+                        :value="day"
+                        class="mr-2"
+                      />
+                      {{ day }}
+                    </label>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">{{
+                    UI_TEXTS.settings.restaurantSettings.specialDaysLabel
+                  }}</label>
+                  <div class="flex gap-2 mb-2">
+                    <input
+                      v-model="newSpecialDay"
+                      type="date"
+                      class="min-w-0 flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                    />
+                    <button
+                      @click.prevent="addSpecialDay"
+                      class="px-3 py-1 bg-blue-500 text-white rounded text-sm"
+                    >
+                      {{ UI_TEXTS.settings.restaurantSettings.addSpecialDayButton }}
+                    </button>
+                  </div>
+                  <ul class="space-y-1">
+                    <li
+                      v-for="(date, index) in restaurantSettingsRef.hours.specialDays"
+                      :key="index"
+                      class="flex items-center justify-between bg-blue-50 p-2 rounded"
+                    >
+                      <span>{{ date }}</span>
+                      <button
+                        @click.prevent="removeSpecialDay(index)"
+                        class="text-red-500 hover:text-red-700 text-sm"
+                      >
+                        {{ UI_TEXTS.settings.restaurantSettings.removeSpecialDayButton }}
+                      </button>
+                    </li>
+                    <li
+                      v-if="!restaurantSettingsRef.hours.specialDays?.length"
+                      class="text-gray-500 text-sm italic"
+                    >
+                      {{ UI_TEXTS.settings.specialDays.emptyState }}
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">{{
+                    UI_TEXTS.settings.restaurantSettings.holidaysLabel
+                  }}</label>
+                  <div class="flex gap-2 mb-2">
+                    <input
+                      v-model="newHoliday"
+                      type="date"
+                      class="min-w-0 flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                    />
+                    <button
+                      @click.prevent="addHoliday"
+                      class="px-3 py-1 bg-green-500 text-white rounded text-sm"
+                    >
+                      {{ UI_TEXTS.settings.restaurantSettings.addHolidayButton }}
+                    </button>
+                  </div>
+                  <ul class="space-y-1">
+                    <li
+                      v-for="(date, index) in restaurantSettingsRef.hours.holidays"
+                      :key="index"
+                      class="flex items-center justify-between bg-gray-50 p-2 rounded"
+                    >
+                      <span>{{ date }}</span>
+                      <button
+                        @click.prevent="removeHoliday(index)"
+                        class="text-red-500 hover:text-red-700 text-sm"
+                      >
+                        {{ UI_TEXTS.settings.restaurantSettings.removeHolidayButton }}
+                      </button>
+                    </li>
+                    <li
+                      v-if="!restaurantSettingsRef.hours.holidays?.length"
+                      class="text-gray-500 text-sm italic"
+                    >
+                      {{ UI_TEXTS.settings.holidays.emptyState }}
+                    </li>
+                  </ul>
+                </div>
               </div>
-              <ul class="space-y-1 mb-4">
-                <li
-                  v-for="(date, index) in restaurantSettingsRef.hours.specialDays"
-                  :key="index"
-                  class="flex items-center justify-between bg-blue-50 p-2 rounded"
-                >
-                  <span>{{ date }}</span>
-                  <button
-                    @click.prevent="removeSpecialDay(index)"
-                    class="text-red-500 hover:text-red-700 text-sm"
-                  >
-                    {{ UI_TEXTS.settings.restaurantSettings.removeSpecialDayButton }}
-                  </button>
-                </li>
-                <li
-                  v-if="!restaurantSettingsRef.hours.specialDays?.length"
-                  class="text-gray-500 text-sm italic"
-                >
-                  {{ UI_TEXTS.settings.specialDays.emptyState }}
-                </li>
-              </ul>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">{{
-                UI_TEXTS.settings.restaurantSettings.holidaysLabel
-              }}</label>
-              <div class="flex gap-2 mb-2">
-                <input
-                  v-model="newHoliday"
-                  type="date"
-                  class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                />
-                <button
-                  @click.prevent="addHoliday"
-                  class="px-3 py-1 bg-green-500 text-white rounded text-sm"
-                >
-                  {{ UI_TEXTS.settings.restaurantSettings.addHolidayButton }}
-                </button>
+            </section>
+
+            <section>
+              <h3 class="text-sm font-bold text-gray-500 uppercase mb-3">
+                {{ UI_TEXTS.settings.restaurantSettings.deliveryGroupTitle }}
+              </h3>
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="space-y-4">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label for="deliveryStart" class="block text-sm font-medium text-gray-700">{{
+                        UI_TEXTS.settings.restaurantSettings.deliveryStartLabel
+                      }}</label>
+                      <input
+                        v-model="restaurantSettingsRef.delivery_hours.start"
+                        type="time"
+                        id="deliveryStart"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                      />
+                    </div>
+                    <div>
+                      <label for="deliveryEnd" class="block text-sm font-medium text-gray-700">{{
+                        UI_TEXTS.settings.restaurantSettings.deliveryEndLabel
+                      }}</label>
+                      <input
+                        v-model="restaurantSettingsRef.delivery_hours.end"
+                        type="time"
+                        id="deliveryEnd"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">{{
+                    UI_TEXTS.settings.restaurantSettings.deliveryDisabledDatesLabel
+                  }}</label>
+                  <div class="grid grid-cols-2 gap-2 mb-3">
+                    <button
+                      type="button"
+                      @click="quickToggleDeliveryDisabledDate(todayDate)"
+                      :class="
+                        isDeliveryDisabledDate(todayDate)
+                          ? 'bg-orange-600 text-white border-orange-600'
+                          : 'bg-white text-orange-700 border-orange-300'
+                      "
+                      class="px-3 py-2 rounded border font-bold text-sm"
+                    >
+                      {{
+                        isDeliveryDisabledDate(todayDate)
+                          ? UI_TEXTS.settings.restaurantSettings.resumeTodayDeliveryButton
+                          : UI_TEXTS.settings.restaurantSettings.stopTodayDeliveryButton
+                      }}
+                    </button>
+                    <button
+                      type="button"
+                      @click="quickToggleDeliveryDisabledDate(tomorrowDate)"
+                      :class="
+                        isDeliveryDisabledDate(tomorrowDate)
+                          ? 'bg-orange-600 text-white border-orange-600'
+                          : 'bg-white text-orange-700 border-orange-300'
+                      "
+                      class="px-3 py-2 rounded border font-bold text-sm"
+                    >
+                      {{
+                        isDeliveryDisabledDate(tomorrowDate)
+                          ? UI_TEXTS.settings.restaurantSettings.resumeTomorrowDeliveryButton
+                          : UI_TEXTS.settings.restaurantSettings.stopTomorrowDeliveryButton
+                      }}
+                    </button>
+                  </div>
+                  <div class="flex gap-2 mb-2">
+                    <input
+                      v-model="newDeliveryDisabledDate"
+                      type="date"
+                      class="min-w-0 flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                    />
+                    <button
+                      @click.prevent="addDeliveryDisabledDate"
+                      class="px-3 py-1 bg-orange-500 text-white rounded text-sm"
+                    >
+                      {{ UI_TEXTS.settings.restaurantSettings.addDeliveryDisabledDateButton }}
+                    </button>
+                  </div>
+                  <ul class="space-y-1">
+                    <li
+                      v-for="(date, index) in restaurantSettingsRef.delivery_disabled_dates"
+                      :key="index"
+                      class="flex items-center justify-between bg-orange-50 p-2 rounded"
+                    >
+                      <span>{{ date }}</span>
+                      <button
+                        @click.prevent="removeDeliveryDisabledDate(index)"
+                        class="text-red-500 hover:text-red-700 text-sm"
+                      >
+                        {{ UI_TEXTS.settings.restaurantSettings.removeDeliveryDisabledDateButton }}
+                      </button>
+                    </li>
+                    <li
+                      v-if="!restaurantSettingsRef.delivery_disabled_dates?.length"
+                      class="text-gray-500 text-sm italic"
+                    >
+                      {{ UI_TEXTS.settings.deliveryDisabledDates.emptyState }}
+                    </li>
+                  </ul>
+                </div>
               </div>
-              <ul class="space-y-1">
-                <li
-                  v-for="(date, index) in restaurantSettingsRef.hours.holidays"
-                  :key="index"
-                  class="flex items-center justify-between bg-gray-50 p-2 rounded"
-                >
-                  <span>{{ date }}</span>
-                  <button
-                    @click.prevent="removeHoliday(index)"
-                    class="text-red-500 hover:text-red-700 text-sm"
-                  >
-                    {{ UI_TEXTS.settings.restaurantSettings.removeHolidayButton }}
-                  </button>
-                </li>
-                <li
-                  v-if="!restaurantSettingsRef.hours.holidays?.length"
-                  class="text-gray-500 text-sm italic"
-                >
-                  {{ UI_TEXTS.settings.holidays.emptyState }}
-                </li>
-              </ul>
-            </div>
+            </section>
           </div>
           <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">
             {{ UI_TEXTS.settings.restaurantSettings.saveButton }}
@@ -617,11 +722,20 @@ export default {
         start: '',
         end: '',
       },
+      delivery_disabled_dates: [],
       support: {},
     });
     const bannersListRef = ref([]);
     const newBannerRef = ref({ title: '', link: '' });
     const newHoliday = ref('');
+    const newDeliveryDisabledDate = ref('');
+    const getJstDateString = (offsetDays = 0) => {
+      const date = new Date();
+      date.setDate(date.getDate() + offsetDays);
+      return date.toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' });
+    };
+    const todayDate = ref(getJstDateString());
+    const tomorrowDate = ref(getJstDateString(1));
     const sensitiveSettingsRef = ref({ orderingEnabled: true });
     const showConfirmDialog = ref(false);
     const showSettingsConfirmDialog = ref(false);
@@ -647,6 +761,9 @@ export default {
             ...(info.business_hours || {}),
           },
           delivery_hours: info.delivery_hours || { start: '', end: '' },
+          delivery_disabled_dates: Array.isArray(info.delivery_disabled_dates)
+            ? info.delivery_disabled_dates
+            : [],
           support: info.support_info || {},
         };
         sensitiveSettingsRef.value.orderingEnabled =
@@ -730,6 +847,10 @@ export default {
         const success = await settingsApi.updateSettings('business_hours', info.hours);
         if (success) {
           await settingsApi.updateSettings('delivery_hours', info.delivery_hours);
+          await settingsApi.updateSettings(
+            'delivery_disabled_dates',
+            info.delivery_disabled_dates || []
+          );
           editMode.value.settings = false;
         }
       } catch (error) {
@@ -838,6 +959,43 @@ export default {
       restaurantSettingsRef.value.hours.specialDays.splice(index, 1);
     };
 
+    const addDeliveryDisabledDate = () => {
+      if (
+        newDeliveryDisabledDate.value &&
+        !restaurantSettingsRef.value.delivery_disabled_dates.includes(newDeliveryDisabledDate.value)
+      ) {
+        restaurantSettingsRef.value.delivery_disabled_dates.push(newDeliveryDisabledDate.value);
+        restaurantSettingsRef.value.delivery_disabled_dates.sort();
+        newDeliveryDisabledDate.value = '';
+      }
+    };
+
+    const removeDeliveryDisabledDate = (index) => {
+      restaurantSettingsRef.value.delivery_disabled_dates.splice(index, 1);
+    };
+
+    const isDeliveryDisabledDate = (date) => {
+      return restaurantSettingsRef.value.delivery_disabled_dates.includes(date);
+    };
+
+    const quickToggleDeliveryDisabledDate = async (date) => {
+      const dates = [...restaurantSettingsRef.value.delivery_disabled_dates];
+      const existingIndex = dates.indexOf(date);
+      if (existingIndex >= 0) {
+        dates.splice(existingIndex, 1);
+      } else {
+        dates.push(date);
+        dates.sort();
+      }
+
+      const success = await settingsApi.updateSettings('delivery_disabled_dates', dates);
+      if (success) {
+        restaurantSettingsRef.value.delivery_disabled_dates = dates;
+      } else {
+        alert('配達停止日の保存に失敗しました');
+      }
+    };
+
     return {
       activeTab,
       isSoundTesting,
@@ -863,6 +1021,13 @@ export default {
       addSpecialDay,
       removeSpecialDay,
       newSpecialDay,
+      addDeliveryDisabledDate,
+      removeDeliveryDisabledDate,
+      newDeliveryDisabledDate,
+      isDeliveryDisabledDate,
+      quickToggleDeliveryDisabledDate,
+      todayDate,
+      tomorrowDate,
       bannersListRef,
       newBannerRef,
       addNewBanner,

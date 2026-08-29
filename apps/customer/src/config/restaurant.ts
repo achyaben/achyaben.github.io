@@ -38,5 +38,6 @@ export const RESTAURANT_INFO = {
     start: '',
     end: '',
   },
+  delivery_disabled_dates: [],
   banners: [],
 };

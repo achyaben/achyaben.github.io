@@ -100,6 +100,7 @@ export interface RestaurantSettings {
     start: string;
     end: string;
   };
+  delivery_disabled_dates?: string[];
   support: {
     phone: string;
     hours: string;

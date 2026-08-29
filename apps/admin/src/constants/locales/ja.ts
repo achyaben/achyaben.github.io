@@ -60,9 +60,13 @@ export const ja = {
     restaurantSettings: {
       title: 'レストラン設定',
       editButton: '編集',
+      businessHoursGroupTitle: '営業時間',
+      businessCalendarGroupTitle: '営業カレンダー',
+      deliveryGroupTitle: '配達設定',
       openingTimeLabel: '開店時間',
       closingTimeLabel: '閉店時間',
-      minAdvanceTimeLabel: '最小事前注文時間（時間）',
+      minAdvanceTimeLabel: '最小事前注文時間（分）',
+      minAdvanceTimeUnit: '分',
       maxAdvanceDaysLabel: '最大事前注文日数',
       businessDaysLabel: '営業日',
       specialDaysLabel: '特別営業日（定休日の例外）',
@@ -74,6 +78,13 @@ export const ja = {
       deliveryHoursLabel: '配達可能時間',
       deliveryStartLabel: '配達開始時間',
       deliveryEndLabel: '配達終了時間',
+      deliveryDisabledDatesLabel: '配達停止日（店頭受取は可）',
+      stopTodayDeliveryButton: '今日の配達を停止',
+      resumeTodayDeliveryButton: '今日の配達を再開',
+      stopTomorrowDeliveryButton: '明日の配達を停止',
+      resumeTomorrowDeliveryButton: '明日の配達を再開',
+      addDeliveryDisabledDateButton: '配達停止日を追加',
+      removeDeliveryDisabledDateButton: '削除',
       saveButton: '設定を保存',
     },
     orderingEnabled: {
@@ -122,6 +133,9 @@ export const ja = {
     },
     holidays: {
       emptyState: '特別休業日は設定されていません。',
+    },
+    deliveryDisabledDates: {
+      emptyState: '配達停止日は設定されていません。',
     },
     // NOTE: day names are stored in the DB — keep as English values in all locales
     days: [

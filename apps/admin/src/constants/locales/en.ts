@@ -60,9 +60,13 @@ export const en = {
     restaurantSettings: {
       title: 'Restaurant Settings',
       editButton: 'Edit',
+      businessHoursGroupTitle: 'Business Hours',
+      businessCalendarGroupTitle: 'Business Calendar',
+      deliveryGroupTitle: 'Delivery Settings',
       openingTimeLabel: 'Opening Time',
       closingTimeLabel: 'Closing Time',
-      minAdvanceTimeLabel: 'Minimum Advance Time (Hours)',
+      minAdvanceTimeLabel: 'Minimum Advance Time (Minutes)',
+      minAdvanceTimeUnit: 'minutes',
       maxAdvanceDaysLabel: 'Maximum Advance Days',
       businessDaysLabel: 'Business Days',
       specialDaysLabel: 'Special Open Days (Override Closed days)',
@@ -74,6 +78,13 @@ export const en = {
       deliveryHoursLabel: 'Delivery Hours',
       deliveryStartLabel: 'Delivery Start Time',
       deliveryEndLabel: 'Delivery End Time',
+      deliveryDisabledDatesLabel: 'Delivery Off Dates (Pickup Available)',
+      stopTodayDeliveryButton: "Stop Today's Delivery",
+      resumeTodayDeliveryButton: "Resume Today's Delivery",
+      stopTomorrowDeliveryButton: "Stop Tomorrow's Delivery",
+      resumeTomorrowDeliveryButton: "Resume Tomorrow's Delivery",
+      addDeliveryDisabledDateButton: 'Add Delivery Off Date',
+      removeDeliveryDisabledDateButton: 'Remove',
       saveButton: 'Save Restaurant Settings',
     },
     orderingEnabled: {
@@ -122,6 +133,9 @@ export const en = {
     },
     holidays: {
       emptyState: 'No special holidays set.',
+    },
+    deliveryDisabledDates: {
+      emptyState: 'No delivery off dates set.',
     },
     // NOTE: day names are stored in the DB — keep as English values in all locales
     days: [

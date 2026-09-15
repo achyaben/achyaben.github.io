@@ -1,0 +1,7 @@
+interface:
+  display_name: "Pair Programmer"
+  short_description: "Collaborate, clarify, code, and hand over checks"
+  default_prompt: "Use $pair-programmer for this task. Clarify important doubts before implementation, do the production-grade coding heavy lift, keep updates concise, and give concrete commands to check or test."
+policy:
+  allow_implicit_invocation: false
+

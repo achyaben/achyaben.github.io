@@ -15,6 +15,11 @@ describe('admin JST date utilities', () => {
     });
   });
 
+  it('rejects invalid date keys instead of building a misleading query range', () => {
+    expect(getJSTDateRangeUtc('')).toBeNull();
+    expect(getJSTDateRangeUtc('2026/09/15')).toBeNull();
+  });
+
   it('adds calendar days without browser-local timezone drift', () => {
     expect(addDaysToDateKey('2026-09-15', 1)).toBe('2026-09-16');
     expect(addDaysToDateKey('2026-03-01', -1)).toBe('2026-02-28');

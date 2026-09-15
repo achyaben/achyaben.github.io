@@ -27,6 +27,7 @@
     "tailwindcss": "^4.1.11",
     "typescript": "^5.8.3",
     "vite": "^7.0.0",
+    "vitest": "^5.0.1",
     "vue-eslint-parser": "^10.2.0",
     "vue-tsc": "^2.2.10"
   },
@@ -35,6 +36,9 @@
     "format": "prettier --write .",
     "prepare": "husky",
     "gen:types": "npx supabase gen types typescript --project-id cvkulllzrgadpyqapvzb > libs/supabase/types.ts",
+    "test": "vitest run",
+    "test:admin": "vitest run apps/admin/src",
+    "test:customer": "vitest run apps/customer/src",
     "build:customer": "yarn workspace customer build",
     "build:admin": "yarn workspace admin build",
     "build": "yarn build:customer && yarn build:admin"

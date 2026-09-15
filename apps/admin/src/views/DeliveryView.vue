@@ -190,7 +190,7 @@
         </details>
         <div class="flex justify-end mt-2">
           <button
-            v-if="order.status !== 'completed'"
+            v-if="!isDeliveryListHiddenStatus(order.status)"
             @click="startDelivery(order)"
             class="px-4 py-2 bg-blue-500 text-white rounded text-sm"
           >
@@ -252,7 +252,13 @@
 import { ref, computed, onMounted } from 'vue';
 import { ordersApi } from '../api/orders';
 import ConfirmDialog from '../components/ConfirmDialog.vue';
-import { formatTime } from '../utils/date';
+import {
+  isCancelledStatus,
+  isCompletedStatus,
+  isDeliveryListHiddenStatus,
+  ORDER_STATUS,
+} from '../constants/orderStatus';
+import { formatTime, toJSTDateString } from '../utils/date';
 import type { Order } from '../types/types';
 
 const tabs = [UI_TEXTS.delivery.tabs.current, UI_TEXTS.delivery.tabs.myDeliveries];
@@ -267,7 +273,8 @@ const deliveryOrders = ref<Order[]>([]);
 const currentDelivery = computed(
   () =>
     deliveryOrders.value.find(
-      (order) => order.status === 'delivering' && order.driver?.name === currentDriver.value
+      (order) =>
+        order.status === ORDER_STATUS.delivering && order.driver?.name === currentDriver.value
     ) || null
 );
 
@@ -296,34 +303,31 @@ const showConfirmDialog = ref(false);
 const confirmDialogProps = ref({ title: '', message: '' });
 
 const markAsDelivered = (order: Order) => {
-  if (order.paymentStatus !== 'completed') {
-    confirmDialogProps.value = {
-      title: UI_TEXTS.delivery.dialogs.paymentReminder,
-      message: `Payment status is '${order.paymentStatus}'. Please confirm payment before marking as delivered.`,
-    };
-  } else {
-    confirmDialogProps.value = {
-      title: UI_TEXTS.delivery.dialogs.deliveryConfirmation,
-      message: `Order ${order.id} will be marked as delivered.`,
-    };
-  }
+  confirmDialogProps.value = {
+    title: UI_TEXTS.delivery.dialogs.deliveryConfirmation,
+    message: `Order ${order.id} will be marked as delivered.`,
+  };
   showConfirmDialog.value = true;
 };
 
 const startDelivery = async (order: Order) => {
-  const success = await ordersApi.updateOrderStatus(order.id, 'delivering');
+  if (isCancelledStatus(order.status)) return;
+  const success = await ordersApi.updateOrderStatus(order.id, ORDER_STATUS.delivering);
   if (success) {
-    order.status = 'delivering';
+    order.status = ORDER_STATUS.delivering;
     alert(`Starting delivery for order ${order.id}.`);
   }
 };
 
 const handleConfirm = async (order: Order) => {
   if (order) {
-    const success = await ordersApi.updateOrderStatus(order.id, 'completed');
+    const success = await ordersApi.updateOrderStatus(order.id, ORDER_STATUS.completed);
     if (success) {
-      order.status = 'completed';
+      order.status = ORDER_STATUS.completed;
       order.deliveredAt = new Date().toISOString();
+    } else {
+      alert('Failed to mark as delivered. Please refresh and check order status.');
+      await fetchOrders();
     }
   }
   showConfirmDialog.value = false;
@@ -332,22 +336,16 @@ const handleConfirm = async (order: Order) => {
 const hideDelivered = ref(true);
 
 const filteredDeliveries = computed(() => {
-  const getLocalDateString = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-  const today = getLocalDateString(new Date());
+  const today = toJSTDateString(new Date());
   return myDeliveries.value.filter((order) => {
     if (!order.deliveryTime) return false;
-    return getLocalDateString(new Date(order.deliveryTime)) === today;
+    return toJSTDateString(order.deliveryTime) === today;
   });
 });
 
 const visibleDeliveries = computed(() => {
   return filteredDeliveries.value.filter(
-    (order) => !hideDelivered.value || order.status !== 'completed'
+    (order) => !hideDelivered.value || !isCompletedStatus(order.status)
   );
 });
 

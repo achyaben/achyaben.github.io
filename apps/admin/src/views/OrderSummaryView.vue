@@ -119,10 +119,7 @@ import { ordersApi } from '../api/orders';
 import { UI_TEXTS } from '../constants/ui-texts';
 import type { OrderSummary } from '../types/types';
 import MenuPerformanceChart from '../components/MenuPerformanceChart.vue';
-
-const formatJstDate = (date: Date): string => {
-  return date.toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' });
-};
+import { addDaysToDateKey, toJSTDateString } from '../utils/date';
 
 const getDateKeyParts = (dateKey: string) => {
   const [year, month, day] = dateKey.split('-').map(Number);
@@ -131,12 +128,6 @@ const getDateKeyParts = (dateKey: string) => {
 
 const formatDateKeyParts = (year: number, month: number, day: number) => {
   return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-};
-
-const addDaysToDateKey = (dateKey: string, days: number) => {
-  const { year, month, day } = getDateKeyParts(dateKey);
-  const date = new Date(Date.UTC(year, month - 1, day + days));
-  return formatDateKeyParts(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate());
 };
 
 const getWeekStartDateKey = (dateKey: string) => {
@@ -168,7 +159,7 @@ onMounted(async () => {
 });
 
 const applyQuickFilter = () => {
-  const todayKey = formatJstDate(new Date());
+  const todayKey = toJSTDateString(new Date());
 
   switch (selectedQuickFilter.value) {
     case 'today': {

@@ -695,7 +695,12 @@ async function confirmCancel() {
   try {
     const success = await ordersApi.cancelOrder(order.value.id, cancelReason.value.trim());
     if (success) {
-      order.value = { ...order.value, status: 'cancelled' };
+      order.value = {
+        ...order.value,
+        status: 'cancelled',
+        cancel_reason: cancelReason.value.trim(),
+        cancelled_at: new Date().toISOString(),
+      };
     } else {
       alert('キャンセルに失敗しました。もう一度お試しください。');
     }

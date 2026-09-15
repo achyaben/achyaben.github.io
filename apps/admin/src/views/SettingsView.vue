@@ -683,6 +683,7 @@ import { ref, onMounted } from 'vue';
 import ConfirmDialog from '../components/ConfirmDialog.vue';
 import { UI_TEXTS } from '../constants/ui-texts';
 import { settingsApi } from '../api/settings';
+import { addDaysToDateKey, toJSTDateString } from '../utils/date';
 
 export default {
   components: {
@@ -729,11 +730,8 @@ export default {
     const newBannerRef = ref({ title: '', link: '' });
     const newHoliday = ref('');
     const newDeliveryDisabledDate = ref('');
-    const getJstDateString = (offsetDays = 0) => {
-      const date = new Date();
-      date.setDate(date.getDate() + offsetDays);
-      return date.toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' });
-    };
+    const getJstDateString = (offsetDays = 0) =>
+      addDaysToDateKey(toJSTDateString(new Date()), offsetDays);
     const todayDate = ref(getJstDateString());
     const tomorrowDate = ref(getJstDateString(1));
     const sensitiveSettingsRef = ref({ orderingEnabled: true });

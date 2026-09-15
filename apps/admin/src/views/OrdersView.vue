@@ -73,7 +73,7 @@
         </h2>
         <div class="flex gap-2">
           <button
-            @click="batchUpdateStatus('ready')"
+            @click="batchUpdateStatus(ORDER_STATUS.ready)"
             class="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 flex items-center justify-center"
           >
             <span class="font-bold mr-2">✔️</span> {{ UI_TEXTS.orders.kitchenPrep.markAllReady }}
@@ -158,13 +158,13 @@
             <span class="text-xs">{{ UI_TEXTS.orders.deliveryList.showCompleted }}</span>
           </label>
           <button
-            @click="batchUpdateStatus('delivering')"
+            @click="batchUpdateStatus(ORDER_STATUS.delivering)"
             class="px-3 py-1 bg-yellow-500 text-white text-xs rounded hover:bg-yellow-600"
           >
             {{ UI_TEXTS.orders.deliveryList.batchActions.markDelivering }}
           </button>
           <button
-            @click="batchUpdateStatus('completed')"
+            @click="batchUpdateStatus(ORDER_STATUS.completed)"
             class="px-3 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600"
           >
             {{ UI_TEXTS.orders.deliveryList.batchActions.markCompleted }}
@@ -346,14 +346,16 @@
               {{ STATUS_LABELS[status] || status }}
               <span class="flex gap-1 items-center">
                 <span class="bg-white bg-opacity-50 px-2 py-0.5 rounded-full">{{
-                  filteredOrdersByStatus[status].filter((o: Order) => o.status !== 'cancelled')
+                  filteredOrdersByStatus[status].filter((o: Order) => !isCancelledStatus(o.status))
                     .length
                 }}</span>
                 <span
-                  v-if="filteredOrdersByStatus[status].some((o: Order) => o.status === 'cancelled')"
+                  v-if="
+                    filteredOrdersByStatus[status].some((o: Order) => isCancelledStatus(o.status))
+                  "
                   class="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-[10px]"
                   >✕{{
-                    filteredOrdersByStatus[status].filter((o: Order) => o.status === 'cancelled')
+                    filteredOrdersByStatus[status].filter((o: Order) => isCancelledStatus(o.status))
                       .length
                   }}</span
                 >
@@ -425,9 +427,9 @@
                   >
                 </div>
                 <div class="flex gap-1">
-                  <template v-if="order.status !== 'cancelled'">
+                  <template v-if="!isCancelledStatus(order.status)">
                     <button
-                      v-if="order.status !== 'pending'"
+                      v-if="order.status !== ORDER_STATUS.pending"
                       @click.stop="updateOrderStatus(order, 'prev')"
                       :class="
                         STATUS_FLOW.indexOf(order.status) === 1
@@ -509,7 +511,7 @@
               >{{ STATUS_LABELS[selectedOrder.status] || selectedOrder.status }}</span
             >
             <button
-              v-if="!['cancelled', 'completed'].includes(selectedOrder.status)"
+              v-if="!isCancelledStatus(selectedOrder.status)"
               @click="openCancelModal(selectedOrder)"
               class="px-2 py-0.5 rounded text-xs font-black border border-red-300 text-red-500 hover:bg-red-50 transition-colors"
             >
@@ -592,7 +594,7 @@
 
       <!-- Cancel reason -->
       <div
-        v-if="selectedOrder.status === 'cancelled'"
+        v-if="isCancelledStatus(selectedOrder.status)"
         class="bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-4"
       >
         <p class="text-[10px] font-black text-red-400 uppercase tracking-widest mb-1">
@@ -673,14 +675,34 @@ import type { Order, OrderItem, OrderItemOption } from '../types/types';
 import { ordersApi } from '../api/orders';
 import { PrinterIcon, XMarkIcon, MapPinIcon } from '@heroicons/vue/24/solid';
 import { UI_TEXTS } from '../constants/ui-texts';
+import {
+  canBulkUpdateToStatus,
+  isCompactBoardHiddenStatus,
+  isCancelledStatus,
+  isCompletedStatus,
+  isDeliveryListHiddenStatus,
+  isKitchenStatusHidden,
+  isPrepQueueStatus,
+  ORDER_DISPLAY_STATUSES,
+  ORDER_STATUS,
+  ORDER_STATUS_FLOW,
+  type OrderStatus,
+} from '../constants/orderStatus';
 import { settingsApi } from '../api/settings';
-import { formatTime, formatOrderedAt, formatDateJST } from '../utils/date';
+import {
+  addDaysToDateKey,
+  formatTime,
+  formatOrderedAt,
+  formatDateJST,
+  toJSTDateString,
+} from '../utils/date';
 import { onUnmounted } from 'vue';
 
 const activeTab = ref<keyof typeof UI_TEXTS.orders.tabs>('singleOrders');
 const restaurantAddress = ref('');
 const orders = ref<Order[]>([]);
-const STATUS_FLOW = ['pending', 'accepted', 'preparing', 'ready', 'delivering', 'completed'];
+const STATUS_FLOW = ORDER_STATUS_FLOW;
+const DISPLAY_STATUSES = ORDER_DISPLAY_STATUSES;
 const STATUS_LABELS = UI_TEXTS.orders.statusLabels;
 const selectedOrder = ref<Order | null>(null);
 const route = useRoute();
@@ -748,20 +770,22 @@ const openOrderByTrackingId = async (
   if (dateRaw) {
     selectedDateFilter.value = 'specific';
     specificDate.value = dateRaw;
+    await fetchOrders();
   } else {
     const order = orders.value.find((o) => o.trackingId === trackingId);
     if (order?.deliveryTime) {
       selectedDateFilter.value = 'specific';
-      specificDate.value = getLocalDateString(new Date(order.deliveryTime));
+      specificDate.value = toJSTDateString(order.deliveryTime);
+      await fetchOrders();
     }
   }
   await nextTick();
   const order = orders.value.find((o) => o.trackingId === trackingId);
   if (order) {
     selectedOrder.value = order;
-    if (autoAccept && order.status === 'pending') {
-      const success = await ordersApi.updateOrderStatus(order.id, 'accepted');
-      if (success) order.status = 'accepted';
+    if (autoAccept && order.status === ORDER_STATUS.pending) {
+      const success = await ordersApi.updateOrderStatus(order.id, ORDER_STATUS.accepted);
+      if (success) order.status = ORDER_STATUS.accepted;
     }
     if (autoPrint) {
       printSingleOrder(order, 'single-order-print');
@@ -800,17 +824,17 @@ onUnmounted(() => {
 
 const fetchOrders = async () => {
   try {
-    orders.value = await ordersApi.getOrders();
+    const deliveryDate = /^\d{4}-\d{2}-\d{2}$/.test(selectedDateDisplay.value)
+      ? selectedDateDisplay.value
+      : undefined;
+    if (!deliveryDate) {
+      orders.value = [];
+      return;
+    }
+    orders.value = await ordersApi.getOrders({ deliveryDate });
   } catch (err) {
     console.error('Error fetching orders:', err);
   }
-};
-
-const getLocalDateString = (date: Date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
 };
 
 const formatOptionsList = (options?: OrderItemOption[]) => {
@@ -869,15 +893,17 @@ const formatOptionsList = (options?: OrderItemOption[]) => {
 const formatOptionsStr = (options?: OrderItemOption[]) => formatOptionsList(options).join(', ');
 
 const selectedDateDisplay = computed(() => {
-  const today = new Date();
-  if (selectedDateFilter.value === 'today') return getLocalDateString(today);
+  const today = toJSTDateString(new Date());
+  if (selectedDateFilter.value === 'today') return today;
   if (selectedDateFilter.value === 'tomorrow') {
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
-    return getLocalDateString(tomorrow);
+    return addDaysToDateKey(today, 1);
   }
   if (selectedDateFilter.value === 'specific' && specificDate.value) return specificDate.value;
   return '--';
+});
+
+watch(selectedDateDisplay, async () => {
+  await fetchOrders();
 });
 
 const filteredDailyOrders = computed(() => {
@@ -885,9 +911,14 @@ const filteredDailyOrders = computed(() => {
   return orders.value
     .filter((order) => {
       // 1. Date Filter
-      const matchesDate = order.deliveryTime
-        ? getLocalDateString(new Date(order.deliveryTime)) === targetDateStr
+      const matchesDeliveryDate = order.deliveryTime
+        ? toJSTDateString(order.deliveryTime) === targetDateStr
         : false;
+      const matchesCancellationDate =
+        isCancelledStatus(order.status) && order.cancelled_at
+          ? toJSTDateString(order.cancelled_at) === targetDateStr
+          : false;
+      const matchesDate = matchesDeliveryDate || matchesCancellationDate;
       if (!matchesDate) return false;
 
       // 2. Postal Code Filter
@@ -928,8 +959,8 @@ const ordersByPostalCode = computed(() => {
   const groups: Record<string, Order[]> = {};
   filteredDailyOrders.value
     .filter((order) => {
-      if (order.status === 'cancelled') return false;
-      if (!showDeliveryCompleted.value && order.status === 'completed') return false;
+      if (isCancelledStatus(order.status)) return false;
+      if (!showDeliveryCompleted.value && isCompletedStatus(order.status)) return false;
       return true;
     })
     .forEach((order) => {
@@ -952,7 +983,7 @@ const groupedPrepItems = computed(() => {
   > = {};
 
   filteredDailyOrders.value
-    .filter((order: Order) => ['pending', 'accepted', 'preparing'].includes(order.status))
+    .filter((order: Order) => isPrepQueueStatus(order.status))
     .forEach((order: Order) => {
       order.items.forEach((item: OrderItem) => {
         const itemName = item.name;
@@ -983,21 +1014,19 @@ const groupedPrepItems = computed(() => {
 });
 
 const filteredOrdersByStatus = computed(() => {
-  return STATUS_FLOW.reduce(
+  return DISPLAY_STATUSES.reduce(
     (acc: Record<string, Order[]>, status: string) => {
       acc[status] = filteredDailyOrders.value.filter((order: Order) => {
-        // Cancelled orders bucket into the 'completed' column
-        const effectiveStatus = order.status === 'cancelled' ? 'completed' : order.status;
-        const matchesStatus = effectiveStatus === status;
+        const matchesStatus = order.status === status;
 
         // Smart Filtering Logic per Tab
         let isVisible = true;
         if (activeTab.value === 'kitchenPrep') {
-          isVisible = order.status === 'preparing';
+          isVisible = order.status === ORDER_STATUS.preparing;
         } else if (activeTab.value === 'deliveryList') {
-          isVisible = !['completed', 'cancelled'].includes(order.status);
+          isVisible = !isDeliveryListHiddenStatus(order.status);
         } else if (hideDeliveredAndDelivering.value) {
-          isVisible = !['delivering', 'completed', 'cancelled'].includes(order.status);
+          isVisible = !isCompactBoardHiddenStatus(order.status);
         }
 
         return matchesStatus && isVisible;
@@ -1009,14 +1038,14 @@ const filteredOrdersByStatus = computed(() => {
 });
 
 const filteredStatuses = computed(() => {
-  if (!hideDeliveredAndDelivering.value) return STATUS_FLOW;
+  if (!hideDeliveredAndDelivering.value) return DISPLAY_STATUSES;
 
   if (activeTab.value === 'kitchenPrep') {
-    return STATUS_FLOW.filter((s) => !['ready', 'delivering', 'completed'].includes(s));
+    return STATUS_FLOW.filter((s) => !isKitchenStatusHidden(s));
   }
 
   // Default for singleOrders and deliveryList
-  return STATUS_FLOW.filter((s) => !['delivering', 'completed'].includes(s));
+  return DISPLAY_STATUSES.filter((s) => !isCompactBoardHiddenStatus(s));
 });
 
 const canUpdateStatus = (order: Order) => {
@@ -1037,9 +1066,9 @@ async function confirmAdminCancel() {
   if (!cancelTarget.value || !cancelReason.value.trim()) return;
   const success = await ordersApi.cancelOrder(cancelTarget.value.id, cancelReason.value.trim());
   if (success) {
-    cancelTarget.value.status = 'cancelled';
+    cancelTarget.value.status = ORDER_STATUS.cancelled;
     if (selectedOrder.value?.id === cancelTarget.value.id) {
-      selectedOrder.value.status = 'cancelled';
+      selectedOrder.value.status = ORDER_STATUS.cancelled;
     }
   } else {
     alert('キャンセルに失敗しました。');
@@ -1071,18 +1100,19 @@ const updateOrderStatus = async (order: Order, direction: 'next' | 'prev' = 'nex
     const success = await ordersApi.updateOrderStatus(order.id, newStatus);
     if (success) {
       order.status = newStatus;
+    } else {
+      alert('Failed to update status. Please refresh and check order status.');
+      await fetchOrders();
     }
   }
 };
 
-const batchUpdateStatus = async (status: string) => {
-  const eligible = Object.values(ordersByPostalCode.value)
-    .flat()
-    .filter((order) => {
-      if (status === 'delivering') return !['delivering', 'completed'].includes(order.status);
-      if (status === 'completed') return order.status !== 'completed';
-      return true;
-    });
+const batchUpdateStatus = async (status: OrderStatus) => {
+  const candidates =
+    status === ORDER_STATUS.ready
+      ? filteredDailyOrders.value
+      : Object.values(ordersByPostalCode.value).flat();
+  const eligible = candidates.filter((order) => canBulkUpdateToStatus(order.status, status));
 
   if (!eligible.length) {
     alert('No eligible orders to update.');
@@ -1090,25 +1120,31 @@ const batchUpdateStatus = async (status: string) => {
   }
   if (!confirm(`Mark ${eligible.length} order(s) as ${status}?`)) return;
 
-  await Promise.all(eligible.map((order) => ordersApi.updateOrderStatus(order.id, status)));
+  const results = await Promise.all(
+    eligible.map((order) => ordersApi.updateOrderStatus(order.id, status))
+  );
+  const failedCount = results.filter((success) => !success).length;
+  if (failedCount) {
+    alert(`${failedCount} order(s) could not be updated. Please check order status.`);
+  }
   await fetchOrders();
 };
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'pending':
+    case ORDER_STATUS.pending:
       return 'bg-orange-100 text-orange-800 border-orange-200';
-    case 'accepted':
+    case ORDER_STATUS.accepted:
       return 'bg-blue-100 text-blue-800 border-blue-200';
-    case 'preparing':
+    case ORDER_STATUS.preparing:
       return 'bg-purple-100 text-purple-800 border-purple-200';
-    case 'ready':
+    case ORDER_STATUS.ready:
       return 'bg-green-100 text-green-800 border-green-200';
-    case 'delivering':
+    case ORDER_STATUS.delivering:
       return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    case 'completed':
+    case ORDER_STATUS.completed:
       return 'bg-gray-100 text-gray-800 border-gray-200';
-    case 'cancelled':
+    case ORDER_STATUS.cancelled:
       return 'bg-red-100 text-red-800 border-red-200';
     default:
       return 'bg-gray-100 text-gray-800 border-gray-200';
@@ -1117,11 +1153,11 @@ const getStatusColor = (status: string) => {
 
 const getStatusBg = (status: string) => {
   switch (status) {
-    case 'ready':
+    case ORDER_STATUS.ready:
       return 'bg-green-100 text-green-800';
-    case 'delivering':
+    case ORDER_STATUS.delivering:
       return 'bg-yellow-100 text-yellow-800';
-    case 'completed':
+    case ORDER_STATUS.completed:
       return 'bg-gray-100 text-gray-800';
     default:
       return 'bg-white';
@@ -1435,7 +1471,7 @@ const printSingleOrder = (order: Order, target = '_blank') => {
 
           ${hasComments ? `<div class="notes"><div class="label">Comments</div>${escapeHtml(order.comments)}</div>` : ''}
           ${
-            order.status === 'cancelled'
+            isCancelledStatus(order.status)
               ? `<div class="notes"><div class="label">Cancel Reason</div>${escapeHtml(order.cancel_reason || '-')}</div>`
               : ''
           }
@@ -1452,7 +1488,7 @@ const printSingleOrder = (order: Order, target = '_blank') => {
 const timeUntilDelivery = (deliveryTime?: string, status?: string, updatedAt?: string): string => {
   if (!deliveryTime) return '';
   // If completed, show completion time (proxy: updatedAt)
-  if (status === 'completed' && updatedAt) {
+  if (isCompletedStatus(status) && updatedAt) {
     return `完了: ${formatDateJST(updatedAt)}`;
   }
   const diff = new Date(deliveryTime).getTime() - Date.now();

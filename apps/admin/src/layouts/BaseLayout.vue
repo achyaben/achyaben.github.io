@@ -178,6 +178,7 @@ import { supabase } from '@app/supabase';
 import { settingsApi } from '../api/settings';
 import chimeUrl from '../assets/chime.mp3';
 import { UI_TEXTS } from '../constants/ui-texts';
+import { addDaysToDateKey, formatTime, toJSTDateString } from '../utils/date';
 
 // Fallback: show error after N failed reconnects
 const MAX_RECONNECT_ATTEMPTS = 6;
@@ -263,11 +264,15 @@ const dismissAlert = () => {
 
 const formatAlertDate = (isoString: string) => {
   if (!isoString) return '';
-  const d = new Date(isoString);
   return (
-    d.toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'short' }) +
+    new Intl.DateTimeFormat('ja-JP', {
+      timeZone: 'Asia/Tokyo',
+      month: 'long',
+      day: 'numeric',
+      weekday: 'short',
+    }).format(new Date(isoString)) +
     ' ' +
-    d.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })
+    formatTime(isoString)
   );
 };
 
@@ -347,12 +352,12 @@ const isWithinBusinessHours = () => {
 const triggerTestNotification = () => {
   const fakeId = 'TEST-' + Math.floor(Math.random() * 9000 + 1000);
   // Use tomorrow as fake delivery date for test
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowKey = addDaysToDateKey(toJSTDateString(new Date()), 1);
+  const tomorrow = `${tomorrowKey}T12:00:00+09:00`;
   newOrderAlert.value = {
     trackingId: fakeId,
-    deliveryDate: formatAlertDate(tomorrow.toISOString()),
-    deliveryDateRaw: tomorrow.toISOString().slice(0, 10),
+    deliveryDate: formatAlertDate(tomorrow),
+    deliveryDateRaw: tomorrowKey,
   };
   startChimeLoop();
 };
@@ -386,7 +391,7 @@ const setupRealtimeNotification = () => {
           trackingId: payload.new.tracking_id,
           deliveryDate: formatAlertDate(payload.new.delivery_datetime),
           deliveryDateRaw: payload.new.delivery_datetime
-            ? new Date(payload.new.delivery_datetime).toISOString().slice(0, 10)
+            ? toJSTDateString(payload.new.delivery_datetime)
             : '',
         };
 

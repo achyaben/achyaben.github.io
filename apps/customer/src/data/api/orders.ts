@@ -370,7 +370,7 @@ export const ordersApi = {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) return false;
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('orders')
       .update({
         status: 'cancelled',
@@ -379,12 +379,13 @@ export const ordersApi = {
         cancel_reason: reason,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', orderId);
+      .eq('id', orderId)
+      .select('id');
     if (error) {
       console.error('Failed to cancel order:', error);
       return false;
     }
-    return true;
+    return Boolean(data?.length);
   },
 
   // Get most recent pending order

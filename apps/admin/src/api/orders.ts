@@ -1,16 +1,19 @@
 import { supabase } from '@app/supabase';
 import type { Order } from '../types/types';
+import {
+  ORDER_BULK_TARGET_SOURCE_STATUSES,
+  ORDER_STATUS,
+  type OrderStatus,
+} from '../constants/orderStatus';
+import { getJSTDateRangeUtc, toJSTDateString } from '../utils/date';
 
-const JST_DATE_FORMATTER = new Intl.DateTimeFormat('sv-SE', {
-  timeZone: 'Asia/Tokyo',
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-});
+type GetOrdersOptions = {
+  deliveryDate?: string;
+};
 
 export const ordersApi = {
-  async getOrders(): Promise<Order[]> {
-    const { data, error } = await supabase
+  async getOrders(options: GetOrdersOptions = {}): Promise<Order[]> {
+    let query = supabase
       .from('orders_with_customer')
       .select(
         `
@@ -30,6 +33,20 @@ export const ordersApi = {
             `
       )
       .order('created_at', { ascending: false });
+
+    if (options.deliveryDate) {
+      const range = getJSTDateRangeUtc(options.deliveryDate);
+      if (range) {
+        query = query.or(
+          [
+            `and(delivery_datetime.gte.${range.start},delivery_datetime.lt.${range.end})`,
+            `and(cancelled_at.gte.${range.start},cancelled_at.lt.${range.end})`,
+          ].join(',')
+        );
+      }
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error('Error fetching orders:', error);
@@ -78,39 +95,53 @@ export const ordersApi = {
     }));
   },
 
-  async updateOrderStatus(orderId: string, status: string): Promise<boolean> {
-    const { error } = await supabase
+  async updateOrderStatus(orderId: string, status: OrderStatus): Promise<boolean> {
+    let query = supabase
       .from('orders')
       .update({ status, updated_at: new Date().toISOString() })
-      .eq('id', orderId);
+      .eq('id', orderId)
+      .select('id');
+
+    if (status !== ORDER_STATUS.cancelled) {
+      query = query.neq('status', ORDER_STATUS.cancelled);
+    }
+
+    const sourceStatuses = ORDER_BULK_TARGET_SOURCE_STATUSES[status];
+    if (sourceStatuses?.length) {
+      query = query.in('status', sourceStatuses);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error('Failed to update order status:', error);
       return false;
     }
 
-    return true;
+    return Boolean(data?.length);
   },
 
   async cancelOrder(orderId: string, reason?: string): Promise<boolean> {
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('orders')
       .update({
-        status: 'cancelled',
+        status: ORDER_STATUS.cancelled,
         cancelled_at: new Date().toISOString(),
         cancelled_by_id: user?.id ?? null,
         cancel_reason: reason ?? null,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', orderId);
+      .eq('id', orderId)
+      .neq('status', ORDER_STATUS.cancelled)
+      .select('id');
     if (error) {
       console.error('Failed to cancel order:', error);
       return false;
     }
-    return true;
+    return Boolean(data?.length);
   },
 
   async assignDriver(orderId: string, driverId: string): Promise<boolean> {
@@ -134,10 +165,10 @@ export const ordersApi = {
     const orders = await this.getOrders();
     const summaries: Record<string, any> = {};
     orders.forEach((order) => {
-      if (order.status === 'cancelled') return;
+      if (order.status === ORDER_STATUS.cancelled) return;
       // Use deliveryTime for grouping summaries as requested by the user
       if (!order.deliveryTime) return;
-      const date = JST_DATE_FORMATTER.format(new Date(order.deliveryTime));
+      const date = toJSTDateString(order.deliveryTime);
 
       if (!summaries[date]) {
         summaries[date] = { date, totalOrders: 0, totalRevenue: 0, cash: 0, card: 0, paypay: 0 };

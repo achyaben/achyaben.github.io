@@ -97,15 +97,7 @@ const router = createRouter({
 router.beforeEach(async (to, _from, next) => {
   const authStore = useAuthStore();
 
-  // Wait for initial auth check to complete if it hasn't already
-  if (authStore.isInitialLoading) {
-    // Basic polling or a more elegant watch could be used, but for simplicity:
-    let attempts = 0;
-    while (authStore.isInitialLoading && attempts < 20) {
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      attempts++;
-    }
-  }
+  await authStore.refreshUser();
 
   const isLoggedIn = !!authStore.user;
 
@@ -127,13 +119,7 @@ router.beforeEach(async (to, _from, next) => {
     const userRole = authStore.user?.role;
     if (!userRole || !to.meta.roles.includes(userRole)) {
       console.warn(`Access denied for role: ${userRole}. Required: ${to.meta.roles}`);
-      // Redirect to a safe place based on role, or login if stuck
-      if (isLoggedIn) {
-        // If logged in but role doesn't match, maybe they are just a 'customer' trying to reach admin
-        next('/login');
-      } else {
-        next('/login');
-      }
+      next(isLoggedIn ? '/orders' : '/login');
       return;
     }
   }

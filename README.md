@@ -46,6 +46,7 @@ Modern Japanese lunch box pre-order system built with Vue 3 and TypeScript.
 
 ## Development
 
+- Use the Node.js version in `.nvmrc`: `nvm install && nvm use` (with nvm installed). CI uses the same version.
 - Install dependencies: `yarn install`
 - Run customer app: `yarn workspace customer dev`
 - Run admin app: `yarn workspace admin dev`

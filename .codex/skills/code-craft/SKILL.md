@@ -1,6 +1,7 @@
 ---
 name: code-craft
-description: Apply the user's coding taste for clean production changes: minimal comments, local naming and patterns, DRY shared code, scoped checks, and restrained git/PR practice when explicitly requested.
+description: >-
+  Apply the user's coding taste for clean production changes: minimal comments, local naming and patterns, DRY shared code, scoped checks, and restrained git/PR practice when explicitly requested.
 metadata:
   short-description: Clean code craft rules
 ---

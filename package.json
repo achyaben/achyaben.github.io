@@ -26,8 +26,8 @@
     "prettier": "^3.6.2",
     "tailwindcss": "^4.1.11",
     "typescript": "^5.8.3",
-    "vite": "^7.0.0",
-    "vitest": "^5.0.1",
+    "vite": "^7.3.7",
+    "vitest": "^5.0.5",
     "vue-eslint-parser": "^10.2.0",
     "vue-tsc": "^2.2.10"
   },
@@ -44,8 +44,8 @@
     "build": "yarn build:customer && yarn build:admin"
   },
   "dependencies": {
-    "@vue/compiler-sfc": "^3.5.17",
-    "axios": "^1.13.2",
-    "vue": "^3.5.17"
+    "@vue/compiler-sfc": "~3.5.44",
+    "axios": "^1.20.0",
+    "vue": "~3.5.44"
   }
 }

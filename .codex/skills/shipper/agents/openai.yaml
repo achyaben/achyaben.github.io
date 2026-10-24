@@ -1,0 +1,7 @@
+interface:
+  display_name: "Shipper"
+  short_description: "Scope, implement, check, and optionally PR an issue"
+  default_prompt: "Use $shipper for this issue. Work in a separate worktree only if independent work is requested, scope the issue, implement the smallest complete fix, run basic scoped checks, and create a PR only if asked."
+policy:
+  allow_implicit_invocation: false
+

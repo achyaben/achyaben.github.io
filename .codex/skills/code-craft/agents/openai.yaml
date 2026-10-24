@@ -1,0 +1,7 @@
+interface:
+  display_name: "Code Craft"
+  short_description: "Apply clean code, naming, pattern, DRY, checks, and git/PR preferences"
+  default_prompt: "Use $code-craft for this task. Respect local naming and patterns, avoid unnecessary comments, keep code clean and shared where it genuinely helps, run only scoped useful checks, and only perform git or PR operations if explicitly asked."
+policy:
+  allow_implicit_invocation: true
+

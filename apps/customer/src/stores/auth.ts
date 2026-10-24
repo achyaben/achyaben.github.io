@@ -49,27 +49,33 @@ async function initLiff() {
       const idToken = liff.getIDToken();
       if (idToken && !token.value && !lineSessionSet.value) {
         lineSessionSet.value = true;
-        const resp = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/line-auth`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-            },
-            body: JSON.stringify({ id_token: idToken }),
-          }
-        );
+        const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/line-auth`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({ id_token: idToken }),
+        });
         const result = await resp.json();
-        if (result.token) {
-          await supabase.auth.setSession({
+        if (resp.ok && result.token && result.refresh_token) {
+          const { error } = await supabase.auth.setSession({
             access_token: result.token,
             refresh_token: result.refresh_token,
           });
+          if (error) {
+            lineSessionSet.value = false;
+            throw error;
+          }
           // ✅ Wait for onAuthStateChange to actually set token
           await new Promise<void>((resolve) => {
-            if (token.value) { resolve(); return; }
-            const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (token.value) {
+              resolve();
+              return;
+            }
+            const {
+              data: { subscription },
+            } = supabase.auth.onAuthStateChange((event, session) => {
               if (session) {
                 subscription.unsubscribe();
                 resolve();
@@ -89,7 +95,8 @@ async function initLiff() {
 }
 
 // ✅ Fix - only run in LINE context
-export const isLineContext = /Line/i.test(navigator.userAgent) ||
+export const isLineContext =
+  /Line/i.test(navigator.userAgent) ||
   window.location.search.includes('liffClientId') ||
   window.location.search.includes('liffIsEscapedFromApp');
 
@@ -141,22 +148,18 @@ export const useAuthStore = () => {
         return { success: false, error: 'LINE ID token not found' };
       }
 
-      const resp = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/line-auth`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id_token: idToken }),
-        }
-      );
+      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/line-auth`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id_token: idToken }),
+      });
 
       const result = await resp.json();
 
-      if (!resp.ok || !result.token) {
+      if (!resp.ok || !result.token || !result.refresh_token) {
         return { success: false, error: result.error || 'LINE login failed' };
       }
 
-      // ✅ Real refresh token now!
       const { error } = await supabase.auth.setSession({
         access_token: result.token,
         refresh_token: result.refresh_token,
@@ -165,7 +168,6 @@ export const useAuthStore = () => {
       if (error) return { success: false, error: error.message };
 
       return { success: true };
-
     } catch (e: any) {
       return { success: false, error: e.message || 'LINE login error' };
     }
@@ -196,20 +198,20 @@ export const useAuthStore = () => {
   }
 
   async function logout() {
-  await supabase.auth.signOut();
+    await supabase.auth.signOut();
 
-  // ✅ Clear LIFF session if logged in via LINE
-  if (liffLoaded.value && liff.isLoggedIn()) {
-    liff.logout(); // this reloads the page automatically
-    return; // ← stop here, liff.logout() handles reload
+    // ✅ Clear LIFF session if logged in via LINE
+    if (liffLoaded.value && liff.isLoggedIn()) {
+      liff.logout(); // this reloads the page automatically
+      return; // ← stop here, liff.logout() handles reload
+    }
+
+    token.value = null;
+    user.value = null;
+    isSoftDeleted.value = false;
+    lineSessionSet.value = false;
+    window.location.reload();
   }
-
-  token.value = null;
-  user.value = null;
-  isSoftDeleted.value = false;
-  lineSessionSet.value = false;
-  window.location.reload();
-}
 
   return {
     token,

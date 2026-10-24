@@ -37,7 +37,7 @@
           :key="index"
           class="border-b border-gray-100 last:border-0 pb-6 last:pb-0"
         >
-          <h2 class="text-xl font-bold text-gray-900 mb-3">{{ section.title }}</h2>
+          <h2 class="text-xl font-bold text-gray-900 mb-3">{{ index + 1 }}. {{ section.title }}</h2>
           <p class="text-gray-600 leading-relaxed mb-2">{{ section.content }}</p>
           <ul v-if="section.list" class="list-disc list-inside text-gray-600 space-y-1 ml-2">
             <li v-for="(item, i) in section.list" :key="i" class="leading-relaxed">{{ item }}</li>

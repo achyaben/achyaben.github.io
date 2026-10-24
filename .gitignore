@@ -38,3 +38,6 @@ apps/api
 apps/admin/public/assets
 apps/customer/public/assets
 tsconfig.app.tsbuildinfo
+
+# Local customer-app HTTPS certificates
+apps/customer/.certs/

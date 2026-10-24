@@ -44,8 +44,8 @@
     "build": "yarn build:customer && yarn build:admin"
   },
   "dependencies": {
-    "@vue/compiler-sfc": "^3.5.17",
+    "@vue/compiler-sfc": "~3.5.44",
     "axios": "^1.20.0",
-    "vue": "^3.5.17"
+    "vue": "~3.5.44"
   }
 }

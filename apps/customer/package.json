@@ -14,7 +14,7 @@
     "@line/liff": "2.31.2",
     "@supabase/supabase-js": "^2.93.3",
     "vite-plugin-pwa": "^1.0.0",
-    "vue": "^3.5.17",
+    "vue": "~3.5.44",
     "vue-router": "4",
     "vue3-google-login": "^2.0.26"
   },

@@ -31,6 +31,14 @@ function getRecentCachedOrders(limit = RECENT_ORDER_LIMIT): Order[] {
     .slice(0, limit);
 }
 
+function hasOrderDetails(order: Order | null | undefined): boolean {
+  return (
+    !!order &&
+    order.items.length > 0 &&
+    order.items.every(({ item }) => !!item?.id && item.id !== 'summary' && !!item.name)
+  );
+}
+
 function mergeWithCachedOrder(apiOrder: Order, cachedOrders = getCachedOrders()): Order {
   const cached = cachedOrders.find(
     (order) => order.id === apiOrder.id || order.trackingId === apiOrder.trackingId
@@ -38,10 +46,17 @@ function mergeWithCachedOrder(apiOrder: Order, cachedOrders = getCachedOrders())
 
   if (!cached) return apiOrder;
 
+  const items =
+    hasOrderDetails(cached) && !hasOrderDetails(apiOrder)
+      ? cached.items
+      : apiOrder.items.length
+        ? apiOrder.items
+        : cached.items;
+
   return {
     ...cached,
     ...apiOrder,
-    items: apiOrder.items.length ? apiOrder.items : cached.items,
+    items,
     customer: cached.customer || apiOrder.customer,
     notes: cached.notes ?? apiOrder.notes,
     status: apiOrder.status,
@@ -354,7 +369,9 @@ export const ordersApi = {
   async getOrderByTrackingId(trackingId: string): Promise<Order | null> {
     const cachedOrders = getCachedOrders();
     const cachedOrder = cachedOrders.find((o) => o.trackingId === trackingId) || null;
-    return cachedOrder ? this.getOrderStatus(trackingId) : this.getOrderDetail(trackingId);
+    return hasOrderDetails(cachedOrder)
+      ? this.getOrderStatus(trackingId)
+      : this.getOrderDetail(trackingId);
   },
 
   // Update an order (staff/manager role usually required)

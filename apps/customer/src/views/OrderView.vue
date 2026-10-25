@@ -530,9 +530,7 @@ async function loadOrder() {
       isLoading.value = false;
     }
 
-    const result = cachedOrder
-      ? await ordersApi.getOrderStatus(id)
-      : await ordersApi.getOrderDetail(id);
+    const result = await ordersApi.getOrderByTrackingId(id);
     order.value = result;
   } catch (error) {
     console.error('Failed to load order:', error);
